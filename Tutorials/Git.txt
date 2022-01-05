@@ -1,0 +1,1 @@
+Don't mess with the .git file in your git repositories, lest you corrupt your projects.
