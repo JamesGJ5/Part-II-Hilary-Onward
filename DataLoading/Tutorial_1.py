@@ -38,7 +38,9 @@ landmarks = landmarks.astype('float').reshape(-1, 2)
 print('Image name: {}'.format(img_name))
 print('Landmarks shape: {}'.format(landmarks.shape))
 print('First 4 landmarks: {}'.format(landmarks[:4]))
-# TODO: understand why the first landmark is [32. 65.]
+# See person-7.jpg row of the file mentioned above for why the first landmark is [32. 65.]
+# TODO: find out why the above row is found by having n=65 somewhere above even though it is line 67. Is the function 
+# not zero-indexing?
 
 # Writing a helper function to show an image and its landmarks and use it to show a sample
 
@@ -156,6 +158,7 @@ class Rescale(object):
         new_h, new_w = int(new_h), int(new_w)
 
         img = transform.resize(image, (new_h, new_w))
+        # Above mention of transform is skimage.transform, imported earlier in this scripts
 
         # h and w are swapped for landmarks because for images,
         # x and y axes are axis 1 and 0 respectively
@@ -276,8 +279,13 @@ def show_landmarks_batch(sample_batched):
 
     grid = utils.make_grid(images_batch)
     plt.imshow(grid.numpy().transpose((1, 2, 0)))
+    # Want to get image back into H x W x C as it should be in numpy; in torch it is C (0) x H (1) x W (2)
 
     for i in range(batch_size):
+        # Below, the first argument seems to be the x-values of the landmarks; need to add something because there are 
+        # 4 different images in a horizontal row, so while the first part of the sum is relative to one image's origin, 
+        # the entiretry of the sum is relative to the grid's origin, otherwise you'd probably get all landmarks in the 
+        # right height but in the first image when many of them should be in other images
         plt.scatter(landmarks_batch[i, :, 0].numpy() + i * im_size + (i + 1) * grid_border_size,
         landmarks_batch[i, :, 1].numpy() + grid_border_size,
         s=10,
