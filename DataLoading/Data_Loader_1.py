@@ -115,6 +115,7 @@ train_transform = Compose([
     Resize(image_size, F2.InterpolationMode.BICUBIC),
     RandomAffine(degrees=2, translate=(0.02, 0.02), scale=(0.08,
     1.02), shear=2, fill=(124)),
+    # TODO: NOT THAT THIS IS AN OLD DATA LOADING FILE, RANDOM AFFINE SHOULD NOT BE USED!
     # Originally got fill as a 3-tuple from https://www.kaggle.com/hmendonca/efficientnet-cifar-10-ignite/notebook; 
     # had to reduce this to the first element to fit greyscale input images.
     # todo: will have to remember that I can vary the first element, especially if it isn't as applicable as it would 
