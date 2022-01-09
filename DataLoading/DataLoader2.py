@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import torchvision.transforms.functional as F2
 import numpy as np
 import torch
+import datetime
 
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
@@ -30,10 +31,22 @@ from torchvision import utils
 # I won't code this into the RonchigramDataset class definition, since this is dependent on train/test pipeline, which 
 # is subject to change; instead I will leave this to the transforms themselves, probably.
 
-# Seed 17 is arbitrary here
+
+# Seeding
+# 17 is arbitrary here
 seed = 17
 random.seed(seed)
-torch.manual_seed(seed)
+
+# Random seed or a fixed seed (defined above)
+torchReproducible = True
+
+if torchReproducible:
+    torchSeed = seed
+else:
+    torchSeed = torch.seed()
+
+torch.manual_seed(torchSeed)
+
 
 # Plan:
 
@@ -262,7 +275,9 @@ diagnosticTransform = Compose([
 
 ronchdset.transform = diagnosticTransform
 
-diagnosticDataloader = DataLoader(ronchdset, batch_size=4, shuffle=True, num_workers=0)
+diagnosticBatchSize = 4
+diagnosticShuffle = True
+diagnosticDataloader = DataLoader(ronchdset, batch_size=diagnosticBatchSize, shuffle=diagnosticShuffle, num_workers=0)
 
 # Cite https://towardsdatascience.com/how-to-calculate-the-mean-and-standard-deviation-normalizing-datasets-in-pytorch-704bd7d05f4c
 def getMeanAndStd(dataloader, reducedBatches=None):
@@ -283,7 +298,6 @@ def getMeanAndStd(dataloader, reducedBatches=None):
         sum += torch.mean(batchedRonchs)
         squaredSum += torch.mean(batchedRonchs ** 2)
         numBatches += 1
-        print(iBatch)
 
         if iBatch + 1 == reducedBatches:
             break
@@ -296,8 +310,19 @@ def getMeanAndStd(dataloader, reducedBatches=None):
     return mean, std
 
 # To test the mean and std I am going to get a mean and std over 32 batches
-mean, std = getMeanAndStd(diagnosticDataloader, 32)
-print(mean, std)
+batchesTested = 32
+calculatedMean, calculatedStd = getMeanAndStd(diagnosticDataloader, batchesTested)
+
+# Going to create a file for logging meand and std's calculated above. Log entries will include date and time of entry, 
+# mean and std, number of batches and batch size, and torch seed; that should be clear enough for now.
+with open("/home/james/VSCode/DataLoading/MeanStdLog.txt", "a") as f:
+    try:
+        f.write(f"\n\n{datetime.datetime.now()}")
+        f.write(f"\nCalculated mean: {calculatedMean}\nCalculated std: {calculatedStd}")
+        f.write(f"\nMean and std calculated from {batchesTested} batches of size {diagnosticBatchSize}")
+        f.write(f"\nShuffling was {diagnosticShuffle} torch-randomly and torch seed was {torchSeed}")
+    except:
+        pass
 
 # Fourth, apply transforms and repeat the third step
 # - I think I should indeed implement a way in the RonchigramDataset class definition to incorporate transforms
@@ -337,6 +362,16 @@ print(mean, std)
 # Image size must be 600 x 600 for EfficientNet-B7
 resolution = 600
 
+# try works if mean and std of data are being calculated earlier in the script; except assigns fixed values to them, 
+# preferably values found previously - going to develop that bit such that it changes depending on mean and std already 
+# found, and stored somewhere, since don't want to calculate mean and std for same data over and over again.
+try:
+    mean = calculatedMean
+    std = calculatedStd
+except:
+    mean = 0.5008
+    std = 0.2562
+
 trainTransform = Compose([
     ToTensor(),
     Resize(resolution, F2.InterpolationMode.BICUBIC),
@@ -346,7 +381,7 @@ trainTransform = Compose([
 testTransform = Compose([
     ToTensor(),
     Resize(resolution, F2.InterpolationMode.BICUBIC),
-    Normalize(mean=[0.5], std=[0.3])
+    Normalize(mean=[mean], std=[std])
 ])
 
 ronchdset.transform = trainTransform
@@ -383,7 +418,8 @@ def showBatch(batchedSample):
 
     images_batch, labels_batch = batchedSample["ronchigram"], batchedSample["aberrations"]
 
-    print(labels_batch)
+    # Decomment if desired to see
+    # print(labels_batch)
 
     batch_size = len(images_batch)
     im_size = images_batch[0].size(2)
