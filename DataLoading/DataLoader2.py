@@ -244,6 +244,61 @@ def show_data(ronch, abers):
 #         break
 
 
+# Sixth, implement a way to find the mean and std of the data for Normalize(). Going to use method in 
+# https://towardsdatascience.com/how-to-calculate-the-mean-and-standard-deviation-normalizing-datasets-in-pytorch-704bd7d05f4c
+# Since this relies on ToTensor() being done, I am going to create a new composed transform variable containing just 
+# ToTensor() and Resize(resolution, F2.InterpolationMode.BICUBIC). Going to exclude Normalize() of course because we 
+# are looking for the mean and std to pass to Normalize(), which should only act after the image has been converted to a 
+# torch Tensor with values between 0 and 1 inclusive and then resized to the desired resolution. Going to put this earlier 
+# in the data loading pipeline, before the "Fourth" step, since in the fourth step the trainTransform is applied to the 
+# data.
+
+resolution = 600
+
+diagnosticTransform = Compose([
+    ToTensor(),
+    Resize(resolution, F2.InterpolationMode.BICUBIC)
+])
+
+ronchdset.transform = diagnosticTransform
+
+diagnosticDataloader = DataLoader(ronchdset, batch_size=4, shuffle=True, num_workers=0)
+
+# Cite https://towardsdatascience.com/how-to-calculate-the-mean-and-standard-deviation-normalizing-datasets-in-pytorch-704bd7d05f4c
+def getMeanAndStd(dataloader, reducedBatches=None):
+    """Returns the mean and standard deviation of all Ronchigrams in dataloader. reducedBatches is the number of batches to 
+    stop after if just testing out this function. Otherwise, don't pass an argument to it if want to really calculate 
+    mean and std over every single batch."""
+
+    sum, squaredSum, numBatches = 0, 0, 0
+    
+    # First index in enumerate(dataloader) is of course the index assigned to each iterable, the second index is the 
+    # batch contained by the first index, and in this batch is a dictionary whose keys are "ronchigram" (whose value 
+    # is a single tensor containing all Ronchigram tensors in batch) and "aberrations" (whose value is a single tensor 
+    # containg all aberration tensors in batch)
+    for iBatch, batch in enumerate(dataloader):
+        # Mean over batch, height and width
+        batchedRonchs = batch["ronchigram"]
+
+        sum += torch.mean(batchedRonchs)
+        squaredSum += torch.mean(batchedRonchs ** 2)
+        numBatches += 1
+        print(iBatch)
+
+        if iBatch + 1 == reducedBatches:
+            break
+
+    mean = sum / numBatches
+
+    # std = sqrt(E(X^2) - (E[X])^2)
+    std = (squaredSum / numBatches - mean ** 2) ** 0.5
+
+    return mean, std
+
+# To test the mean and std I am going to get a mean and std over 32 batches
+mean, std = getMeanAndStd(diagnosticDataloader, 32)
+print(mean, std)
+
 # Fourth, apply transforms and repeat the third step
 # - I think I should indeed implement a way in the RonchigramDataset class definition to incorporate transforms
 # - Once that is done, will instantiate one RonchigramDatset object, whose transforms are Resize and Normalize like 
@@ -285,7 +340,7 @@ resolution = 600
 trainTransform = Compose([
     ToTensor(),
     Resize(resolution, F2.InterpolationMode.BICUBIC),
-    Normalize(mean=[0.5], std=[0.3])
+    Normalize(mean=[mean], std=[std])
 ])
 
 testTransform = Compose([
@@ -322,6 +377,7 @@ ronchdset.transform = trainTransform
 dataloader = DataLoader(ronchdset, batch_size=4,
                         shuffle=True, num_workers=0)
 
+# Cite the pytorch.org tutorial for the below, MAYBE, ALTHOUGH IT MAY NOT BE INCLUDED IN FINAL CUT
 def showBatch(batchedSample):
     """Show Ronchigram and print its aberrations for a batch of samples."""
 
@@ -340,20 +396,20 @@ def showBatch(batchedSample):
 
 dataloader = DataLoader(ronchdset, batch_size=4, shuffle=True, num_workers=0)
 
-# for iBatch, batchedSample in enumerate(dataloader):
-#     # print(iBatch, batchedSample["ronchigram"].size(),
-#     #         batchedSample["aberrations"].size())
+for iBatch, batchedSample in enumerate(dataloader):
+    # print(iBatch, batchedSample["ronchigram"].size(),
+    #         batchedSample["aberrations"].size())
 
-#     if iBatch == 3:
-#         plt.figure()
-#         showBatch(batchedSample)
-#         # print(batchedSample["aberrations"])
-#         plt.ioff()
-#         plt.show()
-#         break
+    if iBatch == 3:
+        plt.figure()
+        showBatch(batchedSample)
+        # print(batchedSample["aberrations"])
+        plt.ioff()
+        plt.show()
+        break
 
 
-# Sixth, implement a way to find the mean and std of the data for Normalize()
+
 
 
 
