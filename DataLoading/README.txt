@@ -2,6 +2,15 @@ A directory I've made to learn how to create a Torch dataset and to actually do 
 
 Notable Contents:
 
+    DataLoader2.py was made after I installed parallel HDF5 so I could save simulations from different 
+    processes in the same file. I plan to implement a way to represent, in a single complex number, the stored aberration 
+    magnitudes and associated phi_nm angles.
+
+    MeanStdLog.txt is a log for storing mean and std values calculated in DataLoader2.py for the data in question. I am 
+    using calculated values for the the mean and std arguments passed to the Normalize() transform.
+
+Archived Contents:
+
     Tutorial_1.py was me following a tutorial from https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
 
     data/ just contains some of the resources used in Tutorial_1.py
@@ -10,16 +19,6 @@ Notable Contents:
     HDF5 enabled, and before implementing a way to represent, in a single complex number, the stored aberration magnitudes 
     and associated phi_nm angles. This file was made 12/12/2021 for CNN_6.py. It was made by adapting the procedures used 
     in the pytorch.org tutorial mentioned above, but adapting said procedures to my own data.
-
-    DataLoader2.py was made after I installed parallel HDF5 so I could save simulations from different 
-    processes in the same file. I plan to implement a way to represent, in a single complex number, the stored aberration 
-    magnitudes and associated phi_nm angles.
-
-Archived Contents:
-
-    I have not yet started coding up the dataloading stage for the loading of simulations from a single HDF5 file
-    containing all the simulations and not just links to files which contain the simulations. So, the files here will 
-    give me a foundation to do that, I will not yet archive them.
 
 Extra information:
 
