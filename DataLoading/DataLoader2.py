@@ -33,6 +33,7 @@ from torchvision import utils
 # Seed 17 is arbitrary here
 seed = 17
 random.seed(seed)
+torch.manual_seed(seed)
 
 # Plan:
 
@@ -139,14 +140,14 @@ class RonchigramDataset(Dataset):
         # TODO: see if there is a function that does what you are doing below (i.e. that can take an array of moduli 
         # and an array of arguments and return an array of complex numbers) without you having to use a for loop
 
-        # List of aberrations in complex form, where each element will be for C10, C12, C21, and C23 respectively, each 
+        # Arrat of aberrations in complex form, where each element will be for C10, C12, C21, and C23 respectively, each 
         # element being a complex number whose modulus is aberration magnitude/m and whose argument is aberration phi_n,m/rad
-        complexList = []
+        complexArray = np.array([])
 
         for aber in range(len(mags)):
             complexAber = cmath.rect(mags[aber], angs[aber])
 
-            complexList.append(complexAber)
+            complexArray = np.append(complexArray, complexAber)
 
         # The below is so that ToTensor() normalises the Ronchigram to between 0 and 1 inclusive
         ronch = ronch.astype(np.uint8)
@@ -159,10 +160,15 @@ class RonchigramDataset(Dataset):
         if self.transform:
             ronch = self.transform(ronch)
 
+        # Okay, so above, I put if self.transform, as if there might not be a transform. However, there will always 
+        # be ToTensor(), at least for what I will be doing for a while, so I am going to make sure that the label gets 
+        # transformed to a tensor.
+        complexArray = torch.from_numpy(complexArray)
+
         # Decomment if you go back to using the magnitudes and angles themselves as labels
         # sample = {"ronchigram": ronch, "aberration magnitudes": mags, "aberration angles": angs}
 
-        sample = {"ronchigram": ronch, "aberrations": complexList}
+        sample = {"ronchigram": ronch, "aberrations": complexArray}
 
         return sample
 
@@ -269,6 +275,9 @@ def show_data(ronch, abers):
 #   rescale on my own. In fact, going to rescale numpy array to between 0 and 255 in the RonchigramDataset class 
 #   definition, in __getitem__, just by dividing my the maximum element as in 
 #   https://pytorch.org/vision/stable/transforms.html#torchvision.transforms.ToTensor
+# - So, images get plotted successfully below, except they look a bit weird--this is just because of the clipping of 
+#   the negative values, the Tensors themselves have dtype torch.FloatTensor, as a result of ToTensor(). Just need to 
+#   make sure that test data has the same Normalization process so its images look similarly funny.
 
 # Image size must be 600 x 600 for EfficientNet-B7
 resolution = 600
@@ -287,13 +296,14 @@ testTransform = Compose([
 
 ronchdset.transform = trainTransform
 # print(ronchdset[0]["ronchigram"])
+# print(torch.Tensor.type(ronchdset[0]["ronchigram"]))
 
 # Using the show_landmarks_batch() function in https://pytorch.org/tutorials/beginner/data_loading_tutorial.html 
 # as inspiration.
 
 # plt.figure()
 
-# images_batch = [ronchdset[i]["ronchigram"] for i in range(4)]
+# images_batch = [ronchdset[i]["ronchigram"].type(torch.float64) for i in range(4)]
 # batch_size = len(images_batch)
 # im_size = images_batch[0].size(2)
 # grid_border_size = 2
@@ -313,20 +323,39 @@ dataloader = DataLoader(ronchdset, batch_size=4,
                         shuffle=True, num_workers=0)
 
 def showBatch(batchedSample):
-    """Show Ronchigram for a batch of samples."""
+    """Show Ronchigram and print its aberrations for a batch of samples."""
 
-    images_batch = [ronchdset[i]["ronchigram"] for i in range(4)]
+    images_batch, labels_batch = batchedSample["ronchigram"], batchedSample["aberrations"]
+
+    print(labels_batch)
+
     batch_size = len(images_batch)
     im_size = images_batch[0].size(2)
     grid_border_size = 2
 
     grid = utils.make_grid(images_batch)
     plt.imshow(grid.numpy().transpose((1, 2, 0)))
+
     plt.title("Batch from dataloader")
 
-# Right now I am in the middle of showing that the dataloader works, as inspired by the pytorch.org tutorial. The 
-# function body above I copied from the last section, planning to adapt it. Still have to find mean and std of data 
-# for Normalize, and practise splitting the datasets.
+dataloader = DataLoader(ronchdset, batch_size=4, shuffle=True, num_workers=0)
+
+# for iBatch, batchedSample in enumerate(dataloader):
+#     # print(iBatch, batchedSample["ronchigram"].size(),
+#     #         batchedSample["aberrations"].size())
+
+#     if iBatch == 3:
+#         plt.figure()
+#         showBatch(batchedSample)
+#         # print(batchedSample["aberrations"])
+#         plt.ioff()
+#         plt.show()
+#         break
+
+
+# Sixth, implement a way to find the mean and std of the data for Normalize()
+
+
 
 
 
