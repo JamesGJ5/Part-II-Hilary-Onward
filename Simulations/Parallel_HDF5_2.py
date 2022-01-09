@@ -6,18 +6,22 @@ import math
 import time
 import os
 from mpi4py import MPI
+import cmath
 
 from datetime import datetime
 
 if __name__ == "__main__":
 
+    # Must check whether this is really necessary by testing simulating without it
     os.environ["HDF5_USE_FILE_LOCKING"] = "FALSE"
 
     # Output Ronchigram will be an array of size imdim x imdim in pixels
     imdim = 1024
+
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
     simdim = 100 * 10**-3
+
     max_C10 = 100 * 10**-9  # Maximum C10 (defocus) magnitude/m
     max_C12 = 100 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
     max_C21 = 600 * 10**-9  # Maximum C21 (axial coma) magnitude/m
@@ -35,25 +39,25 @@ if __name__ == "__main__":
     min_t = 0.1 # Minimum Ronchigram acquisition time/s
     max_t = 1   # Maximum Ronchigram acquisition time/s
 
-    def simulate_single_aberrations(number_simulations: int, imdim: int, simdim: int or float, max_C10: int or float, 
-        max_C12: int or float, max_C21: int or float, max_C23: int or float, min_I: int or float, max_I: int or float, 
-        min_t: int or float, max_t: int or float) -> None:
-        """A function defined to run simulations for single-aberration Ronchigrams until I can find out how to 
-        use the multiprocessing library (or another) for concurrent CPU processes without needing to use a 
-        function. This is done using min_Cnm = 0, b = 0 and with random phi_n,m between 0 and pi radians. One function 
-        should be run for each process.
+    def simulate_single_aberrations(number_simulations: int, imdim: int, simdim: float, max_C10: float, 
+        max_C12: float, max_C21: float, max_C23: float, min_I: float, max_I: float, 
+        min_t: float, max_t: float) -> None:
+        # TODO: take this outside of function because, unlike the multiprocessing method I found in a video, MPI 
+        # doesn't need the script being parallelised to be put in a function definition.
+        """Simulates single-aberration Ronchigrams and saves them along with the magnitudes and angles individually. 
+        min_Cnm = 0, b = 1, and phi_n,m are random between 0 and pi radians.
 
-        :param number_simulations: total number of Ronchigrams being simulated per process
-        :param imdim: output Ronchigram array size in pixels (imdim x imdim)
-        :param simdim: effectively the Ronchigram's convergence semi-angle/rad
-        :param max_C10: maximum defocus magnitude/m
-        :param max_C12: maximum 2-fold astigmatism/m
-        :param max_C21: maximum axial coma/m
-        :param max_C23: maximum 3-fold astigmatism/m
+        :param number_simulations: number of Ronchigrams simulated per process
+        :param imdim: Ronchigram array size in pixels (imdim x imdim)
+        :param simdim: effectively Ronchigram convergence semi-angle/rad
+        :param max_C10: max. defocus magnitude/m
+        :param max_C12: max. 2-fold astigmatism/m
+        :param max_C21: max. axial coma/m
+        :param max_C23: max. 3-fold astigmatism/m
         """
 
         with h5py.File(f"/media/rob/hdd1/james-gj/Ronchigrams/Simulations/Temp/Single_Aberrations.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
-            # Be wary that you are in append mode
+            # Be wary that you are in write mode
 
             try:
                 random_mags_dset = f.create_dataset("random_mags dataset", (number_processes, number_simulations, 4), dtype="float64")
@@ -61,6 +65,7 @@ if __name__ == "__main__":
                 random_I_dset = f.create_dataset("random_I dataset", (number_processes, number_simulations, 1), dtype="float64")
                 random_t_dset = f.create_dataset("random_t dataset", (number_processes, number_simulations, 1), dtype="float64")
                 ronch_dset = f.create_dataset("ronch dataset", (number_processes, number_simulations, 1024, 1024), dtype="float64")
+            
             except:
                 random_mags_dset = f["random_mags dataset"]
                 random_angs_dset = f["random_angs dataset"]
@@ -70,7 +75,9 @@ if __name__ == "__main__":
 
             randu = random.uniform
 
+            # Initialising simulation_number variable that will be incremented below
             simulation_number = 0
+
             for simulation in range(number_simulations):
                 simulation_number += 1
 
@@ -106,6 +113,10 @@ if __name__ == "__main__":
                 I = randu(min_I, max_I)
                 t = randu(min_t, max_t)
 
+                # Note: simulations have toe be saved as below for the dataloader in DataLoader2.py to work, so be 
+                # careful when it comes to making changes to the below. Also, make sure that the spaces created in the 
+                # HDF5 file are filled completely, otherwise the length method of the dataset won't work properly, and 
+                # nor will the getitem method.
                 random_mags = np.array([C10, C12, C21, C23])
                 random_mags_dset[rank, simulation] = random_mags[:]
 
@@ -140,11 +151,8 @@ if __name__ == "__main__":
                 #         print(f"{time_to_test} seconds elapsed since script began running")
 
     # CPUs AND PROCESSES
-    total_simulations = 100
+    total_simulations = 100000
 
-    # TODO: implement a way to take the number of processes selected by "mpiexec -n <number> python Parallel_HDF5_2.py" 
-    # and divide total_simulations above by it to get the number of simulations per process that will lead to the total 
-    # number of simulations desired.
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = math.ceil(total_simulations / number_processes)
 
