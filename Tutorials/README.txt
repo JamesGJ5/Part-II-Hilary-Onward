@@ -17,6 +17,10 @@ Contents:
     importTest2.py was created to write a script where the importation of importTest1.py was to be tested. Importation 
     seems to be working just fine.
 
+    importTest3.py was created to see if one could import a scipt in which there were already importations and see if 
+    things carried over. So, import this script into importTest1.py and then importTest1.py into importTest2.py and see 
+    if all is accessible. Seems like it all works.
+
 Extra information:
 
     This is a directory I have created to get started
