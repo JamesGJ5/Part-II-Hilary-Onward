@@ -11,6 +11,12 @@ Contents:
     Tutorial_1.py is where I have been trying out the occasional torch function, it seems, although it isn't specifically 
     for this purpose and seems quite flexible.
 
+    importTest1.py was created to write a script whose exportation to importTest2.py was to be tested. Exportation seems 
+    to be working just fine.
+
+    importTest2.py was created to write a script where the importation of importTest1.py was to be tested. Importation 
+    seems to be working just fine.
+
 Extra information:
 
     This is a directory I have created to get started
