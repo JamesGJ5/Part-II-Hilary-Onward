@@ -6,6 +6,8 @@ Notable Contents:
     COMPARED TO THE BELOW. HOWEVER, IF YOU CONTINUE READING EXTRA INFORMATION, IT SEEMS I DELETED THOSE FILES, THEN 
     MADE NEW FILES OF THE SAME NAME.
 
+    model1.py was made for storing the model for importation into other scripts.
+
     CNN_1.py, I believe, is where I first wrote code from the following Kaggle webpage to make a training/testing 
     pipeline for EfficientNet on CIFAR-10 data: https://www.kaggle.com/hmendonca/efficientnet-cifar-10-ignite/notebook
 
@@ -26,7 +28,7 @@ Notable Contents:
     CNN_4.py, as presently constructed, was made to change predictions from CNN_3.py for MNIST digits from discrete to 
     continuous. One of the things I did was change the loss criterion from cross-entropy loss to MSELoss, a loss criterion 
     that permits prediction of continuous labels. I also introduced the metric MeanAbsoluteError from ignite.metrics to 
-    evaluate the training stage, since top-1 and top-5 accuracy didn't really make sense to use. I believe I wrote about 
+    evaluate the training stage, since it didn't really make sense to use top-1 and top-5 accuracy. I believe I wrote about 
     this in my lab book. I think I remember the training bits of this file working and predictions being continuous, 
     although the rest might be a bit dodgy. HOWEVER, IT LOOKS LIKE I HAVE WRITTEN MEANSQUAREDERROR WHERE I SHOULDN'T 
     HAVE IN HERE, I MUST AMEND THIS; I ALSO MIGHT HAVE TO TAKE OUT MENTIONS OF "ACCURACY" AS WELL, I THINK THESE APPLY 
