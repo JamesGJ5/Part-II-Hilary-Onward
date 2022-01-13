@@ -271,7 +271,7 @@ if efficientet_model == "EfficientNet-B0":
     model = EfficientNet(num_classes=1000, width_coefficient=1.0, depth_coefficient=1.0, dropout_rate=0.2).to(device)
 
 elif efficientet_model == "EfficientNet-B7":
-    model = EfficientNet(num_classes=1000, width_coefficient=1.0, depth_coefficient=1.0, dropout_rate=0.2).to(device)
+    model = EfficientNet(num_classes=1000, width_coefficient=2.0, depth_coefficient=3.1, dropout_rate=0.5).to(device)
 
 # fout = open("EfficientNet_B0_Model_Architecture_CNN_3", "w")
 # fout.write(str(model))
