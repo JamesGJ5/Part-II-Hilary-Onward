@@ -3,7 +3,7 @@ hasn't been updated based on useful changes to pytorch3copy).
 
 Notable Contents:
     
-    model.py will be where my model (and functions it relies on etc.) is stored.
+    model1.py will be where my model (and functions it relies on etc.) is stored.
 
     training.py will be my training pipeline.
 
