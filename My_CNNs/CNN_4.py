@@ -244,12 +244,13 @@ class EfficientNet(nn.Module):
 efficientet_model = "EfficientNet-B0"   # Exact model must be in this format, e.g. could also be "EfficentNet-B0"
 # Note, if changing to B7, must also change the pretrained weights loaded as well as possibly something else that I have currently
 # forgotten about.
-will_train = True
-using_existing_model_path = False
+will_train = False
+using_existing_model_path = True
 if using_existing_model_path:   # Note, this below is for cifar10
     # model_path = "efficientNet_cifar10_9475.p.pt" # Can be whatever the existing model path is, make sure cwd is My_CNNs
-    model_path = "efficientNet_MNIST_9855.p.pt"
-running_inferencer = False   # Be careful, setting this to False may cause issues for the bits after inferencer.run
+    # This is in VSCode/, so make sure that is your working directory
+    model_path = "efficientNet_MNIST_7837.p.pt"
+running_inferencer = True   # Be careful, setting this to False may cause issues for the bits after inferencer.run
 
 # DEVICE CONFIGURATION
 GPU = 0
@@ -699,7 +700,7 @@ if __name__ == "__main__":
         os.system(f"ls {log_path}") # Unlike the webpage I am adapting code from, I use os.system() rather than !
         checkpoints = next(os.walk(log_path))[2]
         checkpoints = sorted(filter(lambda f: f.endswith(".pt"), checkpoints))
-        # The Kaggle webpage has the above with .pth instead of .pt - mine save as .pth for some reason
+        # The Kaggle webpage has the above with .pth instead of .pt - mine save as .pt for some reason
         scores = [c[22:28] for c in checkpoints]    # c[22:28] is supposed to pick the score out of the file name
         print(scores)
         best_epoch = np.argmax(scores)
