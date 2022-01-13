@@ -721,8 +721,8 @@ if __name__ == "__main__":
     metrics = {
         "Accuracy": Accuracy(),
         "Precision": Precision(average=True),
-        "MeanAbsoluteError": MeanAbsoluteError,
-        "MeanSquaredError": MeanSquaredError
+        "MeanAbsoluteError": MeanAbsoluteError(),
+        "MeanSquaredError": MeanSquaredError()
     }
 
     all_pred = np.empty((0, 10), float)

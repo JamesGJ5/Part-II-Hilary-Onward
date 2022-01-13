@@ -1,4 +1,4 @@
-Directory for my CNNs.
+Directory for tutorial CNNs.
 
 Notable Contents:
     
