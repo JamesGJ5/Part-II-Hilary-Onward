@@ -370,7 +370,7 @@ print(len(train_dataset), len(test_dataset), len(train_eval_dataset))
 
 from torch.utils.data import DataLoader
 
-batch_size = 125
+batch_size = 64
 num_workers = 2
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size,
@@ -457,7 +457,6 @@ from ignite.utils import convert_tensor, to_onehot
 i=0
 def update_fn(engine, batch):
     """Used by ignite.engine.Engine to update model while running over the input data."""
-
     model.train()
 
     global i
@@ -465,13 +464,30 @@ def update_fn(engine, batch):
 
     x = convert_tensor(batch[0], device=device, non_blocking=True)
     if i==1: print(x.size())
+
     y = convert_tensor(batch[1], device=device, non_blocking=True)
     y = y.reshape((y.size(dim=0), 1))
     y = y.to(torch.float32)
     if i == 1: print(f"y's size is {y.size()}")
+
+    # It seems I removed salient code for prediction etc. because I was simply debugging. I will now re-add relevant 
+    # code here from https://www.kaggle.com/hmendonca/efficientnet-cifar-10-ignite/notebook
+    y_pred = model(x)
+
+    # Compute loss (criterion is defined somewhere above this function definition)
+    loss = criterion(y_pred, y)
+
+    optimiser.zero_grad()
+
+    # Won't be using apex amp from now on so the if statement probably won't run again
+    if use_amp:
+        with amp.scale_loss(loss, optimizer, loss_id=0) as scaled_loss:
+            scaled_loss.backward()
     else:
         loss.backward()
+
     optimiser.step()
+
     return {
         "batchloss": loss.item(),
     }
