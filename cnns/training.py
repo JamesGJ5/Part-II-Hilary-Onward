@@ -15,6 +15,12 @@ print(f"torch version: {torch.__version__}, ignite version: {ignite.__version__}
 # TODO: import functions for transforms and data loading
 
 
+# NAVIGATING THE TERMINAL TO THE WORKING DIRECTORY THIS FILE IS IN
+
+os.chdir("/home/james/VSCode/cnns")
+print(os.getcwd())
+
+
 # SEED INFORMATION
 
 # Arbitrary seed number
