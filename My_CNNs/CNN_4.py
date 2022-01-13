@@ -510,7 +510,7 @@ print(res) # Returns 2.3156 (to 5 significant figures), which is close to the va
 # progress bar and models/optimizers checkpointing
 
 from ignite.engine import Engine, Events, create_supervised_evaluator
-from ignite.metrics import RunningAverage, Loss, TopKCategoricalAccuracy, MeanAbsoluteError
+from ignite.metrics import RunningAverage, Loss, MeanAbsoluteError, MeanSquaredError, Precision, Accuracy
 
 from ignite.contrib.handlers import TensorboardLogger
 from ignite.contrib.handlers.tensorboard_logger import OutputHandler, OptimizerParamsHandler
@@ -715,13 +715,14 @@ if __name__ == "__main__":
         os.system(f"touch model_path_{model_path}")
         os.system(f"rm {log_path}/*")
 
-    best_model = EfficientNet()
+    best_model = EfficientNet(num_classes=1, width_coefficient=1.0, depth_coefficient=1.0, dropout_rate=0.2)
     best_model.load_state_dict(torch.load(model_path))
 
     metrics = {
         "Accuracy": Accuracy(),
         "Precision": Precision(average=True),
-        "Recall": Recall(average=True)
+        "MeanAbsoluteError": MeanAbsoluteError,
+        "MeanSquaredError": MeanSquaredError
     }
 
     all_pred = np.empty((0, 10), float)
