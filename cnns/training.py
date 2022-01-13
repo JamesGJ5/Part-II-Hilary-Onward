@@ -7,6 +7,7 @@ import os
 import numpy as np
 import ignite # Installed via "conda install ignite -c pytorch"
 import model1
+import datetime
 # If haven't done already, run "conda install -c conda-forge tensorboardx==1.6"
 
 print(f"torch version: {torch.__version__}, ignite version: {ignite.__version__}")
@@ -50,10 +51,12 @@ model = model1.EfficientNet(num_labels=1, width_coefficient=2.0, depth_coefficie
                             dropout_rate=0.5).to(device)
 
 
+# SAVING CURRENT ARCHITECTURE FOR EASY VIEWING AND REFERENCE
 
+with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
+    f.write(f"\n\n{datetime.datetime.now()}\n\n")
+    f.write(str(model))
 
-
-# Saving current architecture for easy viewing and reference
 
 # Transforms
 
