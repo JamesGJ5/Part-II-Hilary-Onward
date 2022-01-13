@@ -398,7 +398,7 @@ if __name__ == "__main__":
     # Automatic Mixed Precision
 
     # NOTE, HAVEN'T ACTUALLY TRIED THINGS WITH use_amp = False
-    use_amp = True
+    use_amp = False
 
     if use_amp:
         try:
