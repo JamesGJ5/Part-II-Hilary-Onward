@@ -5,6 +5,7 @@ import torch.nn as nn
 import os
 import numpy as np
 import random
+import sys
 
 # FIXME: IT LOOKS LIKE I HAVE WRITTEN MEANSQUAREDERROR WHERE I SHOULDN'T HAVE IN HERE, I MUST 
 # AMEND THIS; I ALSO MIGHT HAVE TO TAKE OUT MENTIONS OF "ACCURACY" AS WELL, I THINK THESE APPLY TO DISCRETE LABELS.
@@ -433,7 +434,7 @@ lr_scheduler = ExponentialLR(optimiser, gamma=0.975)
 
 # Automatic Mixed Precision
 
-use_amp = True
+use_amp = False
 
 if use_amp:
     try:
@@ -445,8 +446,8 @@ if use_amp:
         # https://github.com/NVIDIA/apex and https://stackoverflow.com/questions/19042389/conda-installing-upgrading-directly-from-github
         # and https://stackoverflow.com/questions/46076754/use-package-from-github-in-conda-virtual-environment
 
-# Initialize Amp
-model, optimiser = amp.initialize(model, optimiser, opt_level="O2", num_losses=1)
+    # Initialize Amp
+    model, optimiser = amp.initialize(model, optimiser, opt_level="O2", num_losses=1)
 
 # Next, let's define a single iteration function update_fn. This function is then used by ignite.engine.Engine to
 # update model while running over the input data.
@@ -455,6 +456,8 @@ from ignite.utils import convert_tensor, to_onehot
 
 i=0
 def update_fn(engine, batch):
+    """Used by ignite.engine.Engine to update model while running over the input data."""
+
     model.train()
 
     global i
@@ -466,17 +469,6 @@ def update_fn(engine, batch):
     y = y.reshape((y.size(dim=0), 1))
     y = y.to(torch.float32)
     if i == 1: print(f"y's size is {y.size()}")
-    if i == 1: print(y)
-    y_pred = model(x)
-    if i ==1: print(f"y_pred's size is {y_pred.size()}")
-    if i ==1: print(y_pred)
-
-    # Compute loss
-    loss = criterion(y_pred, y)
-    optimiser.zero_grad()
-    if use_amp:
-        with amp.scale_loss(loss, optimiser, loss_id=0) as scaled_loss:
-            scaled_loss.backward()
     else:
         loss.backward()
     optimiser.step()
@@ -648,7 +640,9 @@ trainer.add_event_handler(Events.EPOCH_COMPLETED, empty_cuda_cache)
 evaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 train_evaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 
-num_epochs = 20
+num_epochs = 4
+
+sys.exit()
 
 if __name__ == "__main__":
 
