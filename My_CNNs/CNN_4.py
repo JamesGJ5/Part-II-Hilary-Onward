@@ -658,8 +658,6 @@ train_evaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 
 num_epochs = 4
 
-sys.exit()
-
 if __name__ == "__main__":
 
     ## Note: uncomment this when want to train
