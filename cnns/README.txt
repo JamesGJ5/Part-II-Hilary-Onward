@@ -8,3 +8,5 @@ Notable Contents:
     training.py will be my training pipeline.
 
     inference.py will be my inference pipeline.
+
+    modelLogging logs model architectures used in each training run.
