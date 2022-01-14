@@ -463,8 +463,12 @@ def update_fn(engine, batch):
     global i
     i += 1   # Just put this here because I only want the print statements below to work once
 
+    print(torch.cuda.memory_allocated())
+
     x = convert_tensor(batch[0], device=device, non_blocking=True)
     if i==1: print(x.size())
+
+    print(torch.cuda.memory_allocated())
 
     y = convert_tensor(batch[1], device=device, non_blocking=True)
     y = y.reshape((y.size(dim=0), 1))
