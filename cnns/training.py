@@ -8,6 +8,17 @@ import numpy as np
 import ignite # Installed via "conda install ignite -c pytorch"
 import model1
 import datetime
+
+# For data loading onward
+import sys
+import h5py
+import cmath
+import math
+import torchvision.transforms.functional as F2
+from torch.utils.data import Dataset, DataLoader, random_split
+from torchvision.transforms import Compose, Resize, ToTensor, Normalize
+from torchvision import utils
+
 # If haven't done already, run "conda install -c conda-forge tensorboardx==1.6"
 
 print(f"torch version: {torch.__version__}, ignite version: {ignite.__version__}")
@@ -16,10 +27,12 @@ print(f"torch version: {torch.__version__}, ignite version: {ignite.__version__}
 # TODO: import functions for transforms and data loading
 
 
+
 # NAVIGATING THE TERMINAL TO THE WORKING DIRECTORY THIS FILE IS IN
 
 os.chdir("/home/james/VSCode/cnns")
 print(os.getcwd())
+
 
 
 # SEED INFORMATION
@@ -32,11 +45,13 @@ torchSeed = fixedSeed
 torch.manual_seed(torchSeed)
 
 
+
 # OPTIONS LIKE IN CNN_5.PY
 
 # Creating this variable because in model importation I will only import EfficientNet-B7 if this name in string form is 
 # what the below variable is assigned to
 efficientNetModel = "EfficientNet-B7"
+
 
 
 # GPU STUFF
@@ -46,9 +61,11 @@ device = torch.device(f"cuda:{GPU}" if torch.cuda.is_available() else "cpu")
 print(f"GPU: {torch.cuda.current_device()}")
 
 
+
 # MODEL INSTANTIATION
 model = model1.EfficientNet(num_labels=1, width_coefficient=2.0, depth_coefficient=3.1, 
                             dropout_rate=0.5).to(device)
+
 
 
 # SAVING CURRENT ARCHITECTURE FOR EASY VIEWING AND REFERENCE
@@ -58,15 +75,77 @@ with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
     f.write(str(model))
 
 
-# Transforms
 
-# Datasets, including splitting
+# TRANSFORMS, DATASETS AND DATASET SPLITTING, AND DATA LOADERS
 
-# Data loaders
+# Import dataset from dataLoader2.py
 
-# Optimiser
+sys.path.insert(1, "/home/james/VSCode/DataLoading")
+from DataLoader2 import RonchigramDataset
 
-# Amp stuff
+ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/Temp/Single_Aberrations.h5")
+
+
+# Apply transforms
+
+if efficientNetModel == "EfficientNet-B7":
+    resolution = 600 
+
+# TODO: import function in DataLoader2.py that calculates mean and std for normalisation. The values below right now 
+# are values from previous mean and std measurement, so should be roughly accurate, although this measurement was only 
+# done over 32 Ronchigrams.
+mean = 0.5008
+std = 0.2562
+
+trainTransform = Compose([
+    ToTensor(),
+    Resize(resolution, F2.InterpolationMode.BICUBIC),
+    Normalize(mean=[mean], std=[std])
+])
+
+testTransform = Compose([
+    ToTensor(),
+    Resize(resolution, F2.InterpolationMode.BICUBIC),
+    Normalize(mean=[mean], std=[std])
+])
+
+# TODO: figure out how to apply different transforms to individual split datasets rather than just applying one transform 
+# to the overall dataset, although it doesn't matter so much right now since trainTransform and testTransform are the 
+# same
+ronchdset.transform = trainTransform
+
+
+# Lengths for trainSet, evalSet and testSet
+
+ronchdsetLength = len(ronchdset)
+
+trainLength = math.ceil(ronchdsetLength * 0.70)
+evalLength = math.ceil(ronchdsetLength * 0.15)
+testLength = ronchdsetLength - trainLength - evalLength
+
+
+# Split up dataset into train, eval and test
+
+trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
+
+
+# Create data loaders via torch.utils.data.DataLoader
+
+batchSize = 64
+numWorkers = 2
+
+trainLoader = DataLoader(trainSet, batch_size=batchSize, num_workers=numWorkers, shuffle=True, drop_last=True, 
+                        pin_memory=True)
+
+evalLoader = DataLoader(evalSet, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
+                        pin_memory=True)
+
+testLoader = DataLoader(testSet, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
+                        pin_memory=True)
+
+
+
+# OPTIMISER
 
 # update_fn definition
 
@@ -91,3 +170,7 @@ with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
 # Training running
 
 # Storing best model from training
+
+# Closing the HDF5 file
+
+ronchdset.close_file()
