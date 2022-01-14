@@ -30,6 +30,12 @@ from torch.optim.lr_scheduler import ExponentialLR
 # For update_fn definition onward
 from ignite.utils import convert_tensor
 
+# For Output_transform definition onward
+from ignite.engine import Engine, Events, create_supervised_evaluator
+from ignite.metrics import RunningAverage, Loss, MeanAbsoluteError, MeanSquaredError, Precision, Accuracy
+from ignite.contrib.handlers import TensorboardLogger
+from ignite.contrib.handlers.tensorboard_logger import OutputHandler, OptimizerParamsHandler
+
 # TODO: import remaining modules here as required
 
 
@@ -229,7 +235,6 @@ def update_fn(engine, batch):
     # print(y)
     # print(y_pred)
 
-
     # Compute loss
     loss = criterion(y_pred, y)
     print(loss)
@@ -243,7 +248,6 @@ def update_fn(engine, batch):
     return {
         "batchloss": loss.item(),
     }
-
 
 
 
@@ -261,12 +265,39 @@ torch.cuda.empty_cache()
 
 
 
-
-
-
 # Output_transform definition
 
-# Some tensorboard stuff
+trainer = Engine(update_fn)
+
+def output_transform(out):
+    return out["batchloss"]
+
+# Computes the running average of the batchloss, I believe
+# NOTE: below, the first mention of "output_transform" is one of RunningAverage's parameters, its argument is the 
+# function defined above
+RunningAverage(output_transform=output_transform).attach(trainer, "batchloss")
+
+
+
+# SOME TENSORBOARD STUFF
+
+exp_name = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+log_path = f"/media/rob/hdd1/james-gj/finetune_efficientnet_MNIST/{exp_name}"
+
+tb_logger = TensorboardLogger(log_dir=log_path)
+
+tb_logger.attach(trainer, log_handler=OutputHandler('training', ['batchloss', ]), event_name=Events.ITERATION_COMPLETED)
+print("Experiment name: ", exp_name)
+
+
+# Learning rate scheduling
+trainer.add_event_handler(Events.EPOCH_COMPLETED, lambda engine: lr_scheduler.step())
+
+
+# Log optimiser parameters
+tb_logger.attach(trainer, log_handler=OptimizerParamsHandler(optimiser, "lr"), event_name=Events.EPOCH_STARTED)
+
+
 
 # Metrics for training
 
