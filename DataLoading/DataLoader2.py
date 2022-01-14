@@ -145,6 +145,16 @@ class RonchigramDataset(Dataset):
         # transformed to a tensor regardless.
         complexArray = torch.from_numpy(complexArray)
 
+        # Okay, I am going to put this line of code here until I can find a better workaround for complex numbers. To 
+        # make my network architecture work with complex numbers directly, I would have to put time in to do that, so 
+        # for now I will just split complexArray into two tensors, one with its real parts and the other with its 
+        # imaginary parts. Next I will create a new tensor, i.e. an 8-element vector whose first 4 elements are the real 
+        # parts and whose latter 4 elements are the corresponding imaginary parts.
+        realPart = torch.real(complexArray)
+        imagPart = torch.imag(complexArray)
+        # NOTE: here, complex array is a bit of a misnomer
+        complexArray = torch.cat((realPart, imagPart))
+
         # Decomment if you go back to using the magnitudes and angles themselves as labels, although will have to convert 
         # magnitude and angle array labels to torch Tensor like above
         # sample = {"ronchigram": ronch, "aberration magnitudes": mags, "aberration angles": angs}
