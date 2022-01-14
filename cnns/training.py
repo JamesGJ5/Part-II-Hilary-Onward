@@ -9,6 +9,8 @@ import ignite # Installed via "conda install ignite -c pytorch"
 import model1
 import datetime
 
+# If haven't done already, run "conda install -c conda-forge tensorboardx==1.6"
+
 # For data loading onward
 import sys
 import h5py
@@ -19,12 +21,18 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 from torchvision import utils
 
-# If haven't done already, run "conda install -c conda-forge tensorboardx==1.6"
-
-print(f"torch version: {torch.__version__}, ignite version: {ignite.__version__}")
+# For optimiser onward
+from itertools import chain
+import torch.optim as optim
+import torch.nn.functional as F
+from torch.optim.lr_scheduler import ExponentialLR
 
 # TODO: import remaining modules here as required
-# TODO: import functions for transforms and data loading
+
+
+# Version checking
+
+print(f"torch version: {torch.__version__}, ignite version: {ignite.__version__}")
 
 
 
@@ -146,6 +154,30 @@ testLoader = DataLoader(testSet, batch_size=batchSize, num_workers=numWorkers, s
 
 
 # OPTIMISER
+
+criterion = nn.MSELoss()
+
+lr = 0.01
+
+# TODO: make sure this, from the Kaggle webpage, is really applicable to your own data (I think it can be, though)
+optimiser = optim.SGD([
+    {
+        "params": chain(model.stem.parameters(), model.blocks.parameters()),
+        "lr": lr * 0.1,
+    },
+    {
+        "params": model.head[:6].parameters(),
+        "lr": lr * 0.2
+    },
+    {
+        "params": model.head[6].parameters(),
+        "lr": lr
+    }],
+    momentum=0.9, weight_decay=1e-3, nesterov=True)
+
+lr_scheduler = ExponentialLR(optimiser, gamma=0.975)
+
+
 
 # update_fn definition
 
