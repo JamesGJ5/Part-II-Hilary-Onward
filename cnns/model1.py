@@ -121,10 +121,10 @@ class EfficientNet(nn.Module):
         return new_num_channels
 
     def __init__(self, num_labels=1,
-                 width_coefficient=2.0,
-                 depth_coefficient=3.1,
+                 width_coefficient=1.0,
+                 depth_coefficient=1.0,
                  se_rate=0.25,
-                 dropout_rate=0.5,
+                 dropout_rate=0.2,
                  drop_connect_rate=0.2):
         super(EfficientNet, self).__init__()
 

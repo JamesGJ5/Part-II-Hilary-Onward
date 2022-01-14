@@ -61,7 +61,7 @@ torch.manual_seed(torchSeed)
 
 # Creating this variable because in model importation I will only import EfficientNet-B7 if this name in string form is 
 # what the below variable is assigned to
-efficientNetModel = "EfficientNet-B7"
+efficientNetModel = "EfficientNet-B0"
 
 
 
@@ -74,8 +74,15 @@ print(f"GPU: {torch.cuda.current_device()}")
 
 
 # MODEL INSTANTIATION
-model = model1.EfficientNet(num_labels=1, width_coefficient=2.0, depth_coefficient=3.1, 
-                            dropout_rate=0.5).to(device)
+if efficientNetModel == "EfficientNet-B7":
+    model = model1.EfficientNet(num_labels=1, width_coefficient=2.0, depth_coefficient=3.1, 
+                                dropout_rate=0.5).to(device)
+
+elif efficientNetModel == "EfficientNet-B0":
+    model = model1.EfficientNet(num_labels=1, width_coefficient=1.0, depth_coefficient=1.1, 
+                            dropout_rate=0.2).to(device)
+
+print(f"After model instantiation: {torch.cuda.memory_allocated(0)}")
 
 
 
@@ -96,11 +103,16 @@ from DataLoader2 import RonchigramDataset
 
 ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/Temp/Single_Aberrations.h5")
 
+print(f"After ronchdset instantiation: {torch.cuda.memory_allocated(0)}")
+
 
 # Apply transforms
 
 if efficientNetModel == "EfficientNet-B7":
     resolution = 600 
+
+elif efficientNetModel == "EfficientNet-B0":
+    resolution = 224
 
 # TODO: import function in DataLoader2.py that calculates mean and std for normalisation. The values below right now 
 # are values from previous mean and std measurement, so should be roughly accurate, although this measurement was only 
@@ -130,7 +142,7 @@ ronchdset.transform = trainTransform
 
 ronchdsetLength = len(ronchdset)
 
-trainLength = math.ceil(ronchdsetLength * 0.70)
+trainLength = math.ceil(ronchdsetLength * 0.7)
 evalLength = math.ceil(ronchdsetLength * 0.15)
 testLength = ronchdsetLength - trainLength - evalLength
 
@@ -139,22 +151,26 @@ testLength = ronchdsetLength - trainLength - evalLength
 
 trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
 
+print(f"After ronchdset splitting: {torch.cuda.memory_allocated(0)}")
+
 
 # Create data loaders via torch.utils.data.DataLoader
 
-batchSize = 64
+batchSize = 32
 numWorkers = 2
 
 trainLoader = DataLoader(trainSet, batch_size=batchSize, num_workers=numWorkers, shuffle=True, drop_last=True, 
                         pin_memory=True)
 
+
 evalLoader = DataLoader(evalSet, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
                         pin_memory=True)
+
 
 testLoader = DataLoader(testSet, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
                         pin_memory=True)
 
-
+print(f"After creating data loaders: {torch.cuda.memory_allocated(0)}")
 
 # OPTIMISER
 
@@ -186,29 +202,35 @@ lr_scheduler = ExponentialLR(optimiser, gamma=0.975)
 
 # Initialise a variable that is used to check the below function only when this variable equals 1
 i=0
+
 def update_fn(engine, batch):
     # Only do checking below when i == 1
     global i
     i += 1
 
+    print(f"Just before selecting optimiser and creating learning rate scheduler: {torch.cuda.memory_allocated(0)}")
+
     model.train()
 
-    x = convert_tensor(batch[0], device=device, non_blocking=True)
+    print(f"After putting model into trainmode: {torch.cuda.memory_allocated(0)}")
+
+    x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
     if i == 1:
         print(f"Size of x is: {x.size()}")
 
-    y = convert_tensor(batch[1], device=device, non_blocking=True)
-    # TODO: be careful with the reshaping you have done here, it won't work for your data
-    y = y.reshape((y.size(dim=0), 1))
-    y = y.to(torch.float32)
-    if i == 1: 
-        print(f"Size of y is: {y.size()}")
-        print(y)
+    print(f"After x: {torch.cuda.memory_allocated(0)}")
+    
 
     y_pred = model(x)
     if i == 1: 
         print(f"Size of y_pred is: {y_pred.size()}")
-        print(y_pred)
+
+    del x
+
+    y = convert_tensor(batch["aberrations"], device=device, non_blocking=True)
+    if i == 1: 
+        print(f"Size of y is: {y.size()}")
+
 
     # Compute loss
     loss = criterion(y_pred, y)
@@ -225,7 +247,21 @@ def update_fn(engine, batch):
 
 
 
-# Checking update_fn
+# CHECKING update_fn
+
+batch = next(iter(trainLoader))
+
+# Having memory issues so going to, in update_fn, put x on device, calculate y_pred on device, remove x from device, #
+# then add y to device and then calculate loss
+res = update_fn(engine=None, batch=batch)
+
+batch = None
+torch.cuda.empty_cache()
+
+
+
+
+
 
 # Output_transform definition
 
