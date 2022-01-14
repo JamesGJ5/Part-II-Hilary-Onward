@@ -17,3 +17,219 @@ Calculated mean: 0.5008420944213867
 Calculated std: 0.2561987340450287
 Mean and std calculated from 32 batches of size 4
 Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-13 20:26:20.558709
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-13 20:33:03.852767
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-13 20:35:15.049798
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-13 20:35:53.992016
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-13 20:36:08.774824
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-13 21:15:07.664483
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-13 21:16:41.523187
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-13 21:17:27.294283
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-13 21:18:31.543187
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-13 21:19:20.556920
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-13 21:21:24.296767
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:37:25.240957
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:38:44.013808
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:39:33.524839
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:40:00.118508
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:41:19.293633
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:41:44.872992
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:41:58.899989
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:42:53.959009
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:43:11.219288
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:44:41.765858
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:46:58.832731
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:50:31.058279
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:51:16.640412
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:51:47.505474
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:52:10.481401
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 09:53:06.249287
+
+2022-01-14 09:54:26.713210
+
+2022-01-14 09:54:52.424191
+
+2022-01-14 09:59:13.956400
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 10:05:53.619568
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 10:07:28.343540
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 10:07:56.350277
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 10:08:36.942009
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 10:10:38.083991
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 10:11:20.560325
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 10:12:45.020304
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-14 10:42:35.964096
+Calculated mean: 0.5008420944213867
+Calculated std: 0.2561987340450287
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17

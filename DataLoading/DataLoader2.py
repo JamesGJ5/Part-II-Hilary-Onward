@@ -9,7 +9,7 @@ import numpy as np
 import torch
 import datetime
 
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 from torchvision import utils
 
@@ -292,18 +292,36 @@ def showBatch(batchedSample):
 
 dataloader = DataLoader(ronchdset, batch_size=4, shuffle=True, num_workers=0)
 
-for iBatch, batchedSample in enumerate(dataloader):
-    # print(iBatch, batchedSample["ronchigram"].size(),
-    #         batchedSample["aberrations"].size())
+testingDataLoader = False
 
-    if iBatch == 3:
-        plt.figure()
-        showBatch(batchedSample)
-        # print(batchedSample["aberrations"])
-        plt.ioff()
-        plt.show()
-        break
+if testingDataLoader:
+    for iBatch, batchedSample in enumerate(dataloader):
+        # print(iBatch, batchedSample["ronchigram"].size(),
+        #         batchedSample["aberrations"].size())
 
+        if iBatch == 3:
+            plt.figure()
+            showBatch(batchedSample)
+            # print(batchedSample["aberrations"])
+            plt.ioff()
+            plt.show()
+            break
+
+# Checking if random_split works by splitting ronchdset into train, eval and test
+# TODO: be careful because there are also dataloaders above, the memory they take up may be high, which is bad if they 
+# are unnecessary
+
+ronchdsetLength = len(ronchdset)
+
+trainLength = math.ceil(ronchdsetLength * 0.70)
+evalLength = math.ceil(ronchdsetLength * 0.15)
+testLength = ronchdsetLength - trainLength - evalLength
+
+trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
+
+# print(trainSet[0]["aberrations"])
 
 # Remember to close HDF5 file
 ronchdset.close_file()
+
+# print(trainSet[0]["aberrations"])
