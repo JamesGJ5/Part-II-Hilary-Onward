@@ -27,6 +27,9 @@ import torch.optim as optim
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import ExponentialLR
 
+# For update_fn definition onward
+from ignite.utils import convert_tensor
+
 # TODO: import remaining modules here as required
 
 
@@ -179,7 +182,48 @@ lr_scheduler = ExponentialLR(optimiser, gamma=0.975)
 
 
 
-# update_fn definition
+# update_fn DEFINITION
+
+# Initialise a variable that is used to check the below function only when this variable equals 1
+i=0
+def update_fn(engine, batch):
+    # Only do checking below when i == 1
+    global i
+    i += 1
+
+    model.train()
+
+    x = convert_tensor(batch[0], device=device, non_blocking=True)
+    if i == 1:
+        print(f"Size of x is: {x.size()}")
+
+    y = convert_tensor(batch[1], device=device, non_blocking=True)
+    # TODO: be careful with the reshaping you have done here, it won't work for your data
+    y = y.reshape((y.size(dim=0), 1))
+    y = y.to(torch.float32)
+    if i == 1: 
+        print(f"Size of y is: {y.size()}")
+        print(y)
+
+    y_pred = model(x)
+    if i == 1: 
+        print(f"Size of y_pred is: {y_pred.size()}")
+        print(y_pred)
+
+    # Compute loss
+    loss = criterion(y_pred, y)
+    optimiser.zero_grad()
+
+    loss.backward()
+
+    optimiser.step()
+
+    return {
+        "batchloss": loss.item(),
+    }
+
+
+
 
 # Checking update_fn
 
