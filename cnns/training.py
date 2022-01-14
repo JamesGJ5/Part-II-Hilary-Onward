@@ -30,11 +30,14 @@ from torch.optim.lr_scheduler import ExponentialLR
 # For update_fn definition onward
 from ignite.utils import convert_tensor
 
-# For Output_transform definition onward
+# For Output_transform and tensorboard stuff definition onward
 from ignite.engine import Engine, Events, create_supervised_evaluator
-from ignite.metrics import RunningAverage, Loss, MeanAbsoluteError, MeanSquaredError, Precision, Accuracy
+from ignite.metrics import RunningAverage, Loss, MeanAbsoluteError, MeanSquaredError
 from ignite.contrib.handlers import TensorboardLogger
 from ignite.contrib.handlers.tensorboard_logger import OutputHandler, OptimizerParamsHandler
+from ignite.contrib.handlers import ProgressBar
+
+# For metrics onward
 
 # TODO: import remaining modules here as required
 
@@ -273,6 +276,7 @@ def output_transform(out):
     return out["batchloss"]
 
 # Computes the running average of the batchloss, I believe
+# This is mostly so batchloss can be displayed during training
 # NOTE: below, the first mention of "output_transform" is one of RunningAverage's parameters, its argument is the 
 # function defined above
 RunningAverage(output_transform=output_transform).attach(trainer, "batchloss")
@@ -298,10 +302,34 @@ trainer.add_event_handler(Events.EPOCH_COMPLETED, lambda engine: lr_scheduler.st
 tb_logger.attach(trainer, log_handler=OptimizerParamsHandler(optimiser, "lr"), event_name=Events.EPOCH_STARTED)
 
 
+# Interaction-wise progress bar
+ProgressBar(bar_format="").attach(trainer, metric_names=['batchloss',])
 
-# Metrics for training
 
-# Evaluator instantiation
+# Epoch-wise progress bar with display of training losses
+ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['batchloss'], event_name=Events.EPOCH_STARTED,
+closing_event_name=Events.EPOCH_COMPLETED)
+
+
+
+# METRICS TO LOG TO TENSORBOARD
+
+metrics = {
+    'Loss': Loss(criterion),
+    'MeanSquaredError': MeanSquaredError(),
+    'MeanAbsoluteError': MeanAbsoluteError(),
+}
+
+
+
+# EVALUATOR INSTANTIATION
+
+# Creating two evaluators to compute metrics on train/test images and log them to Tensorboard
+evaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
+train_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
+
+
+
 
 # Setting up logger
 
@@ -314,6 +342,8 @@ tb_logger.attach(trainer, log_handler=OptimizerParamsHandler(optimiser, "lr"), e
 # Training running
 
 # Storing best model from training
+
+# Add loss curves
 
 # Closing the HDF5 file
 
