@@ -226,8 +226,8 @@ def update_fn(engine, batch):
     if i == 1: 
         print(f"Size of y is: {y.size()}")
 
-    print(y)
-    print(y_pred)
+    # print(y)
+    # print(y_pred)
 
 
     # Compute loss
@@ -254,6 +254,7 @@ batch = next(iter(trainLoader))
 # Having memory issues so going to, in update_fn, put x on device, calculate y_pred on device, remove x from device, #
 # then add y to device and then calculate loss
 res = update_fn(engine=None, batch=batch)
+print(res)
 
 batch = None
 torch.cuda.empty_cache()
