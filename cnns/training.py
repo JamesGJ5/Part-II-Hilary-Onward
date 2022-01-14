@@ -75,11 +75,11 @@ print(f"GPU: {torch.cuda.current_device()}")
 
 # MODEL INSTANTIATION
 if efficientNetModel == "EfficientNet-B7":
-    model = model1.EfficientNet(num_labels=1, width_coefficient=2.0, depth_coefficient=3.1, 
+    model = model1.EfficientNet(num_labels=8, width_coefficient=2.0, depth_coefficient=3.1, 
                                 dropout_rate=0.5).to(device)
 
 elif efficientNetModel == "EfficientNet-B0":
-    model = model1.EfficientNet(num_labels=1, width_coefficient=1.0, depth_coefficient=1.1, 
+    model = model1.EfficientNet(num_labels=8, width_coefficient=1.0, depth_coefficient=1.1, 
                             dropout_rate=0.2).to(device)
 
 print(f"After model instantiation: {torch.cuda.memory_allocated(0)}")
@@ -174,7 +174,7 @@ print(f"After creating data loaders: {torch.cuda.memory_allocated(0)}")
 
 # OPTIMISER
 
-criterion = nn.MSELoss()
+criterion = nn.L1Loss()
 
 lr = 0.01
 
@@ -208,19 +208,14 @@ def update_fn(engine, batch):
     global i
     i += 1
 
-    print(f"Just before selecting optimiser and creating learning rate scheduler: {torch.cuda.memory_allocated(0)}")
-
     model.train()
-
-    print(f"After putting model into trainmode: {torch.cuda.memory_allocated(0)}")
 
     x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
     if i == 1:
         print(f"Size of x is: {x.size()}")
 
-    print(f"After x: {torch.cuda.memory_allocated(0)}")
+    print(f"After putting x onto the GPU: {torch.cuda.memory_allocated(0)}")
     
-
     y_pred = model(x)
     if i == 1: 
         print(f"Size of y_pred is: {y_pred.size()}")
@@ -231,9 +226,14 @@ def update_fn(engine, batch):
     if i == 1: 
         print(f"Size of y is: {y.size()}")
 
+    print(y)
+    print(y_pred)
+
 
     # Compute loss
     loss = criterion(y_pred, y)
+    print(loss)
+
     optimiser.zero_grad()
 
     loss.backward()
@@ -277,7 +277,7 @@ torch.cuda.empty_cache()
 
 # Early stopping
 
-# Function to clearing cuda cache between training and testing
+# Function to clear cuda cache between training and testing
 
 # Training running
 
