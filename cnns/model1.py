@@ -120,7 +120,7 @@ class EfficientNet(nn.Module):
             new_num_channels += self.divisor
         return new_num_channels
 
-    def __init__(self, num_labels=1,
+    def __init__(self, num_labels=8,
                  width_coefficient=1.0,
                  depth_coefficient=1.0,
                  se_rate=0.25,
