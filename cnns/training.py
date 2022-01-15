@@ -40,6 +40,10 @@ from ignite.contrib.handlers import ProgressBar
 # For logger onward
 from ignite.contrib.handlers import CustomPeriodicEvent
 from ignite.handlers import global_step_from_engine
+import logging
+
+# Model checkpointing onward
+from ignite.handlers import ModelCheckpoint, EarlyStopping, TerminateOnNan
 
 # TODO: import remaining modules here as required
 
@@ -357,7 +361,21 @@ global_step_transform=global_step_from_engine(trainer)), event_name=Events.EPOCH
 tb_logger.attach(testEvaluator, log_handler=OutputHandler(tag="test", metric_names=list(metrics.keys()), 
 global_step_transform=global_step_from_engine(trainer)), event_name=Events.EPOCH_COMPLETED)
 
+import logging
 
+# Setup engine & logger
+def setup_logger(logger):
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter("%(asctime)s %(name)-12s %(levelname)-8s %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+
+trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
+
+
+
+# CHECKPOINTING
 
 # Implementing a way to show this script that the best model is the one with the lowest MeanSquaredError value
 def default_score_fn(engine):
@@ -381,8 +399,20 @@ testEvaluator.add_event_handler(Events.COMPLETED, best_model_handler, {'model': 
 
 
 
+# EARLY STOPPING
 
-# Early stopping
+es_patience = 10
+es_handler = EarlyStopping(patience=es_patience, score_function=default_score_fn, trainer=trainer)
+# I haven't looked far into it, it doesn't seem to matter too much right now, but it may be that it is worth replacing 
+# test_evaluator below with train_evaluator, if that is a better indicator of whether early stopping is worth it
+testEvaluator.add_event_handler(Events.COMPLETED, es_handler)
+setup_logger(es_handler.logger)
+
+
+
+
+
+
 
 # Function to clear cuda cache between training and testing
 
