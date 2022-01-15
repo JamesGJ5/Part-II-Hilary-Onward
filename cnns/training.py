@@ -417,10 +417,29 @@ def empty_cuda_cache(engine):
     import gc
     gc.collect()
 
+trainer.add_event_handler(Events.EPOCH_COMPLETED, empty_cuda_cache)
+trainEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
+testEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 
 
 
-# Training running
+# ACTUAL TRAINING
+
+num_epochs = 20
+
+# This is where training begins
+trainer.run(trainLoader, max_epochs=num_epochs)
+
+
+
+# RESULTS OF FINETUNING
+# train_eval dataset metrics
+print(f"trainEvaluator metrics: {trainEvaluator.state.metrics}")
+
+# test dataset metrics
+print(f"test_evaluator metrics: {test_evaluator.state.metrics}")
+
+
 
 # Storing best model from training
 
