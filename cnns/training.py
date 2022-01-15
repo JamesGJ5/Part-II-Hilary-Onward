@@ -37,7 +37,9 @@ from ignite.contrib.handlers import TensorboardLogger
 from ignite.contrib.handlers.tensorboard_logger import OutputHandler, OptimizerParamsHandler
 from ignite.contrib.handlers import ProgressBar
 
-# For metrics onward
+# For logger onward
+from ignite.contrib.handlers import CustomPeriodicEvent
+from ignite.handlers import global_step_from_engine
 
 # TODO: import remaining modules here as required
 
@@ -325,15 +327,60 @@ metrics = {
 # EVALUATOR INSTANTIATION
 
 # Creating two evaluators to compute metrics on train/test images and log them to Tensorboard
-evaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
-train_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
+trainEvaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
+testEvaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
 
 
 
+# SETTING UP LOGGER
 
-# Setting up logger
+from ignite.contrib.handlers import CustomPeriodicEvent
 
-# default_score_fn definition
+cpe = CustomPeriodicEvent(n_epochs=3)
+cpe.attach(trainer)
+
+def run_evaluation(engine):
+    trainEvaluator.run(evalLoader)
+    testEvaluator.run(testLoader)
+
+
+# Evaluation occurs after the 3rd epoch begins, I believe
+trainer.add_event_handler(cpe.Events.EPOCHS_3_STARTED, run_evaluation)
+trainer.add_event_handler(Events.COMPLETED, run_evaluation)
+
+
+# Logging metrics for evaluation on evalLoader
+tb_logger.attach(trainEvaluator, log_handler=OutputHandler(tag="training", metric_names=list(metrics.keys()),
+global_step_transform=global_step_from_engine(trainer)), event_name=Events.EPOCH_COMPLETED)
+
+# Logging metrics for evaluation on TestLoader
+tb_logger.attach(testEvaluator, log_handler=OutputHandler(tag="test", metric_names=list(metrics.keys()), 
+global_step_transform=global_step_from_engine(trainer)), event_name=Events.EPOCH_COMPLETED)
+
+
+
+# Implementing a way to show this script that the best model is the one with the lowest MeanSquaredError value
+def default_score_fn(engine):
+    MSE = engine.state.metrics['MeanSquaredError']
+    # Further below, ModelCheckpoint retains the model with the highest score_function, so the score output here 
+    # must be made higher for lower value of MSE, since we want to save the model with the lowest MSE
+    if MSE == 0:
+        score = float("inf")
+
+    else:
+        score = 1 / MSE
+
+    return score
+
+# TODO: If this script ends up creating a different number of models than 3, may need to change n_saved below from 3 to 
+# something else. The below will result in a file with a number in it that corresponds to 1/MSE (so higher number means 
+# better model). There may be an error with float("inf"), will wait and see if ModelCheckpoint works with it.
+best_model_handler = ModelCheckpoint(dirname=log_path, filename_prefix="best", n_saved=3, score_name="test_recriprocal_MSE",
+score_function=default_score_fn)
+testEvaluator.add_event_handler(Events.COMPLETED, best_model_handler, {'model': model,})
+
+
+
 
 # Early stopping
 
