@@ -159,13 +159,18 @@ class RonchigramDataset(Dataset):
         # NOTE: here, I have made dtype=torch.float32 because I believe dtype=torch.float64 is equivalent to 
         # torch.DoubleTensor, which MSELoss() in cnns/training.py doesn't seem to be accepting.
         complexArray = torch.cat((realPart, imagPart)).to(dtype=torch.float32)
-        print(complexArray.type())
 
         # Decomment if you go back to using the magnitudes and angles themselves as labels, although will have to convert 
         # magnitude and angle array labels to torch Tensor like above
         # sample = {"ronchigram": ronch, "aberration magnitudes": mags, "aberration angles": angs}
 
-        sample = {"ronchigram": ronch, "aberrations": complexArray}
+        # sample = {"ronchigram": ronch, "aberrations": complexArray}
+
+        # NOTE: here I am changing the return to look more like an MNIST return, since the model I am using doesn't seem 
+        # to work well on a dictionary format, but it works on MNIST in My_CNNs/CNN_4.py. See Google Drive > 4th Year > 
+        # CNN Stuff for more details.
+
+        sample = (ronch, complexArray)
 
         return sample
 
@@ -173,7 +178,7 @@ class RonchigramDataset(Dataset):
         self.f.close()
 
 ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/Temp/Single_Aberrations.h5")
-print(ronchdset[50000]["aberrations"])
+# print(ronchdset[50000]["aberrations"])
 
 # Implementing a way to find the mean and std of the data for Normalize(). 
 # Since this relies on ToTensor() being done, I am going to create a new composed transform variable containing just 
