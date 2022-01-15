@@ -67,7 +67,9 @@ if TestLoading:
 #   point code these in.
 # - I am changing the class definition below in accordance with airsplay's comments (25 Jun 2020, 6 Jul 2020 and 15 Jul 
 #   2020) at https://github.com/pytorch/pytorch/issues/11929, in order to avoid opening the HDF5 and forking, which will 
-#   prevent reading from the file by various workers in the training pipeline from being done successfully
+#   prevent reading from the file by various workers in the training pipeline from being done successfully. Among other 
+#   things, modifying the dataset class includes adding an open_hdf5 method and adding a way in __init__ to calculate 
+#   length for __len__
 class RonchigramDataset(Dataset):
     """Ronchigram dataset loaded from a single HDF5 file (see contents of "if TestLoading" above for file contents). Labels are 
     initially aberration magnitudes and angles but a magnitude/angle pair get changed into a single complex number, the 
@@ -79,30 +81,21 @@ class RonchigramDataset(Dataset):
                 hdf5file: path to the HDF5 file containing the data as mentioned in the comment under this class' definition
                 transform (callable, optional): transforms being incroporated
         """
-        # self.f = h5py.File(hdf5file, "r")
 
         self.hdf5filename = hdf5filename
-
-        # self.RandMags = self.f["random_mags dataset"]
-        # self.RandAngs = self.f["random_angs dataset"]
-        # self.ronchs = self.f["ronch dataset"]
-
-        # The below is just here as a reminder that the HDF5 file also stores random Ronchigram capture current and 
-        # capture time information. Decomment when necessary.
-        # self.RandI = f["random_I dataset"]
-        # self.Randt = f["random_t dataset"]
-
         self.transform = transform
 
+        with h5py.File(self.hdf5filename, "r") as flen:
+            # Ranks refers to each parallel process used to save simulations to HDF5 file
+            numRanks = flen["ronch dataset"].shape[0]
+            # Note: this accuracy of the name of the below variable relies on all of the HDF5 file memory spaces 
+            # being filled with valid data, e.g. no incomplete simulations
+            ronchsPerRank = flen["ronch dataset"].shape[1]
+
+            self.length = numRanks * ronchsPerRank
+
     def __len__(self):
-        # Note: this relies on all of the HDF5 file memory spaces being filled with valid data, e.g. no incomplete 
-        # simulations
-        numRanks = self.ronchs.shape[0]
-        ronchsPerRank = self.ronchs.shape[1]
-
-        numRonchs = numRanks * ronchsPerRank
-
-        return numRonchs
+        return self.length
 
     def open_hdf5(self):
 
@@ -202,7 +195,7 @@ class RonchigramDataset(Dataset):
             self.f.close()
 
         else:
-            print("The HDF5 file is already closed.")
+            print("The HDF5 file is closed.")
 
 # TODO: change the below to fit with the new return format above
 
@@ -211,6 +204,7 @@ ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/
 # testItem = ronchdset[50000][0]
 # print(testItem)
 # print(type(testItem))
+# print(len(ronchdset))
 
 # # Implementing a way to find the mean and std of the data for Normalize(). 
 # # Since this relies on ToTensor() being done, I am going to create a new composed transform variable containing just 
