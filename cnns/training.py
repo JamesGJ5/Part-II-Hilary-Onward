@@ -410,11 +410,15 @@ setup_logger(es_handler.logger)
 
 
 
+# FUNCTION TO CLEAR CUDA CACHE BETWEEN TRAINING AND TESTING
+
+def empty_cuda_cache(engine):
+    torch.cuda.empty_cache()
+    import gc
+    gc.collect()
 
 
 
-
-# Function to clear cuda cache between training and testing
 
 # Training running
 
