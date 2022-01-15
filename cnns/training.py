@@ -151,6 +151,8 @@ testTransform = Compose([
 # same
 ronchdset.transform = trainTransform
 
+print(ronchdset[0])
+
 
 # Lengths for trainSet, evalSet and testSet
 
@@ -176,15 +178,36 @@ numWorkers = 2
 trainLoader = DataLoader(trainSet, batch_size=batchSize, num_workers=numWorkers, shuffle=True, drop_last=True, 
                         pin_memory=True)
 
+batch = next(iter(trainLoader))
+# x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
+# xtype = x.type()
+# print(f"trainLoader batch type is {xtype}")
+
+print(batch)
+
+
 
 evalLoader = DataLoader(evalSet, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
                         pin_memory=True)
+
+# batch = next(iter(evalLoader))
+# x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
+# xtype = x.type()
+# print(f"evalLoader batch type is {xtype}")
 
 
 testLoader = DataLoader(testSet, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
                         pin_memory=True)
 
+# batch = next(iter(testLoader))
+# x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
+# xtype = x.type()
+# print(f"testLoader batch type is {xtype}")
+
+
 print(f"After creating data loaders: {torch.cuda.memory_allocated(0)}")
+
+
 
 # OPTIMISER
 
@@ -224,10 +247,12 @@ def update_fn(engine, batch):
 
     model.train()
 
-    x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
+    x = convert_tensor(batch[0], device=device, non_blocking=True)
     if i == 1:
         print(f"Size of x is: {x.size()}")
-        # print(x.type())
+        print(x.type())
+
+    print(x)
 
     print(f"After putting x onto the GPU: {torch.cuda.memory_allocated(0)}")
     
@@ -238,7 +263,7 @@ def update_fn(engine, batch):
 
     del x
 
-    y = convert_tensor(batch["aberrations"], device=device, non_blocking=True)
+    y = convert_tensor(batch[1], device=device, non_blocking=True)
     if i == 1: 
         print(f"Size of y is: {y.size()}")
         # print(y.type())
@@ -266,15 +291,17 @@ def update_fn(engine, batch):
 
 batch = next(iter(trainLoader))
 
+
 # Having memory issues so going to, in update_fn, put x on device, calculate y_pred on device, remove x from device, #
 # then add y to device and then calculate loss
 res = update_fn(engine=None, batch=batch)
-print(res)
+# TODO: decomment the below when you want to test update_fn
+# print(res)
 
 batch = None
 torch.cuda.empty_cache()
 
-sys.exit()
+# sys.exit()
 
 
 
