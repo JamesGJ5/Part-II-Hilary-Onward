@@ -65,22 +65,27 @@ if TestLoading:
 # - Incorporate a transforms option to the RonchigramDataset class definition if needs be
 # - TODO: may eventually want both ToTensor and Normalize to happen by default in RonchigramDataset, so perhaps at some 
 #   point code these in.
+# - I am changing the class definition below in accordance with airsplay's comments (25 Jun 2020, 6 Jul 2020 and 15 Jul 
+#   2020) at https://github.com/pytorch/pytorch/issues/11929, in order to avoid opening the HDF5 and forking, which will 
+#   prevent reading from the file by various workers in the training pipeline from being done successfully
 class RonchigramDataset(Dataset):
     """Ronchigram dataset loaded from a single HDF5 file (see contents of "if TestLoading" above for file contents). Labels are 
     initially aberration magnitudes and angles but a magnitude/angle pair get changed into a single complex number, the 
     magnitude/m being its modulus and the angle/rad being its argument. Currently, aberrations are C10, C12, C21 and 
     C23 in Krivanek notation."""
 
-    def __init__(self, hdf5file: str, transform=None):
+    def __init__(self, hdf5filename: str, transform=None):
         """Args:
                 hdf5file: path to the HDF5 file containing the data as mentioned in the comment under this class' definition
                 transform (callable, optional): transforms being incroporated
         """
-        self.f = h5py.File(hdf5file, "r")
+        # self.f = h5py.File(hdf5file, "r")
 
-        self.RandMags = self.f["random_mags dataset"]
-        self.RandAngs = self.f["random_angs dataset"]
-        self.ronchs = self.f["ronch dataset"]
+        self.hdf5filename = hdf5filename
+
+        # self.RandMags = self.f["random_mags dataset"]
+        # self.RandAngs = self.f["random_angs dataset"]
+        # self.ronchs = self.f["ronch dataset"]
 
         # The below is just here as a reminder that the HDF5 file also stores random Ronchigram capture current and 
         # capture time information. Decomment when necessary.
@@ -99,11 +104,27 @@ class RonchigramDataset(Dataset):
 
         return numRonchs
 
+    def open_hdf5(self):
+
+        self.f = h5py.File(self.hdf5filename, "r")
+
+        self.RandMags = self.f["random_mags dataset"]
+        self.RandAngs = self.f["random_angs dataset"]
+        self.ronchs = self.f["ronch dataset"]
+
+        # The below is just here as a reminder that the HDF5 file also stores random Ronchigram capture current and 
+        # capture time information. Decomment when necessary.
+        # self.RandI = f["random_I dataset"]
+        # self.Randt = f["random_t dataset"]
+
     def __getitem__(self, idx):
         """idx is the single-number index referring to the item being got. Since, for each of self.RandMags, 
         self.RandAngs and self.ronchs, the first dimension is rank and only the second dimension is the item itself, 
         this method must take idx and calculate from it a corresponding rank and index within that rank itself. Here, 
         an aberration's magnitude and angle are converted to a single complex number."""
+
+        if not hasattr(self, 'f'):
+            self.open_hdf5()
 
         numRanks = self.ronchs.shape[0]
         itemsPerRank = self.ronchs.shape[1]
@@ -175,12 +196,16 @@ class RonchigramDataset(Dataset):
         return sample
 
     def close_file(self):
-        self.f.close()
+
+        if hasattr(self, 'f'):
+            self.f.close()
 
 # TODO: change the below to fit with the new return format above
 
-# ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/Temp/Single_Aberrations.h5")
-# # print(ronchdset[50000]["aberrations"])
+ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/Temp/Single_Aberrations.h5")
+# testItem = ronchdset[50000][0]
+# print(testItem)
+# print(type(testItem))
 
 # # Implementing a way to find the mean and std of the data for Normalize(). 
 # # Since this relies on ToTensor() being done, I am going to create a new composed transform variable containing just 
@@ -288,6 +313,10 @@ class RonchigramDataset(Dataset):
 
 # ronchdset.transform = trainTransform
 
+# testItem = ronchdset[50000][0]
+# print(testItem)
+# print(type(testItem))
+
 
 # # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
 # # incorporated, and testing the dataloader
@@ -348,3 +377,5 @@ class RonchigramDataset(Dataset):
 # ronchdset.close_file()
 
 # # print(trainSet[0]["aberrations"])
+
+ronchdset.close_file()
