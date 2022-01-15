@@ -13,6 +13,8 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 from torchvision import utils
 
+import sys
+
 # TODO: assert whatever must be asserted, e.g. number of labels equals number of images
 
 
@@ -152,8 +154,12 @@ class RonchigramDataset(Dataset):
         # parts and whose latter 4 elements are the corresponding imaginary parts.
         realPart = torch.real(complexArray)
         imagPart = torch.imag(complexArray)
+
         # NOTE: here, complex array is a bit of a misnomer
-        complexArray = torch.cat((realPart, imagPart))
+        # NOTE: here, I have made dtype=torch.float32 because I believe dtype=torch.float64 is equivalent to 
+        # torch.DoubleTensor, which MSELoss() in cnns/training.py doesn't seem to be accepting.
+        complexArray = torch.cat((realPart, imagPart)).to(dtype=torch.float32)
+        print(complexArray.type())
 
         # Decomment if you go back to using the magnitudes and angles themselves as labels, although will have to convert 
         # magnitude and angle array labels to torch Tensor like above
@@ -167,7 +173,7 @@ class RonchigramDataset(Dataset):
         self.f.close()
 
 ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/Temp/Single_Aberrations.h5")
-
+print(ronchdset[50000]["aberrations"])
 
 # Implementing a way to find the mean and std of the data for Normalize(). 
 # Since this relies on ToTensor() being done, I am going to create a new composed transform variable containing just 
