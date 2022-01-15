@@ -120,7 +120,6 @@ ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/
 
 print(f"After ronchdset instantiation: {torch.cuda.memory_allocated(0)}")
 
-
 # Apply transforms
 
 if efficientNetModel == "EfficientNet-B7":
@@ -189,7 +188,7 @@ print(f"After creating data loaders: {torch.cuda.memory_allocated(0)}")
 
 # OPTIMISER
 
-criterion = nn.L1Loss()
+criterion = nn.MSELoss()
 
 lr = 0.01
 
@@ -228,18 +227,21 @@ def update_fn(engine, batch):
     x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
     if i == 1:
         print(f"Size of x is: {x.size()}")
+        # print(x.type())
 
     print(f"After putting x onto the GPU: {torch.cuda.memory_allocated(0)}")
     
     y_pred = model(x)
     if i == 1: 
         print(f"Size of y_pred is: {y_pred.size()}")
+        # print(y_pred.type())
 
     del x
 
     y = convert_tensor(batch["aberrations"], device=device, non_blocking=True)
     if i == 1: 
         print(f"Size of y is: {y.size()}")
+        # print(y.type())
 
     # print(y)
     # print(y_pred)
@@ -271,6 +273,8 @@ print(res)
 
 batch = None
 torch.cuda.empty_cache()
+
+sys.exit()
 
 
 
@@ -430,7 +434,7 @@ num_epochs = 20
 # This is where training begins
 trainer.run(trainLoader, max_epochs=num_epochs)
 
-
+g
 
 # RESULTS OF FINETUNING
 # train_eval dataset metrics
@@ -441,7 +445,7 @@ print(f"test_evaluator metrics: {test_evaluator.state.metrics}")
 
 
 
-# Storing best model from training
+# STORING THE BEST MODEL FOR TRAINING
 
 # Add loss curves
 
