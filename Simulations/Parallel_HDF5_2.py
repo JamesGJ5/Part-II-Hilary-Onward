@@ -7,6 +7,7 @@ import time
 import os
 from mpi4py import MPI
 import cmath
+import sys
 
 from datetime import datetime
 
@@ -150,8 +151,15 @@ if __name__ == "__main__":
                 #         print(f"\n{simulation_number} simulations complete for process number {processnum}")
                 #         print(f"{time_to_test} seconds elapsed since script began running")
 
+    # This code was here to make a small practice file (/media/rob/hdd2/james/simulations/17_01_22/Single_Aberrations_Lite.h5)
+    # number_processes = 1
+    # rank = 0
+    # simulate_single_aberrations(10, imdim, simdim, max_C10, max_C12, max_C21, max_C23, min_I, max_I, min_t, max_t)
+
+    # sys.exit()
+
     # CPUs AND PROCESSES
-    total_simulations = 100000
+    total_simulations = 1000
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = math.ceil(total_simulations / number_processes)
