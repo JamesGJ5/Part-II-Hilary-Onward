@@ -357,6 +357,8 @@ train_dataset = MNIST(root=path, train=True, transform=train_transform,
 test_dataset = MNIST(root=path, train=False, transform=test_transform,
                         download=True)
 
+print(train_dataset[0])
+
 import random
 
 train_eval_indices = [random.randint(0, len(train_dataset) - 1)
@@ -376,6 +378,9 @@ num_workers = 2
 
 train_loader = DataLoader(train_dataset, batch_size=batch_size,
 num_workers=num_workers, shuffle=True, drop_last=True, pin_memory=True)
+
+print(next(iter(train_loader)))
+sys.exit()
 
 test_loader = DataLoader(test_dataset, batch_size=batch_size,
 num_workers=num_workers, shuffle=False, drop_last=False, pin_memory=True)
@@ -468,6 +473,8 @@ def update_fn(engine, batch):
     x = convert_tensor(batch[0], device=device, non_blocking=True)
     if i==1: print(x.size())
 
+    print(x)
+
     print(torch.cuda.memory_allocated())
 
     y = convert_tensor(batch[1], device=device, non_blocking=True)
@@ -501,6 +508,8 @@ def update_fn(engine, batch):
 batch = next(iter(train_loader))
 res = update_fn(engine=None, batch=batch)
 
+sys.exit()
+
 batch = None
 
 torch.cuda.empty_cache()
@@ -524,7 +533,10 @@ trainer = Engine(update_fn)
 def output_transform(out):
     return out["batchloss"]
 
-RunningAverage(output_transform=output_transform).attach(trainer, "batchloss")  # Attach attaches current metric to provided enginer
+# Attach attaches current metric to provided enginer
+# NOTE: below, the first mention of "output_transform" is one of RunningAverage's parameters, its argument is the 
+# function defined above
+RunningAverage(output_transform=output_transform).attach(trainer, "batchloss")
 
 # todo: learn more about ignite generally, maybe watch a YouTube video
 
@@ -563,7 +575,7 @@ closing_event_name=Events.EPOCH_COMPLETED)
 
 metrics = {
     'Loss': Loss(criterion),
-    'MeanSquaredError': MeanAbsoluteError()
+    'MeanSquaredError': MeanAbsoluteError(),
 }
 
 evaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)

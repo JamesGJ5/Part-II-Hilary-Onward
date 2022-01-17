@@ -199,6 +199,9 @@ class EfficientNet(nn.Module):
         self.apply(init_weights)
 
     def forward(self, x):
+        # print("\n\n x is given by\n\n")
+        # print(x)
+        # print(f"\n\n x's type is {type(x)}\n\n")
         f = self.stem(x)
         f = self.blocks(f)
         y = self.head(f)
