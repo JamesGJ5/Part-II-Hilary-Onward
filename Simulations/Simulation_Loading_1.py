@@ -3,7 +3,7 @@ from random import randint
 import numpy as np
 import mpi4py
 
-with h5py.File("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/Temp/Single_Aberrations.h5", "r") as f:
+with h5py.File("/media/rob/hdd2/james/Single_Aberrations.h5", "r") as f:
     random_mags_dset = f["random_mags dataset"]
     random_angs_dset = f["random_angs dataset"]
     random_I_dset = f["random_I dataset"]
