@@ -56,7 +56,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd2/james/Single_Aberrations.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd2/james/simulations/17_01_22/Single_Aberrations.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             try:

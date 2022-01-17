@@ -200,13 +200,13 @@ class RonchigramDataset(Dataset):
 
 # TODO: change the below to fit with the new return format above
 
-# ronchdset = RonchigramDataset("/media/rob/hdd2/james/Single_Aberrations.h5")
+ronchdset = RonchigramDataset("/media/rob/hdd2/simulations/17_01_22/james/Single_Aberrations.h5")
 # print(ronchdset[5])
 # ronchdset.open_hdf5()
 # testItem = ronchdset[50000][0]
 # print(testItem)
 # print(type(testItem))
-# print(len(ronchdset))
+print(len(ronchdset))
 
 # # Implementing a way to find the mean and std of the data for Normalize(). 
 # # Since this relies on ToTensor() being done, I am going to create a new composed transform variable containing just 
