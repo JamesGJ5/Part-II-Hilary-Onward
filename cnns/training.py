@@ -116,7 +116,7 @@ with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
 sys.path.insert(1, "/home/james/VSCode/DataLoading")
 from DataLoader2 import RonchigramDataset
 
-ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/Temp/Single_Aberrations.h5")
+ronchdset = RonchigramDataset("/media/rob/hdd2/james/Single_Aberrations.h5")
 
 print(f"After ronchdset instantiation: {torch.cuda.memory_allocated(0)}")
 
@@ -461,14 +461,13 @@ num_epochs = 20
 # This is where training begins
 trainer.run(trainLoader, max_epochs=num_epochs)
 
-g
 
 # RESULTS OF FINETUNING
 # train_eval dataset metrics
 print(f"trainEvaluator metrics: {trainEvaluator.state.metrics}")
 
 # test dataset metrics
-print(f"test_evaluator metrics: {test_evaluator.state.metrics}")
+print(f"testEvaluator metrics: {testEvaluator.state.metrics}")
 
 
 
