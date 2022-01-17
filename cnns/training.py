@@ -45,6 +45,9 @@ import logging
 # Model checkpointing onward
 from ignite.handlers import ModelCheckpoint, EarlyStopping, TerminateOnNan
 
+# For loss curve
+import matplotlib.pyplot as plt
+
 # TODO: import remaining modules here as required
 
 
@@ -267,32 +270,39 @@ lr_scheduler = ExponentialLR(optimiser, gamma=0.975)
 # Initialise a variable that is used to check the below function only when this variable equals 1
 i=0
 
+# This list will be used to create the y-axis of a loss curve later
+batchlossVals = []
+
+# Keeping track of batches gone through so know how many points to plot on x-axis 
+# of loss curve later
+batchesDone = 0
+
 def update_fn(engine, batch):
     # Only do checking below when i == 1
-    global i
-    i += 1
+    # global i
+    # i += 1
 
     model.train()
 
     x = convert_tensor(batch[0], device=device, non_blocking=True)
-    if i == 1:
-        print(f"Size of x is: {x.size()}")
-        print(x.type())
+    # if i == 1:
+    #     print(f"Size of x is: {x.size()}")
+    #     print(x.type())
 
     print(x)
 
     print(f"After putting x onto the GPU: {torch.cuda.memory_allocated(0)}")
     
     y_pred = model(x)
-    if i == 1: 
-        print(f"Size of y_pred is: {y_pred.size()}")
+    # if i == 1: 
+    #     print(f"Size of y_pred is: {y_pred.size()}")
         # print(y_pred.type())
 
     del x
 
     y = convert_tensor(batch[1], device=device, non_blocking=True)
-    if i == 1: 
-        print(f"Size of y is: {y.size()}")
+    # if i == 1: 
+    #     print(f"Size of y is: {y.size()}")
         # print(y.type())
 
     # print(y)
@@ -308,8 +318,16 @@ def update_fn(engine, batch):
 
     optimiser.step()
 
+    batchloss = loss.item()
+
+    # For loss curve
+    global batchlossVals
+    batchlossVals.append(batchloss)
+    global batchesDone
+    batchesDone += 1
+
     return {
-        "batchloss": loss.item(),
+        "batchloss": batchloss,
     }
 
 
@@ -480,7 +498,7 @@ testEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 
 # ACTUAL TRAINING
 
-num_epochs = 1
+num_epochs = 11
 
 # This is where training begins
 # Note: when training, in the display for a given epoch, while the epoch is running, x/y shows the number of batches 
@@ -553,4 +571,20 @@ if removeOtherFiles:
 
 
 
-# TODO: add loss curves
+# PLOTTING AND SAVING LOSS CURVE
+
+def lossCurve(batchAxis, batchlossAxis):
+    """Plots a loss curve and saves it to log_path for a given batchAxis and batchlossAxis.
+    
+    batchAxis: batch axis data, currently an np.ndarray below
+    batchlossAxis: batchloss axis data, currently a list below
+    """
+
+    plt.plot(batchAxis, batchlossAxis)
+    plt.xlabel("Batch Number")
+    plt.ylabel(f"Batch Loss ( {criterion} )")
+    plt.savefig(f"{log_path}/lossCurve.png")
+
+    plt.show()
+
+lossCurve(np.linspace(1, batchesDone, batchesDone).astype(int), batchlossVals)
