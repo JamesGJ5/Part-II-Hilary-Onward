@@ -193,13 +193,15 @@ class RonchigramDataset(Dataset):
         if hasattr(self, 'f'):
             print("Closing HDF5 file...")
             self.f.close()
+            print("The HDF5 file is closed.")
 
         else:
             print("The HDF5 file is closed.")
 
 # TODO: change the below to fit with the new return format above
 
-ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/Temp/Single_Aberrations.h5")
+# ronchdset = RonchigramDataset("/media/rob/hdd2/james/Single_Aberrations.h5")
+# print(ronchdset[5])
 # ronchdset.open_hdf5()
 # testItem = ronchdset[50000][0]
 # print(testItem)
@@ -376,5 +378,3 @@ ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Ronchigrams/Simulations/
 # del ronchdset
 
 # # print(trainSet[0]["aberrations"])
-
-del ronchdset
