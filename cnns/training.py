@@ -191,8 +191,12 @@ numWorkers = 2
 
 # SAVING CURRENT ARCHITECTURE AND BATCH SIZE FOR EASY VIEWING AND REFERENCE
 
+# I am storing the time in this variable scriptTime because I want the same time to be logged for both saving training 
+# information and for the name of the file(s) training results in, i.e. model weights etc.
+scriptTime = datetime.datetime.now()
+
 with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
-    f.write(f"\n\n\n{datetime.datetime.now()}\n\n")
+    f.write(f"\n\n\n{scriptTime}\n\n")
     f.write(efficientNetModel + " " + str(parameters) + f" resolution:{resolution}" + f" batch size: {batchSize}\n\n")
     f.write(str(model))
 
@@ -324,8 +328,6 @@ res = update_fn(engine=None, batch=batch)
 batch = None
 torch.cuda.empty_cache()
 
-# sys.exit()
-
 
 
 # Output_transform definition
@@ -345,8 +347,8 @@ RunningAverage(output_transform=output_transform).attach(trainer, "batchloss")
 
 # SOME TENSORBOARD STUFF
 
-exp_name = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-log_path = f"/media/rob/hdd1/james-gj/finetune_efficientnet_MNIST/{exp_name}"
+exp_name = scriptTime.strftime("%Y%m%d-%H%M%S")
+log_path = f"/media/rob/hdd2/james/training/fineTuneEfficientNet/{exp_name}"
 
 tb_logger = TensorboardLogger(log_dir=log_path)
 
@@ -488,7 +490,7 @@ num_epochs = 20
 # TODO: see if, when the epoch ends, y changes to a number that doesn't correctly show the number of batches overal..
 trainer.run(trainLoader, max_epochs=num_epochs)
 
-sys.exit()
+
 
 # RESULTS OF FINETUNING
 # train_eval dataset metrics
@@ -502,7 +504,3 @@ print(f"testEvaluator metrics: {testEvaluator.state.metrics}")
 # STORING THE BEST MODEL FOR TRAINING
 
 # Add loss curves
-
-# Closing the HDF5 file
-
-ronchdset.close_file()
