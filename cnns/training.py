@@ -76,7 +76,7 @@ torch.manual_seed(torchSeed)
 
 # Creating this variable because in model importation I will only import EfficientNet-B7 if this name in string form is 
 # what the below variable is assigned to
-efficientNetModel = "EfficientNet-B0"
+efficientNetModel = "EfficientNet-B3"
 
 
 
@@ -90,22 +90,42 @@ print(f"GPU: {torch.cuda.current_device()}")
 
 # MODEL INSTANTIATION
 if efficientNetModel == "EfficientNet-B7":
-    model = model1.EfficientNet(num_labels=8, width_coefficient=2.0, depth_coefficient=3.1, 
-                                dropout_rate=0.5).to(device)
+    parameters = {"num_labels": 8, "width_coefficient": 2.0, "depth_coefficient": 3.1, "dropout_rate": 0.5}
+    resolution = 600
+
+elif efficientNetModel == "EfficientNet-B6":
+    parameters = {"num_labels": 8, "width_coefficient": 1.8, "depth_coefficient": 2.6, "dropout_rate": 0.5}
+    resolution = 528
+
+elif efficientNetModel == "EfficientNet-B5":
+    parameters = {"num_labels": 8, "width_coefficient": 1.6, "depth_coefficient": 2.2, "dropout_rate": 0.4}
+    resolution = 456
+
+elif efficientNetModel == "EfficientNet-B4":
+    parameters = {"num_labels": 8, "width_coefficient": 1.4, "depth_coefficient": 1.8, "dropout_rate": 0.4}
+    resolution = 380
+
+elif efficientNetModel == "EfficientNet-B3":
+    parameters = {"num_labels": 8, "width_coefficient": 1.2, "depth_coefficient": 1.4, "dropout_rate": 0.3}
+    resolution = 300
+
+elif efficientNetModel == "EfficientNet-B2":
+    parameters = {"num_labels": 8, "width_coefficient": 1.1, "depth_coefficient": 1.2, "dropout_rate": 0.3}
+    resolution = 260
+
+elif efficientNetModel == "EfficientNet-B1":
+    parameters = {"num_labels": 8, "width_coefficient": 1.0, "depth_coefficient": 1.1, "dropout_rate": 0.2}
+    resolution = 240
 
 elif efficientNetModel == "EfficientNet-B0":
-    model = model1.EfficientNet(num_labels=8, width_coefficient=1.0, depth_coefficient=1.1, 
-                            dropout_rate=0.2).to(device)
+    parameters = {"num_labels": 8, "width_coefficient": 1.0, "depth_coefficient": 1.0, "dropout_rate": 0.2}
+    resolution = 224
+
+model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficient=parameters["width_coefficient"], 
+                            depth_coefficient=parameters["depth_coefficient"], 
+                            dropout_rate=parameters["dropout_rate"]).to(device)
 
 print(f"After model instantiation: {torch.cuda.memory_allocated(0)}")
-
-
-
-# SAVING CURRENT ARCHITECTURE FOR EASY VIEWING AND REFERENCE
-
-with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
-    f.write(f"\n\n{datetime.datetime.now()}\n\n")
-    f.write(str(model))
 
 
 
@@ -121,12 +141,6 @@ ronchdset = RonchigramDataset("/media/rob/hdd2/james/Single_Aberrations.h5")
 print(f"After ronchdset instantiation: {torch.cuda.memory_allocated(0)}")
 
 # Apply transforms
-
-if efficientNetModel == "EfficientNet-B7":
-    resolution = 600 
-
-elif efficientNetModel == "EfficientNet-B0":
-    resolution = 224
 
 # TODO: import function in DataLoader2.py that calculates mean and std for normalisation. The values below right now 
 # are values from previous mean and std measurement, so should be roughly accurate, although this measurement was only 
@@ -172,8 +186,17 @@ print(f"After ronchdset splitting: {torch.cuda.memory_allocated(0)}")
 
 # Create data loaders via torch.utils.data.DataLoader
 
-batchSize = 32
+batchSize = 16
 numWorkers = 2
+
+# SAVING CURRENT ARCHITECTURE AND BATCH SIZE FOR EASY VIEWING AND REFERENCE
+
+with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
+    f.write(f"\n\n\n{datetime.datetime.now()}\n\n")
+    f.write(efficientNetModel + " " + str(parameters) + f" resolution:{resolution}" + f" batch size: {batchSize}\n\n")
+    f.write(str(model))
+
+
 
 trainLoader = DataLoader(trainSet, batch_size=batchSize, num_workers=numWorkers, shuffle=True, drop_last=True, 
                         pin_memory=True)
@@ -459,8 +482,13 @@ testEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 num_epochs = 20
 
 # This is where training begins
+# Note: when training, in the display for a given epoch, while the epoch is running, x/y shows the number of batches 
+# iterated over, y being the total number of batches and x being the number of batches iterated over so far in the epoch.
+# So, x/y shows progress of iterations in an epoch.
+# TODO: see if, when the epoch ends, y changes to a number that doesn't correctly show the number of batches overal..
 trainer.run(trainLoader, max_epochs=num_epochs)
 
+sys.exit()
 
 # RESULTS OF FINETUNING
 # train_eval dataset metrics
