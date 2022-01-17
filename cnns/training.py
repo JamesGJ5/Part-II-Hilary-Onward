@@ -509,6 +509,13 @@ trainer.run(trainLoader, max_epochs=num_epochs)
 
 
 
+# SAVING MORE TRAINING INFORMATION
+
+with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
+    f.write(f"\n\nTraining finished at {datetime.datetime.now()}")
+
+
+
 # RESULTS OF FINETUNING
 # train_eval dataset metrics
 print(f"trainEvaluator metrics: {trainEvaluator.state.metrics}")
