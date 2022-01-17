@@ -60,11 +60,11 @@ if __name__ == "__main__":
             # Be wary that you are in write mode
 
             try:
-                random_mags_dset = f.create_dataset("random_mags dataset", (number_processes, number_simulations, 4), dtype="float64")
-                random_angs_dset = f.create_dataset("random_angs dataset", (number_processes, number_simulations, 4), dtype="float64")
-                random_I_dset = f.create_dataset("random_I dataset", (number_processes, number_simulations, 1), dtype="float64")
-                random_t_dset = f.create_dataset("random_t dataset", (number_processes, number_simulations, 1), dtype="float64")
-                ronch_dset = f.create_dataset("ronch dataset", (number_processes, number_simulations, 1024, 1024), dtype="float64")
+                random_mags_dset = f.create_dataset("random_mags dataset", (number_processes, number_simulations, 4), dtype="float32")
+                random_angs_dset = f.create_dataset("random_angs dataset", (number_processes, number_simulations, 4), dtype="float32")
+                random_I_dset = f.create_dataset("random_I dataset", (number_processes, number_simulations, 1), dtype="float32")
+                random_t_dset = f.create_dataset("random_t dataset", (number_processes, number_simulations, 1), dtype="float32")
+                ronch_dset = f.create_dataset("ronch dataset", (number_processes, number_simulations, 1024, 1024), dtype="float32")
             
             except:
                 random_mags_dset = f["random_mags dataset"]
@@ -151,7 +151,7 @@ if __name__ == "__main__":
                 #         print(f"{time_to_test} seconds elapsed since script began running")
 
     # CPUs AND PROCESSES
-    total_simulations = 1000
+    total_simulations = 100000
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = math.ceil(total_simulations / number_processes)
