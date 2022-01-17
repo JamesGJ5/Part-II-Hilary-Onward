@@ -188,9 +188,12 @@ print(f"After ronchdset splitting: {torch.cuda.memory_allocated(0)}")
 
 
 # Create data loaders via torch.utils.data.DataLoader
+# num_epochs is here to facilitate saving this information to file in code below, didn't want to move lots of code
 
 batchSize = 16
 numWorkers = 2
+
+num_epochs = 1
 
 # SAVING CURRENT ARCHITECTURE AND BATCH SIZE FOR EASY VIEWING AND REFERENCE
 
@@ -200,7 +203,7 @@ scriptTime = datetime.datetime.now()
 
 with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
     f.write(f"\n\n\n{scriptTime}\n\n")
-    f.write(efficientNetModel + " " + str(parameters) + f" resolution:{resolution}" + f" batch size: {batchSize}\n\n")
+    f.write(efficientNetModel + ", " + str(parameters) + f", resolution: {resolution}" + f", batch size: {batchSize}" + f", number of epochs: {num_epochs}\n\n")
     f.write(str(model))
 
 
@@ -497,8 +500,6 @@ testEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 
 
 # ACTUAL TRAINING
-
-num_epochs = 11
 
 # This is where training begins
 # Note: when training, in the display for a given epoch, while the epoch is running, x/y shows the number of batches 
