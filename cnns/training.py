@@ -203,7 +203,7 @@ scriptTime = datetime.datetime.now()
 
 with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
     f.write(f"\n\n\n{scriptTime}\n\n")
-    f.write(efficientNetModel + ", " + str(parameters) + f", resolution: {resolution}" + f", batch size: {batchSize}" + f", number of epochs: {num_epochs}\n\n")
+    f.write(efficientNetModel + ", " + str(parameters) + f", resolution: {resolution}" + f", {ronchdsetLength} Ronchigrams"+ f", batch size: {batchSize}" + f", number of epochs: {num_epochs}\n\n")
     f.write(str(model))
 
 
