@@ -168,7 +168,7 @@ testTransform = Compose([
 # same
 ronchdset.transform = trainTransform
 
-print(ronchdset[0])
+# print(ronchdset[0])
 
 
 # Lengths for trainSet, evalSet and testSet
@@ -193,7 +193,7 @@ print(f"After ronchdset splitting: {torch.cuda.memory_allocated(0)}")
 batchSize = 16
 numWorkers = 2
 
-num_epochs = 1
+num_epochs = 6
 
 # SAVING CURRENT ARCHITECTURE AND BATCH SIZE FOR EASY VIEWING AND REFERENCE
 
@@ -211,12 +211,12 @@ with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
 trainLoader = DataLoader(trainSet, batch_size=batchSize, num_workers=numWorkers, shuffle=True, drop_last=True, 
                         pin_memory=True)
 
-batch = next(iter(trainLoader))
+# batch = next(iter(trainLoader))
 # x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
 # xtype = x.type()
 # print(f"trainLoader batch type is {xtype}")
 
-print(batch)
+# print(batch)
 
 
 
@@ -292,16 +292,16 @@ def update_fn(engine, batch):
     #     print(f"Size of x is: {x.size()}")
     #     print(x.type())
 
-    print(x)
+    # print(x)
 
-    print(f"After putting x onto the GPU: {torch.cuda.memory_allocated(0)}")
+    # print(f"After putting x onto the GPU: {torch.cuda.memory_allocated(0)}")
     
     y_pred = model(x)
     # if i == 1: 
     #     print(f"Size of y_pred is: {y_pred.size()}")
         # print(y_pred.type())
 
-    del x
+    # del x
 
     y = convert_tensor(batch[1], device=device, non_blocking=True)
     # if i == 1: 
@@ -313,7 +313,7 @@ def update_fn(engine, batch):
 
     # Compute loss
     loss = criterion(y_pred, y)
-    print(loss)
+    # print(loss)
 
     optimiser.zero_grad()
 
