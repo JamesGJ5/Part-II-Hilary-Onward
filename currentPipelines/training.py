@@ -59,7 +59,7 @@ print(f"torch version: {torch.__version__}, ignite version: {ignite.__version__}
 
 # NAVIGATING THE TERMINAL TO THE WORKING DIRECTORY THIS FILE IS IN
 
-os.chdir("/home/james/VSCode/cnns")
+os.chdir("/home/james/VSCode/currentPipelines")
 print(os.getcwd())
 
 
@@ -201,7 +201,7 @@ num_epochs = 6
 # information and for the name of the file(s) training results in, i.e. model weights etc.
 scriptTime = datetime.datetime.now()
 
-with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
+with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     f.write(f"\n\n\n{scriptTime}\n\n")
     f.write(efficientNetModel + ", " + str(parameters) + f", resolution: {resolution}" + f", {ronchdsetLength} Ronchigrams"+ f", batch size: {batchSize}" + f", number of epochs: {num_epochs}\n\n")
     f.write(str(model))
@@ -512,7 +512,7 @@ trainer.run(trainLoader, max_epochs=num_epochs)
 
 # SAVING MORE TRAINING INFORMATION
 
-with open("/home/james/VSCode/cnns/modelLogging", "a") as f:
+with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     f.write(f"\n\nTraining finished at {datetime.datetime.now()}")
 
 
