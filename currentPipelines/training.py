@@ -459,7 +459,9 @@ def default_score_fn(engine):
     # Further below, ModelCheckpoint retains the model with the highest score_function, so the score output here 
     # must be made higher for lower value of MSE, since we want to save the model with the lowest MSE
     if MSE == 0:
-        score = float("inf")
+        score = 10**22
+        print("MSE calculated is zero, so the score saved was arbitrarily made to be 10**22.")
+        print("Might want to check that this wasn't an erroneous result.")
 
     else:
         score = 1 / MSE
