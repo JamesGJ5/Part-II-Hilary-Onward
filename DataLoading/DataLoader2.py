@@ -95,6 +95,8 @@ class RonchigramDataset(Dataset):
         complexArray = np.array([])
 
         for aber in range(len(mags)):
+            # NOTE: cmath.rect() has an inherent error in it, for example, cmath.rect(1, cmath.pi/2) leads to 
+            # 10**-19 + 1j rather than simply 1j.
             complexAber = cmath.rect(mags[aber], angs[aber])
 
             complexArray = np.append(complexArray, complexAber)
@@ -172,7 +174,7 @@ if __name__ == "__main__":
 
     torch.manual_seed(torchSeed)
 
-    ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/17_01_22/Single_Aberrations.h5")
+    ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/20_01_22/Single_Aberrations.h5")
 
     # Implementing a way to find the mean and std of the data for Normalize(). 
     # Since this relies on ToTensor() being done, I am going to create a new composed transform variable containing just 

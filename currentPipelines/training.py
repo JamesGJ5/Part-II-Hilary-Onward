@@ -139,7 +139,7 @@ print(f"After model instantiation: {torch.cuda.memory_allocated(0)}")
 sys.path.insert(1, "/home/james/VSCode/DataLoading")
 from DataLoader2 import RonchigramDataset
 
-ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/17_01_22/Single_Aberrations.h5")
+ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/20_01_22/Single_Aberrations.h5")
 
 print(f"After ronchdset instantiation: {torch.cuda.memory_allocated(0)}")
 
