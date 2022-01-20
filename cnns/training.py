@@ -544,7 +544,7 @@ print("\n" + str(checkpoints))
 
 # TODO: automate calculation of the indices of the file names to take the 
 # scores from below
-scores = [c[32:40] for c in checkpoints]
+scores = [eval(c[32:-3]) for c in checkpoints]
 print("\nScores:", scores)
 
 # TODO: check the following--I think bestEpoch is a misnomer, but for 

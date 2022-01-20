@@ -163,7 +163,7 @@ if __name__ == "__main__":
     total_simulations = 100000
 
     number_processes = MPI.COMM_WORLD.size
-    simulations_per_process = math.ceil(total_simulations / number_processes)
+    simulations_per_process = int(math.ceil(total_simulations / number_processes))
 
     rank = MPI.COMM_WORLD.rank
     # The below was in use because previously I was writing HDF5 files containg space for simulations from all 32 channels 
