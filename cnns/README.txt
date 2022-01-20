@@ -10,3 +10,7 @@ Notable Contents:
     inference.py will be my inference pipeline.
 
     modelLogging logs model architectures used in each training run.
+
+How to Use:
+
+    The Conda environment "pytorch3copy" works on this directory.

@@ -20,6 +20,10 @@ Archived Contents:
     and associated phi_nm angles. This file was made 12/12/2021 for CNN_6.py. It was made by adapting the procedures used 
     in the pytorch.org tutorial mentioned above, but adapting said procedures to my own data.
 
+How to Use:
+
+    The Conda environment "pytorch3copy" works on this environment.
+
 Extra information:
 
     See 2:35 of https://www.youtube.com/watch?v=zN49HdDxHi8 for necessities that my dataset class definition must have 

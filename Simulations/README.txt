@@ -40,6 +40,10 @@ Archived Contents:
 
 ...
 
+How to Use:
+
+    The Conda environment "pytorch3copy" works.
+
 Extra information:
 
     11:01am on 01/01/2022: have just created Parallel_HDF5_2.py for what I think should be working simulations for saving in 
