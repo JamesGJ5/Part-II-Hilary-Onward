@@ -262,7 +262,7 @@ if __name__ == "__main__":
 
     # todo: must download the file for efficientnet_b7 weights instead
     # the file below has the pretrained weights for efficientnet-b0
-    model_state = torch.load("My_CNNs/efficientnet-b0-08094119.pth")
+    model_state = torch.load("oldPipelines/efficientnet-b0-08094119.pth")
 
     # A basic remapping is required
     mapping = {
@@ -278,13 +278,13 @@ if __name__ == "__main__":
 
     import json
 
-    with open("My_CNNs/labels_map.txt", "r") as h:
+    with open("oldPipelines/labels_map.txt", "r") as h:
         labels = json.load(h)
 
     from PIL import Image
     import torchvision.transforms as transforms
 
-    img = Image.open("My_CNNs/giant_panda.jpg")
+    img = Image.open("oldPipelines/giant_panda.jpg")
     # Preprocessing image
     tfms = transforms.Compose([transforms.Resize(224),
                                transforms.ToTensor(),

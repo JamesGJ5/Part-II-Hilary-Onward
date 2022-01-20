@@ -14,7 +14,7 @@ Notable Contents:
     CNN_2.py is a file I then made to store relevant content from CNN_1.py, I think because I was having issues with the 
     memory taken up in the GPUs by CNN_1.py, either on my laptop, on the group computer or both. Eventually, I developed 
     CNN_2.py so that it worked in what it was made on Kaggle to do and properly stored the best weights from training. 
-    Apparently, I ended up using the model path efficientNet_cifar10_9475.p.pt in the current My_CNNs/, but it seems not 
+    Apparently, I ended up using the model path efficientNet_cifar10_9475.p.pt in the current oldPipelines/, but it seems not 
     here now, I probably deleted it since I wasn't interested in cifar-10. CNN_2.py has a bit shortly after the beginning 
     where one can choose what to compute.
 
