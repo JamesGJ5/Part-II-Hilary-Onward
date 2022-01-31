@@ -156,6 +156,76 @@ class RonchigramDataset(Dataset):
         else:
             print("The HDF5 file is closed.")
 
+# Inspired by https://towardsdatascience.com/how-to-calculate-the-mean-and-standard-deviation-normalizing-datasets-in-pytorch-704bd7d05f4c
+def getMeanAndStd(dataloader, reducedBatches=None):
+    """Returns the mean and standard deviation of all Ronchigrams in dataloader. reducedBatches is the number of batches to 
+    stop after if just testing out this function. Otherwise, don't pass an argument to it if want to really calculate 
+    mean and std over every single batch."""
+
+    sum, squaredSum, numBatches = 0, 0, 0
+    
+    # First index in enumerate(dataloader) is of course the index assigned to each iterable, the second index is the 
+    # batch contained by the first index, and in this batch is a dictionary whose keys are "ronchigram" (whose value 
+    # is a single tensor containing all Ronchigram tensors in batch) and "aberrations" (whose value is a single tensor 
+    # containg all aberration tensors in batch)
+    for iBatch, batch in enumerate(dataloader):
+        print(f"Looking at batch at index {iBatch}...")
+
+        # Mean over all tensor elements in batch
+        batchedRonchs = batch[0]
+
+        sum += torch.mean(batchedRonchs)
+        squaredSum += torch.mean(batchedRonchs ** 2)
+        numBatches += 1
+
+        if iBatch + 1 == reducedBatches:
+            break
+
+    # Mean across all batches
+    mean = sum / numBatches
+
+    # std = sqrt(E(X^2) - (E[X])^2)
+    std = (squaredSum / numBatches - mean ** 2) ** 0.5
+
+    return mean, std
+
+def getMeanAndStd2(ronchdset, diagnosticBatchSize=4, diagnosticShuffle=True, batchesTested=32):
+    """Takes a Ronchigram dataset and estimates its mean and std after transforms besides torchvision.transforms.Normalize() are applied. 
+    TODO: if/when transforms used for training and testing are changed, modify diagnosticTransform below accordingly.
+
+    ronchdset: total dataset of Ronchigrams, RonchigramDataset object
+    diagnosticBatchSize: size of batches to be iterated through in estimating the mean and std
+    diagnosticShuffle: whether shuffling is done in the torch.utils.data.DataLoader object below; best to keep True for a less biased 
+        estimate of mean and std
+    batchesTested: the number of batches of size diagnosticBatchSize to be sampled for estimation of mean and std
+    """
+
+    # Transform that is applied to the data before mean and std are calculated; should be calculated for transforms that are done before 
+    # the Normalize() is applied
+    diagnosticTransform = Compose([
+        ToTensor(),
+        Resize(resolution, F2.InterpolationMode.BICUBIC)
+    ])
+
+    ronchdset.transform = diagnosticTransform
+
+    diagnosticDataloader = DataLoader(ronchdset, batch_size=diagnosticBatchSize, shuffle=diagnosticShuffle, num_workers=0)
+
+    mean, std = getMeanAndStd(diagnosticDataloader, batchesTested)
+
+    # File for logging mean and std's calculated above. Log entries will include date and time of entry,  mean and std, 
+    # number of batches and batch size, and torch seed.
+    with open("/home/james/VSCode/DataLoading/MeanStdLog.txt", "a") as f:
+        try:
+            f.write(f"\n\n{scriptTime}")
+            f.write(f"\nCalculated mean: {mean}\nCalculated std: {std}")
+            f.write(f"\nMean and std calculated from {batchesTested} batches of size {diagnosticBatchSize}")
+            f.write(f"\nShuffling was {diagnosticShuffle}; random module's seed and torch's seed were {torchSeed}")
+        except:
+            pass
+
+    return mean, std
+
 
 if __name__ == "__main__":
 
@@ -182,66 +252,13 @@ if __name__ == "__main__":
     # are looking for the mean and std to pass to Normalize(), which should only act after the image has been converted to a 
     # torch Tensor with values between 0 and 1 inclusive and then resized to the desired resolution.
 
-    # # Image size must be 600 x 600 for EfficientNet-B7
+    # Image size must be 600 x 600 for EfficientNet-B7; be careful if you instead want to look at things for a different model 
+    # of EfficientNet
     resolution = 600
 
-    diagnosticTransform = Compose([
-        ToTensor(),
-        Resize(resolution, F2.InterpolationMode.BICUBIC)
-    ])
+    scriptTime = datetime.datetime.now()
 
-    ronchdset.transform = diagnosticTransform
-
-    # Making these variables to make it easier to save batch size and information about whether shuffling was done to a log file
-    diagnosticBatchSize = 4
-    diagnosticShuffle = True
-    diagnosticDataloader = DataLoader(ronchdset, batch_size=diagnosticBatchSize, shuffle=diagnosticShuffle, num_workers=0)
-
-    # # Inspired by https://towardsdatascience.com/how-to-calculate-the-mean-and-standard-deviation-normalizing-datasets-in-pytorch-704bd7d05f4c
-    def getMeanAndStd(dataloader, reducedBatches=None):
-        """Returns the mean and standard deviation of all Ronchigrams in dataloader. reducedBatches is the number of batches to 
-        stop after if just testing out this function. Otherwise, don't pass an argument to it if want to really calculate 
-        mean and std over every single batch."""
-
-        sum, squaredSum, numBatches = 0, 0, 0
-        
-        # First index in enumerate(dataloader) is of course the index assigned to each iterable, the second index is the 
-        # batch contained by the first index, and in this batch is a dictionary whose keys are "ronchigram" (whose value 
-        # is a single tensor containing all Ronchigram tensors in batch) and "aberrations" (whose value is a single tensor 
-        # containg all aberration tensors in batch)
-        for iBatch, batch in enumerate(dataloader):
-            # Mean over all tensor elements in batch
-            batchedRonchs = batch[0]
-
-            sum += torch.mean(batchedRonchs)
-            squaredSum += torch.mean(batchedRonchs ** 2)
-            numBatches += 1
-
-            if iBatch + 1 == reducedBatches:
-                break
-
-        # Mean across all batches
-        mean = sum / numBatches
-
-        # std = sqrt(E(X^2) - (E[X])^2)
-        std = (squaredSum / numBatches - mean ** 2) ** 0.5
-
-        return mean, std
-
-    # # If don't want to test every single batch, select a number below (of batches to test)
-    batchesTested = 32
-    calculatedMean, calculatedStd = getMeanAndStd(diagnosticDataloader, batchesTested)
-
-    # # File for logging mean and std's calculated above. Log entries will include date and time of entry,  mean and std, 
-    # # number of batches and batch size, and torch seed.
-    with open("/home/james/VSCode/DataLoading/MeanStdLog.txt", "a") as f:
-        try:
-            f.write(f"\n\n{datetime.datetime.now()}")
-            f.write(f"\nCalculated mean: {calculatedMean}\nCalculated std: {calculatedStd}")
-            f.write(f"\nMean and std calculated from {batchesTested} batches of size {diagnosticBatchSize}")
-            f.write(f"\nShuffling was {diagnosticShuffle} torch-randomly and torch seed was {torchSeed}")
-        except:
-            pass
+    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset)
 
 
     # Applying transforms
@@ -287,8 +304,75 @@ if __name__ == "__main__":
     # print(type(testItem))
 
 
-    # # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
-    # # incorporated, and testing the dataloader
+    # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
+    # incorporated, and testing the dataloader
+
+    # From https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
+    def showBatch(batchedSample):
+        """Show Ronchigram and print its aberrations for a batch of samples."""
+
+        images_batch, labels_batch = batchedSample[0], batchedSample[1]
+
+        # Decomment if desired to see
+        print(labels_batch)
+
+        batch_size = len(images_batch)
+        im_size = images_batch[0].size(2)
+        grid_border_size = 2
+
+        grid = utils.make_grid(images_batch)
+        plt.imshow(grid.numpy().transpose((1, 2, 0)))
+
+        plt.title("Batch from dataloader")
+
+    dataloader = DataLoader(ronchdset, batch_size=4, shuffle=True, num_workers=0)
+
+
+    # Applying transforms
+
+    # trainTransform and testTransform both have toTensor() because both train and test data must be converted to torch 
+    # Tensor for operations by torch; trainTransform and testTransform both have Resize(), with the same arguments, for 
+    # consistency; trainTransform and testTransform both have Normalize(), with the same mean and std, for consistency.
+
+    # Images plotted in tests below deviate from what the simulated Ronchigrams look like since matplotlib clips the negative 
+    # array elements resulting from Normalize(). However, as long as Normalize is done with the same mean and std for both 
+    # train and test data, the consistency should be fine. Anyway, images plotted below aren't exactly what the neural network 
+    # "sees".
+
+    # Image size must be 600 x 600 for EfficientNet-B7
+    resolution = 600
+
+    # TODO: try works if mean and std of data are being calculated earlier in the script; except assigns fixed values to them, 
+    # preferably values found previously - going to develop that bit such that it changes depending on mean and std already 
+    # found, and stored somewhere, since don't want to calculate mean and std for same data over and over again.
+    try:
+        mean = calculatedMean
+        std = calculatedStd
+    except:
+        mean = 0.5008
+        std = 0.2562
+
+    trainTransform = Compose([
+        ToTensor(),
+        Resize(resolution, F2.InterpolationMode.BICUBIC),
+        Normalize(mean=[mean], std=[std])
+    ])
+
+    testTransform = Compose([
+        ToTensor(),
+        Resize(resolution, F2.InterpolationMode.BICUBIC),
+        Normalize(mean=[mean], std=[std])
+    ])
+
+    ronchdset.transform = trainTransform
+
+    # testItem = ronchdset[50000][0]
+    # print(testItem)
+    # print(type(testItem))
+
+
+    # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
+    # incorporated, and testing the dataloader
 
     # From https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
     def showBatch(batchedSample):
