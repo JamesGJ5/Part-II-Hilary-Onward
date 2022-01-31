@@ -61,6 +61,7 @@ if __name__ == "__main__":
             # Be wary that you are in write mode
 
             try:
+                # dtype is float64 rather than float32 to reduce the memory taken up in storage.
                 random_mags_dset = f.create_dataset("random_mags dataset", (number_processes, number_simulations, 4), dtype="float32")
                 random_angs_dset = f.create_dataset("random_angs dataset", (number_processes, number_simulations, 4), dtype="float32")
                 random_I_dset = f.create_dataset("random_I dataset", (number_processes, number_simulations, 1), dtype="float32")

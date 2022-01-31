@@ -80,6 +80,7 @@ torch.manual_seed(torchSeed)
 # Creating this variable because in model importation I will only import EfficientNet-B7 if this name in string form is 
 # what the below variable is assigned to
 efficientNetModel = "EfficientNet-B3"
+pretrainedWeights = False
 
 
 
@@ -87,7 +88,8 @@ efficientNetModel = "EfficientNet-B3"
 
 GPU = 0
 device = torch.device(f"cuda:{GPU}" if torch.cuda.is_available() else "cpu")
-print(f"GPU: {torch.cuda.current_device()}")
+GPU = torch.cuda.current_device()
+print(f"GPU: {GPU}")
 
 
 
@@ -168,6 +170,8 @@ testTransform = Compose([
 # same
 ronchdset.transform = trainTransform
 
+inputDtype = ronchdset[0][0].type()
+
 # print(ronchdset[0])
 
 
@@ -175,8 +179,12 @@ ronchdset.transform = trainTransform
 
 ronchdsetLength = len(ronchdset)
 
-trainLength = math.ceil(ronchdsetLength * 0.7)
-evalLength = math.ceil(ronchdsetLength * 0.15)
+trainFraction = 0.7
+evalFraction = 0.15
+testFraction = 1 - trainFraction - evalFraction
+
+trainLength = math.ceil(ronchdsetLength * trainFraction)
+evalLength = math.ceil(ronchdsetLength * evalFraction)
 testLength = ronchdsetLength - trainLength - evalLength
 
 
@@ -193,7 +201,7 @@ print(f"After ronchdset splitting: {torch.cuda.memory_allocated(0)}")
 batchSize = 16
 numWorkers = 2
 
-num_epochs = 6
+num_epochs = 11
 
 # SAVING CURRENT ARCHITECTURE AND BATCH SIZE FOR EASY VIEWING AND REFERENCE
 
@@ -202,7 +210,16 @@ num_epochs = 6
 scriptTime = datetime.datetime.now()
 
 with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
-    f.write(f"\n\n\n{scriptTime}\n\n")
+    f.write(f"\n\n\n{scriptTime}")
+
+    if not pretrainedWeights:
+        f.write("\n\nSee model1.py at the date and time this training run was done (see https://github.com/JamesGJ5/Part-II-Hilary-Onward) for weights used.")
+
+    f.write(f"\n\nGPU: {GPU}, Torch seed: {torchSeed}, input datatype: {inputDtype}, numWorkers: {numWorkers}, train:eval:test {trainFraction}:{evalFraction}:{testFraction}\n\n")
+    f.write(str(trainTransform))
+    f.write("\n\n")
+    f.write(str(testTransform))
+    f.write("\n\n")
     f.write(efficientNetModel + ", " + str(parameters) + f", resolution: {resolution}" + f", {ronchdsetLength} Ronchigrams"+ f", batch size: {batchSize}" + f", number of epochs: {num_epochs}\n\n")
     f.write(str(model))
 
@@ -264,8 +281,10 @@ optimiser = optim.SGD([
     }],
     momentum=0.9, weight_decay=1e-3, nesterov=True)
 
-lr_scheduler = ExponentialLR(optimiser, gamma=0.975)
-
+# TODO: I have put this here to conveniently save the string to a logging file, must find a way to do this without 
+# instantiating the string first
+lr_scheduler_string = "ExponentialLR(optimiser, gamma=0.975)"
+lr_scheduler = eval(lr_scheduler_string)
 
 
 # update_fn DEFINITION
@@ -280,6 +299,7 @@ batchlossVals = []
 # of loss curve later
 batchesDone = 0
 
+# Updates the weights while iterating over the training data
 def update_fn(engine, batch):
     # Only do checking below when i == 1
     # global i
@@ -508,7 +528,7 @@ testEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 # iterated over, y being the total number of batches and x being the number of batches iterated over so far in the epoch.
 # So, x/y shows progress of iterations in an epoch.
 # TODO: see if, when the epoch ends, y changes to a number that doesn't correctly show the number of batches overal..
-trainer.run(trainLoader, max_epochs=num_epochs)
+# trainer.run(trainLoader, max_epochs=num_epochs)
 
 
 
@@ -516,8 +536,17 @@ trainer.run(trainLoader, max_epochs=num_epochs)
 
 with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     f.write(f"\n\nTraining finished at {datetime.datetime.now()}")
+    f.write("\n\n")
+    f.write(str(optimiser))
+    f.write("\n\nCriterion: " + str(criterion))
+    f.write("\n\nLearning rate scheduler: " + lr_scheduler_string)
+    f.write(f"\n\nEarly stopping patience: {es_patience}")
+    try:
+        f.write("\n\nTraining metrics: " + str(list(metrics.keys())))
+    except:
+        f.write("\n\nTraining metrics from ignite could not be logged.")
 
-
+sys.exit()
 
 # RESULTS OF FINETUNING
 # train_eval dataset metrics

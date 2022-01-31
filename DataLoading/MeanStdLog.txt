@@ -1013,3 +1013,9 @@ Calculated mean: 0.5006910562515259
 Calculated std: 0.2557213008403778
 Mean and std calculated from 32 batches of size 4
 Shuffling was True torch-randomly and torch seed was 17
+
+2022-01-20 19:10:43.192223
+Calculated mean: 0.5025114417076111
+Calculated std: 0.25695478916168213
+Mean and std calculated from 32 batches of size 4
+Shuffling was True torch-randomly and torch seed was 17
