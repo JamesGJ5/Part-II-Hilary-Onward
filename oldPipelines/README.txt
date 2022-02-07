@@ -67,7 +67,7 @@ Archived Contents:
 
 Extra information:
 
-    To see free space, if nvidia-sim in Linux Terminal is 
+    To see free space, if nvidia-smi in Linux Terminal is 
     not enough: https://stackoverflow.com/questions/58216000/get-total-amount-of-free-gpu-memory-and-available-using-pytorch
 
     Places in CNN_1.py where things are currently being stored on "device" (as of 20:24 on 22/11/2021 - I am trying to reduce 

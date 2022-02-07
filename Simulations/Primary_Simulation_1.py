@@ -235,18 +235,11 @@ def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C10_ang, 
 
     # APPLYING OBJECTIVE APERTURE
 
-    # Detector Poisson noise
-    # https://stackoverflow.com/questions/19289470/adding-poisson-noise-to-an-image for assistance, except with 255
-    #   replace by 1 because normalisation of ronch somewhere above leads to array elements between 0 and 1. I am taking
-    #   yuxiang.li's suggestion, but only his upper one, because the lower one looks like it simply adds the Poisson noise
-    #   to the image, which doesn't seem right since Poisson noise isn't additive.
-
-    # FIXME: I am skeptical that the division of PEAK below even does anything, have a look. It would make sense that it does,
-    #   however, especially since PEAK is currently 100. Actually, it does affect the values of ronch of course, but there 
-    #   may be some inherent normalisation process in using matplotlib, especially in greyscale mode. Perhaps the normalisation 
-    #   process above is not even necessary. Must figure this out.
-
-    # ronch = rng.poisson(ronch * PEAK) / PEAK
+    # For detector Poisson noise, I previously followed https://stackoverflow.com/questions/19289470/adding-poisson-noise-to-an-image 
+    # for assistance, except with 255 replaced by 1 because normalisation of ronch somewhere above lead to array elements between 0 and 1. I took
+    # yuxiang.li's suggestion, but only their upper one, because the lower one looked like it simply added the Poisson noise
+    # to the image, which didn't seem right since Poisson noise isn't additive. 
+    # Now, however, I am using my own formulation of Poisson noise derived in the 02/12/2021 entry of my lab book.
 
     # I is quoted electron current/A (Angus mentioned picoamps being a typical scale)
     # b is fraction of I that reaches the detector

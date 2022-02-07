@@ -24,6 +24,9 @@ if __name__ == "__main__":
     max_C23 = 760 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
     # min_Cnm will be 0 since negative values are redundant, I THINK (see lab book's 29/11/2021 entry)
+
+    # NOTE: THE BELOW LINE IS INCORRECT, IT IS ACTUALLY BETWEEN 0 AND PI/m RADIANS, AS THE LAB BOOK ENTRY MENTIONED BELOW NOW SAYS. I WILL 
+    # NOT CHANGE THE CODE SINCE IT IS ARCHIVED CODE BUT BE CAREFUL.
     # phi_n,m will be between 0 and pi radians since other angles are redundant, I THINK (see lab book's 29/11/2021 entry)
 
     # NOISE PARAMETER VALUES
@@ -85,6 +88,9 @@ if __name__ == "__main__":
                 C21 = 0
                 C23 = randu(0, max_C23)
 
+
+            # NOTE: THE BELOW LINE IS INCORRECT, IT IS ACTUALLY BETWEEN 0 AND PI/m RADIANS, AS THE 29/11/21 LAB BOOK NOW SAYS. I WILL 
+            # NOT CHANGE THE CODE SINCE IT IS ARCHIVED CODE BUT BE CAREFUL.
             phi10 = 0   # Defocus has an m-value of 0
             phi12 = randu(0, np.pi)
             phi21 = randu(0, np.pi)

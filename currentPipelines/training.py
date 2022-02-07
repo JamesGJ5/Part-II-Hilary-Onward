@@ -47,6 +47,9 @@ import matplotlib.pyplot as plt
 
 # TODO: import remaining modules here as required
 
+# TODO: cite the below link
+# https://www.kaggle.com/hmendonca/efficientnet-cifar-10-ignite was used for help in building an early version of this pipeline
+
 
 # Version checking
 
