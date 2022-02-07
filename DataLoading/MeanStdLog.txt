@@ -1049,3 +1049,57 @@ Calculated mean: 0.5014532208442688
 Calculated std: 0.25566810369491577
 Mean and std calculated from 32 batches of size 4
 Shuffling was True; random module's seed and torch's seed were 18
+
+2022-01-31 17:52:11.003201
+Calculated mean: 0.5025079846382141
+Calculated std: 0.25708603858947754
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 17
+
+2022-01-31 17:57:08.300878
+Calculated mean: 0.5025114417076111
+Calculated std: 0.25695478916168213
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 17
+
+2022-01-31 21:01:30.435801
+Calculated mean: 0.4996257424354553
+Calculated std: 0.25532427430152893
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 19
+
+2022-01-31 21:02:08.371732
+Calculated mean: 0.501575767993927
+Calculated std: 0.2573671340942383
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 20
+
+2022-01-31 21:02:49.666764
+Calculated mean: 0.501957356929779
+Calculated std: 0.25733017921447754
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 21
+
+2022-01-31 21:03:02.362071
+Calculated mean: 0.500990092754364
+Calculated std: 0.2557201385498047
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-02-07 12:20:08.279571
+Calculated mean: 0.500990092754364
+Calculated std: 0.2557201385498047
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-02-07 12:21:04.016240
+Calculated mean: 0.500990092754364
+Calculated std: 0.2557201385498047
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-02-07 14:37:34.189572
+Calculated mean: 0.500990092754364
+Calculated std: 0.2557201385498047
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
