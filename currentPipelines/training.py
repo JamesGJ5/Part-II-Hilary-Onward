@@ -11,10 +11,7 @@ import datetime
 
 # If haven't done already, run "conda install -c conda-forge tensorboardx==1.6"
 
-# For data loading onward
-import sys
-import h5py
-import cmath
+# For data loading onwardGPU
 import math
 import torchvision.transforms.functional as F2
 from torch.utils.data import Dataset, DataLoader, random_split
@@ -81,6 +78,8 @@ torch.manual_seed(torchSeed)
 # what the below variable is assigned to
 efficientNetModel = "EfficientNet-B3"
 pretrainedWeights = False
+estimateMeanStd = True  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
+                        # transform
 
 
 
@@ -130,7 +129,7 @@ model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficie
                             depth_coefficient=parameters["depth_coefficient"], 
                             dropout_rate=parameters["dropout_rate"]).to(device)
 
-print(f"After model instantiation: {torch.cuda.memory_allocated(0)}")
+print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_allocated(0)}")
 
 
 
@@ -143,15 +142,36 @@ from DataLoader2 import RonchigramDataset
 
 ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/20_01_22/Single_Aberrations.h5")
 
-print(f"After ronchdset instantiation: {torch.cuda.memory_allocated(0)}")
+print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(0)}")
+
+# I am storing the time in this variable scriptTime because I want the same time to be logged for both saving training 
+# information and for the name of the file(s) training results in, i.e. model weights etc. Also, want this time to be 
+# logged for information about the saving of mean and std calculated for the Normalize() transform.
+scriptTime = datetime.datetime.now()
+
+
+# Optional estimation of mean and std of data to pass to torchvision.transforms.Normalize()
+if estimateMeanStd:
+    from DataLoader2 import getMeanAndStd2
+
+    # NOTE: in a test, I found that completing the below without specificDevice == device was quicker than using the GPU, 
+    # so I am doing the below without GPU support.
+    print(f"Resolution of each Ronchigram for which mean and standard deviation are calculated is {resolution}, which should equal the resolution used in training.")
+    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution)
+
 
 # Apply transforms
 
 # TODO: import function in DataLoader2.py that calculates mean and std for normalisation. The values below right now 
 # are values from previous mean and std measurement, so should be roughly accurate, although this measurement was only 
 # done over 32 Ronchigrams.
-mean = 0.5008
-std = 0.2562
+
+try:
+    mean = calculatedMean
+    std = calculatedStd
+except:
+    mean = 0.5010
+    std = 0.2557
 
 trainTransform = Compose([
     ToTensor(),
@@ -179,6 +199,8 @@ inputDtype = ronchdset[0][0].type()
 
 ronchdsetLength = len(ronchdset)
 
+print(f"Total number of Ronchigrams used: {ronchdsetLength}")
+
 trainFraction = 0.7
 evalFraction = 0.15
 testFraction = 1 - trainFraction - evalFraction
@@ -187,12 +209,14 @@ trainLength = math.ceil(ronchdsetLength * trainFraction)
 evalLength = math.ceil(ronchdsetLength * evalFraction)
 testLength = ronchdsetLength - trainLength - evalLength
 
+print(f"trainFraction:evalFraction:testFraction {trainFraction}:{evalFraction}:{testFraction}")
+
 
 # Split up dataset into train, eval and test
 
 trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
 
-print(f"After ronchdset splitting: {torch.cuda.memory_allocated(0)}")
+print(f"Memory/bytes allocated after ronchdset splitting: {torch.cuda.memory_allocated(0)}")
 
 
 # Create data loaders via torch.utils.data.DataLoader
@@ -203,11 +227,8 @@ numWorkers = 2
 
 num_epochs = 11
 
-# SAVING CURRENT ARCHITECTURE AND BATCH SIZE FOR EASY VIEWING AND REFERENCE
 
-# I am storing the time in this variable scriptTime because I want the same time to be logged for both saving training 
-# information and for the name of the file(s) training results in, i.e. model weights etc.
-scriptTime = datetime.datetime.now()
+# SAVING CURRENT ARCHITECTURE AND BATCH SIZE FOR EASY VIEWING AND REFERENCE
 
 with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     f.write(f"\n\n\n{scriptTime}")
@@ -255,7 +276,7 @@ testLoader = DataLoader(testSet, batch_size=batchSize, num_workers=numWorkers, s
 # print(f"testLoader batch type is {xtype}")
 
 
-print(f"After creating data loaders: {torch.cuda.memory_allocated(0)}")
+print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_allocated(0)}")
 
 
 
@@ -528,7 +549,7 @@ testEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 # iterated over, y being the total number of batches and x being the number of batches iterated over so far in the epoch.
 # So, x/y shows progress of iterations in an epoch.
 # TODO: see if, when the epoch ends, y changes to a number that doesn't correctly show the number of batches overal..
-# trainer.run(trainLoader, max_epochs=num_epochs)
+trainer.run(trainLoader, max_epochs=num_epochs)
 
 
 
@@ -546,7 +567,7 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     except:
         f.write("\n\nTraining metrics from ignite could not be logged.")
 
-sys.exit()
+
 
 # RESULTS OF FINETUNING
 # train_eval dataset metrics
