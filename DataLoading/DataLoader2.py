@@ -12,6 +12,7 @@ import datetime
 from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 from torchvision import utils
+from ignite.utils import convert_tensor
 
 import sys
 
@@ -157,10 +158,13 @@ class RonchigramDataset(Dataset):
             print("The HDF5 file is closed.")
 
 # Inspired by https://towardsdatascience.com/how-to-calculate-the-mean-and-standard-deviation-normalizing-datasets-in-pytorch-704bd7d05f4c
-def getMeanAndStd(dataloader, reducedBatches=None):
+def getMeanAndStd(dataloader, reducedBatches=None, specificDevice=None):
     """Returns the mean and standard deviation of all Ronchigrams in dataloader. reducedBatches is the number of batches to 
     stop after if just testing out this function. Otherwise, don't pass an argument to it if want to really calculate 
-    mean and std over every single batch."""
+    mean and std over every single batch.
+    
+    specificDevice: if None, runs the below on the default device; otherwise, runs the below on the device specified
+    """
 
     sum, squaredSum, numBatches = 0, 0, 0
     
@@ -174,12 +178,17 @@ def getMeanAndStd(dataloader, reducedBatches=None):
         # Mean over all tensor elements in batch
         batchedRonchs = batch[0]
 
+        if specificDevice:
+            batchedRonchs = convert_tensor(batchedRonchs, device=device, non_blocking=True)
+
         sum += torch.mean(batchedRonchs)
         squaredSum += torch.mean(batchedRonchs ** 2)
         numBatches += 1
 
         if iBatch + 1 == reducedBatches:
             break
+
+    del batchedRonchs
 
     # Mean across all batches
     mean = sum / numBatches
@@ -189,29 +198,35 @@ def getMeanAndStd(dataloader, reducedBatches=None):
 
     return mean, std
 
-def getMeanAndStd2(ronchdset, diagnosticBatchSize=4, diagnosticShuffle=True, batchesTested=32):
+def getMeanAndStd2(ronchdset, trainingResolution, diagnosticBatchSize=4, diagnosticShuffle=True, batchesTested=32, specificDevice=None):
     """Takes a Ronchigram dataset and estimates its mean and std after transforms besides torchvision.transforms.Normalize() are applied. 
     TODO: if/when transforms used for training and testing are changed, modify diagnosticTransform below accordingly.
 
     ronchdset: total dataset of Ronchigrams, RonchigramDataset object
+
+    trainingResolution: the size a Ronchigram should have before training begins, i.e. (trainingResolution x trainingResolution) pixels
+
     diagnosticBatchSize: size of batches to be iterated through in estimating the mean and std
-    diagnosticShuffle: whether shuffling is done in the torch.utils.data.DataLoader object below; best to keep True for a less biased 
-        estimate of mean and std
+
+    diagnosticShuffle: whether shuffling is done in the torch.utils.data.DataLoader object below; best to keep True for a less biased estimate of mean and std
+
     batchesTested: the number of batches of size diagnosticBatchSize to be sampled for estimation of mean and std
+
+    device: if False, runs the below on the default device; otherwise, runs the below on the device specified
     """
 
     # Transform that is applied to the data before mean and std are calculated; should be calculated for transforms that are done before 
     # the Normalize() is applied
     diagnosticTransform = Compose([
         ToTensor(),
-        Resize(resolution, F2.InterpolationMode.BICUBIC)
+        Resize(trainingResolution, F2.InterpolationMode.BICUBIC)
     ])
 
     ronchdset.transform = diagnosticTransform
 
     diagnosticDataloader = DataLoader(ronchdset, batch_size=diagnosticBatchSize, shuffle=diagnosticShuffle, num_workers=0)
 
-    mean, std = getMeanAndStd(diagnosticDataloader, batchesTested)
+    mean, std = getMeanAndStd(diagnosticDataloader, batchesTested, specificDevice=specificDevice)
 
     # File for logging mean and std's calculated above. Log entries will include date and time of entry,  mean and std, 
     # number of batches and batch size, and torch seed.
@@ -230,8 +245,8 @@ def getMeanAndStd2(ronchdset, diagnosticBatchSize=4, diagnosticShuffle=True, bat
 if __name__ == "__main__":
 
     # Seeding
-    # 17 is arbitrary here
-    seed = 17
+    # 22 is arbitrary here
+    seed = 22
     random.seed(seed)
 
     # Random seed or a fixed seed (defined above)
@@ -244,7 +259,20 @@ if __name__ == "__main__":
 
     torch.manual_seed(torchSeed)
 
+    # GPU STUFF
+    usingGPU = False
+
+    if usingGPU:
+        GPU = 0
+        device = torch.device(f"cuda:{GPU}" if torch.cuda.is_available() else "cpu")
+        GPU = torch.cuda.current_device()
+        print(f"GPU: {GPU}")
+
+
+    # Dataset instantiation
+
     ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/20_01_22/Single_Aberrations.h5")
+
 
     # Implementing a way to find the mean and std of the data for Normalize(). 
     # Since this relies on ToTensor() being done, I am going to create a new composed transform variable containing just 
@@ -258,7 +286,7 @@ if __name__ == "__main__":
 
     scriptTime = datetime.datetime.now()
 
-    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset)
+    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution)
 
 
     # Applying transforms
