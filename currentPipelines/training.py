@@ -11,7 +11,8 @@ import datetime
 
 # If haven't done already, run "conda install -c conda-forge tensorboardx==1.6"
 
-# For data loading onwardGPU
+# For data loading onward
+import sys
 import math
 import torchvision.transforms.functional as F2
 from torch.utils.data import Dataset, DataLoader, random_split
@@ -88,10 +89,11 @@ estimateMeanStd = True  # If want to estimate the mean and std of the data (with
 
 # GPU STUFF
 
-GPU = 0
-device = torch.device(f"cuda:{GPU}" if torch.cuda.is_available() else "cpu")
-GPU = torch.cuda.current_device()
-print(f"GPU: {GPU}")
+GPU = 1
+# device = torch.device(f"cuda:{GPU}" if torch.cuda.is_available() else "cpu")
+device = torch.device(f"cuda:{GPU}")
+torch.cuda.set_device(GPU)
+print(f"torch cuda current device: {torch.cuda.current_device()}")
 
 
 
@@ -132,7 +134,7 @@ model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficie
                             depth_coefficient=parameters["depth_coefficient"], 
                             dropout_rate=parameters["dropout_rate"]).to(device)
 
-print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_allocated(0)}")
+print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_allocated(GPU)}")
 
 
 
@@ -145,7 +147,7 @@ from DataLoader2 import RonchigramDataset
 
 ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/20_01_22/Single_Aberrations.h5")
 
-print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(0)}")
+print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(GPU)}")
 
 # I am storing the time in this variable scriptTime because I want the same time to be logged for both saving training 
 # information and for the name of the file(s) training results in, i.e. model weights etc. Also, want this time to be 
@@ -160,7 +162,7 @@ if estimateMeanStd:
     # NOTE: in a test, I found that completing the below without specificDevice == device was quicker than using the GPU, 
     # so I am doing the below without GPU support.
     print(f"Resolution of each Ronchigram for which mean and standard deviation are calculated is {resolution}, which should equal the resolution used in training.")
-    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution)
+    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, batchesTested=320)
 
 
 # Apply transforms
@@ -219,7 +221,7 @@ print(f"trainFraction:evalFraction:testFraction {trainFraction}:{evalFraction}:{
 
 trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
 
-print(f"Memory/bytes allocated after ronchdset splitting: {torch.cuda.memory_allocated(0)}")
+print(f"Memory/bytes allocated after ronchdset splitting: {torch.cuda.memory_allocated(GPU)}")
 
 
 # Create data loaders via torch.utils.data.DataLoader
@@ -279,7 +281,7 @@ testLoader = DataLoader(testSet, batch_size=batchSize, num_workers=numWorkers, s
 # print(f"testLoader batch type is {xtype}")
 
 
-print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_allocated(0)}")
+print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_allocated(GPU)}")
 
 
 
@@ -352,6 +354,8 @@ def update_fn(engine, batch):
     #     print(f"Size of y is: {y.size()}")
         # print(y.type())
 
+    # sys.exit()
+
     # print(y)
     # print(y_pred)
 
@@ -383,17 +387,18 @@ def update_fn(engine, batch):
 
 batch = next(iter(trainLoader))
 
-
 # Having memory issues so going to, in update_fn, put x on device, calculate y_pred on device, remove x from device, #
 # then add y to device and then calculate loss
 res = update_fn(engine=None, batch=batch)
 # TODO: decomment the below when you want to test update_fn
 # print(res)
 
+# sys.exit()
+
 batch = None
 torch.cuda.empty_cache()
 
-
+# sys.exit()
 
 # Output_transform definition
 
