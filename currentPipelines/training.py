@@ -61,7 +61,7 @@ print(f"torch version: {torch.__version__}, ignite version: {ignite.__version__}
 # NAVIGATING THE TERMINAL TO THE WORKING DIRECTORY THIS FILE IS IN
 
 os.chdir("/home/james/VSCode/currentPipelines")
-print(os.getcwd())
+print(f"Current working directory: {os.getcwd()}")
 
 
 
@@ -95,9 +95,9 @@ device = torch.device(f"cuda:{GPU}")
 torch.cuda.set_device(GPU)
 print(f"torch cuda current device: {torch.cuda.current_device()}")
 
-
-
 # MODEL INSTANTIATION
+
+# TODO: put the below in model1.py instead so you don't have to write it in every script that instantiates an EfficientNet() model
 if efficientNetModel == "EfficientNet-B7":
     parameters = {"num_labels": 8, "width_coefficient": 2.0, "depth_coefficient": 3.1, "dropout_rate": 0.5}
     resolution = 600
@@ -175,8 +175,8 @@ try:
     mean = calculatedMean
     std = calculatedStd
 except:
-    mean = 0.5010
-    std = 0.2557
+    mean = 0.500990092754364
+    std = 0.2557201385498047
 
 trainTransform = Compose([
     ToTensor(),
