@@ -102,10 +102,6 @@ class RonchigramDataset(Dataset):
 
             complexArray = np.append(complexArray, complexAber)
 
-        # The below is so that ToTensor() normalises the Ronchigram to between 0 and 1 inclusive; the resultant torch 
-        # Tensor (after transformation by ToTensor()) will have dtype torch.FloatTensor
-        ronch = ronch.astype(np.uint8)
-
         # Certain torchvision.transform transforms, like ToTensor(), require numpy arrays to have 3 dimensions 
         # (H x W x C) rather than 2D (as of 5:01pm 08/01/22), hence the below. I assume here that if ronch.ndim == 2, 
         # the numpy array is of the form (H x W), as required
@@ -113,6 +109,10 @@ class RonchigramDataset(Dataset):
             ronch = np.expand_dims(ronch, 2)
 
         if self.transform:
+            # The below is so that ToTensor() normalises the Ronchigram to between 0 and 1 inclusive; the resultant torch 
+            # Tensor (after transformation by ToTensor()) will have dtype torch.FloatTensor
+            ronch = ronch.astype(np.uint8)
+            
             ronch = self.transform(ronch)
 
         # Okay, so above, I put "if self.transform", as if there might not be a transform. However, I think there will always 
@@ -401,24 +401,6 @@ if __name__ == "__main__":
 
     # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
     # incorporated, and testing the dataloader
-
-    # From https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
-    def showBatch(batchedSample):
-        """Show Ronchigram and print its aberrations for a batch of samples."""
-
-        images_batch, labels_batch = batchedSample[0], batchedSample[1]
-
-        # Decomment if desired to see
-        print(labels_batch)
-
-        batch_size = len(images_batch)
-        im_size = images_batch[0].size(2)
-        grid_border_size = 2
-
-        grid = utils.make_grid(images_batch)
-        plt.imshow(grid.numpy().transpose((1, 2, 0)))
-
-        plt.title("Batch from dataloader")
 
     dataloader = DataLoader(ronchdset, batch_size=4, shuffle=True, num_workers=0)
 
