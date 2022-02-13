@@ -82,7 +82,7 @@ torch.manual_seed(torchSeed)
 # what the below variable is assigned to
 efficientNetModel = "EfficientNet-B3"
 pretrainedWeights = False
-estimateMeanStd = True  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
+estimateMeanStd = False  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
                         # transform
 
 
@@ -275,6 +275,16 @@ evalLoader = DataLoader(evalSet, batch_size=batchSize, num_workers=numWorkers, s
 testLoader = DataLoader(testSet, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
                         pin_memory=True)
 
+# NOTE: the below is identical code to code found in inferencer.py; I ran both expecting that they would have the same output given that they same seed was used in 
+# each case, along with the same initial RonchigramDataset and train:eval:test proportions and the same transform details. If the output were the same, it would mean 
+# that the test loader instantiated in inferencer.py would be different from that in training.py, meaning the test loader used in inferencer.py wouldn't instead 
+# overlap with the train loader used to train the model being inferenced.
+
+# batch = next(iter(testLoader))
+# exampleRonch = batch[0][1]
+# print(exampleRonch)
+
+
 # batch = next(iter(testLoader))
 # x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
 # xtype = x.type()
@@ -287,7 +297,7 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 
 # OPTIMISER
 
-criterion = nn.MSELoss()
+criterion = nn.L1Loss()
 
 lr = 0.01
 
@@ -574,6 +584,7 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
         f.write("\n\nTraining metrics: " + str(list(metrics.keys())))
     except:
         f.write("\n\nTraining metrics from ignite could not be logged.")
+    f.write("\n\nChanges made since last training run: changed criterion from torch.nn.MSELoss() to torch.nn.L1Loss().")
 
 
 
