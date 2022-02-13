@@ -297,7 +297,7 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 
 # OPTIMISER
 
-criterion = nn.L1Loss()
+criterion = nn.MSELoss()
 
 lr = 0.01
 
@@ -584,7 +584,7 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
         f.write("\n\nTraining metrics: " + str(list(metrics.keys())))
     except:
         f.write("\n\nTraining metrics from ignite could not be logged.")
-    f.write("\n\nChanges made since last training run: changed criterion from torch.nn.MSELoss() to torch.nn.L1Loss().")
+    f.write("\n\nChanges made since last training run: changed criterion from torch.nn.L1Loss back to torch.nn.MSELoss().")
 
 
 
