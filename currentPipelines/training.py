@@ -297,7 +297,7 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 
 # OPTIMISER
 
-criterion = nn.MSELoss()
+criterion = nn.MSELoss(reduction="sum")
 
 lr = 0.01
 
@@ -380,12 +380,6 @@ def update_fn(engine, batch):
     optimiser.step()
 
     batchloss = loss.item()
-
-    # For loss curve
-    global batchlossVals
-    batchlossVals.append(batchloss)
-    global batchesDone
-    batchesDone += 1
 
     return {
         "batchloss": batchloss,
@@ -585,6 +579,7 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     except:
         f.write("\n\nTraining metrics from ignite could not be logged.")
     f.write("\n\nChanges made since last training run: changed criterion from torch.nn.L1Loss back to torch.nn.MSELoss().")
+    f.write("\n\nreduction parameter of torch.nn.MSELoss() set to 'sum'--it was 'mean' in the last run using this function.")
 
 
 
