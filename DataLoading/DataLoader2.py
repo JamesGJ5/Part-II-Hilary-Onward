@@ -33,14 +33,16 @@ class RonchigramDataset(Dataset):
     magnitude/m being its modulus and the angle/rad being its argument. Currently, aberrations are C10, C12, C21 and 
     C23 in Krivanek notation."""
 
-    def __init__(self, hdf5filename: str, transform=None):
+    def __init__(self, hdf5filename: str, transform=None, complexLabels="True"):
         """Args:
-                hdf5file: path to the HDF5 file containing the data as mentioned in the comment under this class' definition
+                hdf5filename: path to the HDF5 file containing the data as mentioned in the comment under this class' definition
                 transform (callable, optional): transforms being incroporated
+                complexLabels: whether the labels will be in complex form or not ("True" or "False")
         """
 
         self.hdf5filename = hdf5filename
         self.transform = transform
+        self.complexLabels = complexLabels
 
         with h5py.File(self.hdf5filename, "r") as flen:
             # Ranks refers to each parallel process used to save simulations to HDF5 file
@@ -87,20 +89,55 @@ class RonchigramDataset(Dataset):
         mags = self.RandMags[rank, itemInRank]
         angs = self.RandAngs[rank, itemInRank]
 
-        # Putting the aberrations into complex form
-        # TODO: see if there is a function that does what you are doing below (i.e. that can take an array of moduli 
-        # and an array of arguments and return an array of complex numbers) without you having to use a for loop
+        if self.complexLabels:
 
-        # Array of aberrations in complex form, where each element will be for C10, C12, C21, and C23 respectively, each 
-        # element being a complex number whose modulus is aberration magnitude/m and whose argument is aberration phi_n,m/rad
-        complexArray = np.array([])
+            # Putting the aberrations into complex form
+            # TODO: see if there is a function that does what you are doing below (i.e. that can take an array of moduli 
+            # and an array of arguments and return an array of complex numbers) without you having to use a for loop
 
-        for aber in range(len(mags)):
-            # NOTE: cmath.rect() has an inherent error in it, for example, cmath.rect(1, cmath.pi/2) leads to 
-            # 10**-19 + 1j rather than simply 1j.
-            complexAber = cmath.rect(mags[aber], angs[aber])
+            # Array of aberrations in complex form, where each element will be for C10, C12, C21, and C23 respectively, each 
+            # element being a complex number whose modulus is aberration magnitude/m and whose argument is aberration phi_n,m/rad
+            complexArray = np.array([])
 
-            complexArray = np.append(complexArray, complexAber)
+            for aber in range(len(mags)):
+                # NOTE: cmath.rect() has an inherent error in it, for example, cmath.rect(1, cmath.pi/2) leads to 
+                # 10**-19 + 1j rather than simply 1j.
+                complexAber = cmath.rect(mags[aber], angs[aber])
+
+                complexArray = np.append(complexArray, complexAber)
+
+            # Okay, so somewhere in __getitem__, I put "if self.transform", as if there might not be a transform. However, I think there will always 
+            # be ToTensor(), at least for what I will be doing for a while, so I am going to make sure that the label gets 
+            # transformed to a tensor regardless.
+            complexArray = torch.from_numpy(complexArray)
+
+            # Okay, I am going to put this line of code here until I can find a better workaround for complex numbers. To 
+            # make my network architecture work with complex numbers directly, I would have to put time in to do that, so 
+            # for now I will just split complexArray into two tensors, one with its real parts and the other with its 
+            # imaginary parts. Next I will create a new tensor, i.e. an 8-element vector whose first 4 elements are the real 
+            # parts and whose latter 4 elements are the corresponding imaginary parts.
+            realPart = torch.real(complexArray)
+            imagPart = torch.imag(complexArray)
+
+            # NOTE: here, complex array is a bit of a misnomer
+            # NOTE: here, I have made dtype=torch.float32 because I believe dtype=torch.float64 is equivalent to 
+            # torch.DoubleTensor, which MSELoss() in cnns/training.py doesn't seem to be accepting.
+            complexArray = torch.cat((realPart, imagPart)).to(dtype=torch.float32)
+
+            # Decomment if you go back to using the magnitudes and angles themselves as labels, although will have to convert 
+            # magnitude and angle array labels to torch Tensor like above
+            # sample = {"ronchigram": ronch, "aberration magnitudes": mags, "aberration angles": angs}
+
+            # sample = {"ronchigram": ronch, "aberrations": complexArray}
+
+            # NOTE: here I am changing the return to look more like an MNIST return, since the model I am using doesn't seem 
+            # to work well on a dictionary format, but it works on MNIST in My_CNNs/CNN_4.py. See Google Drive > 4th Year > 
+            # CNN Stuff for more details.
+
+        else:
+
+            labelsArray = np.array([])
+
 
         # Certain torchvision.transform transforms, like ToTensor(), require numpy arrays to have 3 dimensions 
         # (H x W x C) rather than 2D (as of 5:01pm 08/01/22), hence the below. I assume here that if ronch.ndim == 2, 
@@ -114,34 +151,6 @@ class RonchigramDataset(Dataset):
             ronch = ronch.astype(np.uint8)
             
             ronch = self.transform(ronch)
-
-        # Okay, so above, I put "if self.transform", as if there might not be a transform. However, I think there will always 
-        # be ToTensor(), at least for what I will be doing for a while, so I am going to make sure that the label gets 
-        # transformed to a tensor regardless.
-        complexArray = torch.from_numpy(complexArray)
-
-        # Okay, I am going to put this line of code here until I can find a better workaround for complex numbers. To 
-        # make my network architecture work with complex numbers directly, I would have to put time in to do that, so 
-        # for now I will just split complexArray into two tensors, one with its real parts and the other with its 
-        # imaginary parts. Next I will create a new tensor, i.e. an 8-element vector whose first 4 elements are the real 
-        # parts and whose latter 4 elements are the corresponding imaginary parts.
-        realPart = torch.real(complexArray)
-        imagPart = torch.imag(complexArray)
-
-        # NOTE: here, complex array is a bit of a misnomer
-        # NOTE: here, I have made dtype=torch.float32 because I believe dtype=torch.float64 is equivalent to 
-        # torch.DoubleTensor, which MSELoss() in cnns/training.py doesn't seem to be accepting.
-        complexArray = torch.cat((realPart, imagPart)).to(dtype=torch.float32)
-
-        # Decomment if you go back to using the magnitudes and angles themselves as labels, although will have to convert 
-        # magnitude and angle array labels to torch Tensor like above
-        # sample = {"ronchigram": ronch, "aberration magnitudes": mags, "aberration angles": angs}
-
-        # sample = {"ronchigram": ronch, "aberrations": complexArray}
-
-        # NOTE: here I am changing the return to look more like an MNIST return, since the model I am using doesn't seem 
-        # to work well on a dictionary format, but it works on MNIST in My_CNNs/CNN_4.py. See Google Drive > 4th Year > 
-        # CNN Stuff for more details.
 
         sample = (ronch, complexArray)
 
