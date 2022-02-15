@@ -142,7 +142,8 @@ class RonchigramDataset(Dataset):
 
         # Certain torchvision.transform transforms, like ToTensor(), require numpy arrays to have 3 dimensions 
         # (H x W x C) rather than 2D (as of 5:01pm 08/01/22), hence the below. I assume here that if ronch.ndim == 2, 
-        # the numpy array is of the form (H x W), as required
+        # the numpy array is of the form (H x W), as required. The below in that case makes numpy array have shape 
+        # (H x W x C), later ToTensor() turns shape to (C x H x W) if applied. 
         if ronch.ndim == 2:
             ronch = np.expand_dims(ronch, 2)
 
@@ -251,6 +252,20 @@ def getMeanAndStd2(ronchdset, trainingResolution, diagnosticBatchSize=4, diagnos
 
     return mean, std
 
+def show_data(ronch, abers):
+    """Show a Ronchigram along with the values of the aberrations it contains."""
+    # So, when I first tried this function, matplotlib plotted it in colour despite the Ronchigrams having dimensions 
+    # 1024 x 1024. Matplotlib applies a default colourmap when there are only 2 dimensions, this doesn't necessarily 
+    # mean the Ronchigram itself is of colour. Later, transforms will add a colour channel dimension, whose element = 1, 
+    # so need not worry too much. For now, will just plot a greyscale colourmap like in Simulations/Primary_Simulation_1.py.
+    # TODO: in later simulations, add a dimensions for the colour channel, its element equal to 1.
+    # Despite having conerted the 2D array into a H x W x C array in the RonchigramDataset class definition, passing the 
+    # argument "gray" to the cmap parameter below is probably still necessary, especially before the Ronchigram is 
+    # normalised to array elements in between 0 and 1.
+    plt.imshow(ronch, cmap="gray")
+    plt.xlabel(f"{abers}")
+    # Slight pause so plots have time to update
+    plt.pause(0.001)
 
 if __name__ == "__main__":
 
@@ -283,6 +298,15 @@ if __name__ == "__main__":
 
     ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/20_01_22/Single_Aberrations.h5")
     ronchdset.complexLabels = False
+
+
+    # Quick check of the numpy array plotting
+
+    # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
+    # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
+    plt.figure()
+    show_data(ronchdset[50000][0], ronchdset[50000][1])
+    plt.show()
 
     # Implementing a way to find the mean and std of the data for Normalize(). 
     # Since this relies on ToTensor() being done, I am going to create a new composed transform variable containing just 
@@ -400,6 +424,10 @@ if __name__ == "__main__":
         ToTensor(),
         Resize(resolution, F2.InterpolationMode.BICUBIC),
         Normalize(mean=[mean], std=[std])
+    ])
+
+    tempTrasnform = Compose([
+        ToTensor()
     ])
 
     ronchdset.transform = trainTransform
