@@ -23,6 +23,7 @@ if __name__ == "__main__":
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
     simdim = 100 * 10**-3
 
+    # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
     max_C10 = 100 * 10**-9  # Maximum C10 (defocus) magnitude/m
     max_C12 = 100 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
     max_C21 = 600 * 10**-9  # Maximum C21 (axial coma) magnitude/m
@@ -80,32 +81,37 @@ if __name__ == "__main__":
             # Initialising simulation_number variable that will be incremented below
             simulation_number = 0
 
+            # See Google doc 4th Year > 16/02/22 for how the below ranges were chosen
             for simulation in range(number_simulations):
                 simulation_number += 1
 
                 if simulation_number <= math.ceil(number_simulations / 4):
                     C10 = randu(0, max_C10)
-                    C12 = 0
-                    C21 = 0
-                    C23 = 0
+
+                    C12 = randu(0, C10/100)
+                    C21 = randu(0, C10/10)
+                    C23 = randu(0, C10/10)
 
                 elif math.ceil(number_simulations / 4) < simulation_number <= math.ceil(number_simulations / 2):
-                    C10 = 0
                     C12 = randu(0, max_C12)
-                    C21 = 0
-                    C23 = 0
+
+                    C10 = randu(0, C12/100)
+                    C21 = randu(0, C12/10)
+                    C23 = randu(0, C12/10)
 
                 elif math.ceil(number_simulations / 2) < simulation_number <= math.ceil(3 * number_simulations / 4):
-                    C10 = 0
-                    C12 = 0
                     C21 = randu(0, max_C21)
-                    C23 = 0
+                    
+                    C10 = randu(0, C21/1000)
+                    C12 = randu(0, C21/1000)
+                    C23 = randu(0, C21/100)
 
                 elif math.ceil(3 * number_simulations / 4) < simulation_number:
-                    C10 = 0
-                    C12 = 0
-                    C21 = 0
                     C23 = randu(0, max_C23)
+                    
+                    C10 = randu(0, C23/1000)
+                    C12 = randu(0, C23/1000)
+                    C21 = randu(0, C23/100)
 
                 # Below, the ranges for 
                 phi10 = 0   # Defocus has an m-value of 0
