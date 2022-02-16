@@ -167,7 +167,7 @@ if __name__ == "__main__":
     # sys.exit()
 
     # CPUs AND PROCESSES
-    total_simulations = 1000
+    total_simulations = 100000
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
