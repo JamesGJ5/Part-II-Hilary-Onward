@@ -33,16 +33,20 @@ class RonchigramDataset(Dataset):
     magnitude/m being its modulus and the angle/rad being its argument. Currently, aberrations are C10, C12, C21 and 
     C23 in Krivanek notation."""
 
-    def __init__(self, hdf5filename: str, transform=None, complexLabels=True):
+    def __init__(self, hdf5filename: str, transform=None, complexLabels=True, removePhi10=True):
         """Args:
                 hdf5filename: path to the HDF5 file containing the data as mentioned in the comment under this class' definition
                 transform (callable, optional): transforms being incroporated
+                # NOTE: complexLabels should be made False, see Google doc 16/02/22
                 complexLabels: whether the labels will be in complex form or not (True or False)
+                removePhi10: whether the phi10 label should be removed from the non-complex labels (if it has been included) (True 
+                    or False)
         """
 
         self.hdf5filename = hdf5filename
         self.transform = transform
         self.complexLabels = complexLabels
+        self.removePhi10 = removePhi10
 
         with h5py.File(self.hdf5filename, "r") as flen:
             # Ranks refers to each parallel process used to save simulations to HDF5 file
@@ -89,6 +93,7 @@ class RonchigramDataset(Dataset):
         mags = self.RandMags[rank, itemInRank]
         angs = self.RandAngs[rank, itemInRank]
 
+        # TODO: get rid of the below (see Google doc 16/02/22)
         if self.complexLabels:
 
             # Putting the aberrations into complex form
@@ -137,6 +142,10 @@ class RonchigramDataset(Dataset):
         else:
 
             labelsArray = np.concatenate((mags, angs))
+            
+            if self.removePhi10:
+                labelsArray = np.delete(labelsArray, 4)
+
             labelsArray = torch.from_numpy(labelsArray)
 
 
