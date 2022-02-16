@@ -47,7 +47,7 @@ if __name__ == "__main__":
         # TODO: take this outside of function because, unlike the multiprocessing method I found in a video, MPI 
         # doesn't need the script being parallelised to be put in a function definition.
         """Simulates single-aberration Ronchigrams and saves them along with the magnitudes and angles individually. 
-        min_Cnm = 0, b = 1, and phi_n,m are random between 0 and pi radians.
+        min_Cnm = 0 (for dominant aberration), b = 1, and phi_n,m are random between 0 and pi radians (except for phi10).
 
         :param number_simulations: number of Ronchigrams simulated per process
         :param imdim: Ronchigram array size in pixels (imdim x imdim)
@@ -61,6 +61,7 @@ if __name__ == "__main__":
         with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
+            # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
             try:
                 # dtype is float64 rather than float32 to reduce the memory taken up in storage.
                 random_mags_dset = f.create_dataset("random_mags dataset", (number_processes, number_simulations, 4), dtype="float32")
