@@ -581,7 +581,8 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     except:
         f.write("\n\nTraining metrics from ignite could not be logged.")
     f.write("\n\nChanges made since last training run: changed criterion from torch.nn.L1Loss back to torch.nn.MSELoss(reduction='mean').")
-    f.write("\n\nInstantiated a RonchigramDataset object WITHOUT complex labels for training.")
+    f.write("\nInstantiated a RonchigramDataset object WITHOUT complex labels for training.")
+    f.write("\nAdded functionality to RonchigramDataset to remove phi10 from the label and ensured that'd be the case for this run.")
 
 
 
