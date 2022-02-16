@@ -68,10 +68,8 @@ class RonchigramDataset(Dataset):
         self.RandAngs = self.f["random_angs dataset"]
         self.ronchs = self.f["ronch dataset"]
 
-        # The below is just here as a reminder that the HDF5 file also stores random Ronchigram capture current and 
-        # capture time information. Decomment when necessary.
-        # self.RandI = f["random_I dataset"]
-        # self.Randt = f["random_t dataset"]
+        self.RandI = self.f["random_I dataset"]
+        self.Randt = self.f["random_t dataset"]
 
     def __getitem__(self, idx):
         """idx is the single-number index referring to the item being got. Since, for each of self.RandMags, 
@@ -166,6 +164,23 @@ class RonchigramDataset(Dataset):
         sample = (ronch, labelsArray)
 
         return sample
+
+    def getIt(self, idx):
+        """Returns I (the quoted Ronchigram capture current/A) and t (Ronchigram acquisition time/s)"""
+
+        if not hasattr(self, 'f'):
+            self.open_hdf5()
+
+        numRanks = self.ronchs.shape[0]
+        itemsPerRank = self.ronchs.shape[1]
+
+        rank = idx // itemsPerRank
+        itemInRank = idx % itemsPerRank
+
+        I = self.RandI[rank, itemInRank]
+        t = self.Randt[rank, itemInRank]
+
+        return (I, t)
 
     def __del__(self):
 
@@ -479,3 +494,5 @@ if __name__ == "__main__":
     testLength = ronchdsetLength - trainLength - evalLength
 
     trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
+
+    print(ronchdset.getIt(10))
