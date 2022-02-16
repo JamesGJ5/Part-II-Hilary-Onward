@@ -314,7 +314,7 @@ if __name__ == "__main__":
 
     # Dataset instantiation
 
-    ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/20_01_22/Single_Aberrations.h5")
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5")
     ronchdset.complexLabels = False
 
 
@@ -323,7 +323,7 @@ if __name__ == "__main__":
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
     plt.figure()
-    show_data(ronchdset[50000][0], ronchdset[50000][1])
+    show_data(ronchdset[450][0], ronchdset[450][1])
     plt.show()
 
     # Implementing a way to find the mean and std of the data for Normalize(). 
@@ -451,10 +451,12 @@ if __name__ == "__main__":
 
             if iBatch == 3:
                 plt.figure()
+
                 showBatch(batchedSample)
                 # print(batchedSample["aberrations"])
                 plt.ioff()
                 plt.show()
+
                 break
 
     # Checking if random_split works by splitting ronchdset into train, eval and test
