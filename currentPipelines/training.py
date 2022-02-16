@@ -145,7 +145,7 @@ print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_all
 sys.path.insert(1, "/home/james/VSCode/DataLoading")
 from DataLoader2 import RonchigramDataset
 
-ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/20_01_22/Single_Aberrations.h5")
+ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/20_01_22/Single_Aberrations.h5", complexLabels=False)
 
 print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(GPU)}")
 
@@ -297,7 +297,7 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 
 # OPTIMISER
 
-criterion = nn.MSELoss(reduction="sum")
+criterion = nn.MSELoss(reduction="mean")
 
 lr = 0.01
 
@@ -371,6 +371,8 @@ def update_fn(engine, batch):
 
     # Compute loss
     loss = criterion(y_pred, y)
+
+
     # print(loss)
 
     optimiser.zero_grad()
@@ -578,8 +580,8 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
         f.write("\n\nTraining metrics: " + str(list(metrics.keys())))
     except:
         f.write("\n\nTraining metrics from ignite could not be logged.")
-    f.write("\n\nChanges made since last training run: changed criterion from torch.nn.L1Loss back to torch.nn.MSELoss().")
-    f.write("\n\nreduction parameter of torch.nn.MSELoss() set to 'sum'--it was 'mean' in the last run using this function.")
+    f.write("\n\nChanges made since last training run: changed criterion from torch.nn.L1Loss back to torch.nn.MSELoss(reduction='mean').")
+    f.write("\n\nInstantiated a RonchigramDataset object WITHOUT complex labels for training.")
 
 
 
