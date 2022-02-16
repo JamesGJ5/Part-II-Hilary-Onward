@@ -122,7 +122,8 @@ model.load_state_dict(torch.load(modelPath, map_location = torch.device('cpu')))
 
 # Load RonchigramDataset object with filename equal to the file holding new simulations to be inferred
 
-testSet = RonchigramDataset("/media/rob/hdd2/james/simulations/15_02_22/Single_Aberrations.h5")
+removePhi10 = False
+testSet = RonchigramDataset("/media/rob/hdd2/james/simulations/15_02_22/Single_Aberrations.h5", removePhi10=removePhi10)
 
 # Set up the test transform; it should be the same as testTransform in training.py (1:48pm 15/02/22), with resolution 
 # of 300 (as is necessary for EfficientNet-B3) for Resize, along with the same mean and std estimated for the training 
@@ -193,21 +194,34 @@ with torch.no_grad():
     print("Predicted batch of labels (actualy batch of labels is printed above)\n")
     print(yPred)
 
-
 # Use predicted labels to calculate new Numpy Ronchigrams (with resolution 1024)
 
 imdim = 1024    # Output Ronchigram will have an array size of imdim x imdim elements
 simdim = 100 * 10**-3   # Convergence semi-angle/rad
 
-labelVector = yPred[0]
+# NOTE: this will contain numpy arrays, not torch Tensors
+predictedRonchBatch = np.empty((batchSize, imdim, imdim, 1))
 
-C10_mag, C10_ang = cmath.polar(labelVector[0] + labelVector[4] * 1j)
-C12_mag, C12_ang = cmath.polar(labelVector[1] + labelVector[5] * 1j)
-C21_mag, C21_ang = cmath.polar(labelVector[2] + labelVector[6] * 1j)
-C23_mag, C23_ang = cmath.polar(labelVector[3] + labelVector[7] * 1j)
+for labelVectorIndex in range(batchSize):
+    labelVector = yPred[labelVectorIndex]
 
+    C10_mag, C10_ang = cmath.polar(labelVector[0] + labelVector[4] * 1j)
+    C12_mag, C12_ang = cmath.polar(labelVector[1] + labelVector[5] * 1j)
+    C21_mag, C21_ang = cmath.polar(labelVector[2] + labelVector[6] * 1j)
+    C23_mag, C23_ang = cmath.polar(labelVector[3] + labelVector[7] * 1j)
 
+    I, t = testSet.getIt(chosenIndices[labelVectorIndex])
+    print(I, t)
 
+    # NOTE: for now, haven't been saving b, it will probably just remain as 1 but I may change it so be careful
+    b = 1
+
+    # TODO: calculate Ronchigram here from parameters above
+    predictedRonch = None
+
+    predictedRonch = np.expand_dims(predictedRonch, 2)
+
+    predictedRonchBatch[labelVectorIndex] = predictedRonch
 
 # Get the same indices as before and plot the RonchigramDataset Ronchigrams in numpy form (i.e. without transforms)
 
