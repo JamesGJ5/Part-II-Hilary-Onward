@@ -301,7 +301,6 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 
 # OPTIMISER
 
-# TODO: 17th change the loss criterion of course
 criterion = modifiedMAPE(reduction="mean")
 
 
@@ -520,21 +519,11 @@ trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
 # Implementing a way to show this script that the best model is the one with the lowest MeanSquaredError value
 def default_score_fn(engine):
-    # TODO: 17th make changes mentioned in Google doc 17/02/22 if a better model is allowed to have a lower score 
-    # based on what is done with this score function.
 
-    MSE = engine.state.metrics['MeanSquaredError']
-    # Further below, ModelCheckpoint retains the model with the highest score_function, so the score output here 
-    # must be made higher for lower value of MSE, since we want to save the model with the lowest MSE
-    if MSE == 0:
-        score = 10**22
-        print("MSE calculated is zero, so the score saved was arbitrarily made to be 10**22.")
-        print("Might want to check that this wasn't an erroneous result.")
-
-    else:
-        score = 1 / MSE
+    score = engine.state.metrics['Loss']
 
     return score
+
 
 # TODO: If this script ends up creating a different number of models than 3, may need to change n_saved below from 3 to 
 # something else. The below will result in a file with a number in it that corresponds to 1/MSE (so higher number means 
