@@ -14,6 +14,10 @@ Notable Contents:
 
     modelLogging logs model architectures used in each training run.
 
+    modifyMAPE.py was made 9:25pm on 17/02/22 to modify the source code for MAPE loss criterion from 
+    https://pytorch-forecasting.readthedocs.io/en/latest/api/pytorch_forecasting.metrics.MAPE.html to better suit my 
+    needs. I needed to change the epsilon value (1e-8) first of all.
+
 How to Use:
 
     The Conda environment "pytorch3copy" works on this directory.
