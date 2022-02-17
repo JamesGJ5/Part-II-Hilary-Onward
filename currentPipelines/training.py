@@ -24,6 +24,7 @@ from itertools import chain
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import ExponentialLR
+from modifyMAPE import modifiedMAPE
 
 # For update_fn definition onward
 from ignite.utils import convert_tensor
@@ -82,7 +83,7 @@ torch.manual_seed(torchSeed)
 # what the below variable is assigned to
 efficientNetModel = "EfficientNet-B3"
 pretrainedWeights = False
-estimateMeanStd = True  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
+estimateMeanStd = False  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
                         # transform
 
 
@@ -301,7 +302,8 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 # OPTIMISER
 
 # TODO: 17th change the loss criterion of course
-criterion = nn.MSELoss(reduction="mean")
+criterion = modifiedMAPE(reduction="mean")
+
 
 lr = 0.01
 
