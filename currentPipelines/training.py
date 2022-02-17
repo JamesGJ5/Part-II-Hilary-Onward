@@ -30,7 +30,7 @@ from ignite.utils import convert_tensor
 
 # For Output_transform and tensorboard stuff definition onward
 from ignite.engine import Engine, Events, create_supervised_evaluator
-from ignite.metrics import RunningAverage, Loss, MeanAbsoluteError, MeanSquaredError
+from ignite.metrics import RunningAverage, Loss, MeanAbsoluteError, MeanSquaredError, RootMeanSquaredError
 from ignite.contrib.handlers import TensorboardLogger
 from ignite.contrib.handlers.tensorboard_logger import OutputHandler, OptimizerParamsHandler
 from ignite.contrib.handlers import ProgressBar
@@ -82,14 +82,14 @@ torch.manual_seed(torchSeed)
 # what the below variable is assigned to
 efficientNetModel = "EfficientNet-B3"
 pretrainedWeights = False
-estimateMeanStd = False  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
+estimateMeanStd = True  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
                         # transform
 
 
 
 # GPU STUFF
 
-GPU = 1
+GPU = 0
 # device = torch.device(f"cuda:{GPU}" if torch.cuda.is_available() else "cpu")
 device = torch.device(f"cuda:{GPU}")
 torch.cuda.set_device(GPU)
@@ -97,37 +97,39 @@ print(f"torch cuda current device: {torch.cuda.current_device()}")
 
 # MODEL INSTANTIATION
 
+numLabels = 7
+
 # TODO: put the below in model1.py instead so you don't have to write it in every script that instantiates an EfficientNet() model
 if efficientNetModel == "EfficientNet-B7":
-    parameters = {"num_labels": 8, "width_coefficient": 2.0, "depth_coefficient": 3.1, "dropout_rate": 0.5}
+    parameters = {"num_labels": numLabels, "width_coefficient": 2.0, "depth_coefficient": 3.1, "dropout_rate": 0.5}
     resolution = 600
 
 elif efficientNetModel == "EfficientNet-B6":
-    parameters = {"num_labels": 8, "width_coefficient": 1.8, "depth_coefficient": 2.6, "dropout_rate": 0.5}
+    parameters = {"num_labels": numLabels, "width_coefficient": 1.8, "depth_coefficient": 2.6, "dropout_rate": 0.5}
     resolution = 528
 
 elif efficientNetModel == "EfficientNet-B5":
-    parameters = {"num_labels": 8, "width_coefficient": 1.6, "depth_coefficient": 2.2, "dropout_rate": 0.4}
+    parameters = {"num_labels": numLabels, "width_coefficient": 1.6, "depth_coefficient": 2.2, "dropout_rate": 0.4}
     resolution = 456
 
 elif efficientNetModel == "EfficientNet-B4":
-    parameters = {"num_labels": 8, "width_coefficient": 1.4, "depth_coefficient": 1.8, "dropout_rate": 0.4}
+    parameters = {"num_labels": numLabels, "width_coefficient": 1.4, "depth_coefficient": 1.8, "dropout_rate": 0.4}
     resolution = 380
 
 elif efficientNetModel == "EfficientNet-B3":
-    parameters = {"num_labels": 8, "width_coefficient": 1.2, "depth_coefficient": 1.4, "dropout_rate": 0.3}
+    parameters = {"num_labels": numLabels, "width_coefficient": 1.2, "depth_coefficient": 1.4, "dropout_rate": 0.3}
     resolution = 300
 
 elif efficientNetModel == "EfficientNet-B2":
-    parameters = {"num_labels": 8, "width_coefficient": 1.1, "depth_coefficient": 1.2, "dropout_rate": 0.3}
+    parameters = {"num_labels": numLabels, "width_coefficient": 1.1, "depth_coefficient": 1.2, "dropout_rate": 0.3}
     resolution = 260
 
 elif efficientNetModel == "EfficientNet-B1":
-    parameters = {"num_labels": 8, "width_coefficient": 1.0, "depth_coefficient": 1.1, "dropout_rate": 0.2}
+    parameters = {"num_labels": numLabels, "width_coefficient": 1.0, "depth_coefficient": 1.1, "dropout_rate": 0.2}
     resolution = 240
 
 elif efficientNetModel == "EfficientNet-B0":
-    parameters = {"num_labels": 8, "width_coefficient": 1.0, "depth_coefficient": 1.0, "dropout_rate": 0.2}
+    parameters = {"num_labels": numLabels, "width_coefficient": 1.0, "depth_coefficient": 1.0, "dropout_rate": 0.2}
     resolution = 224
 
 model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficient=parameters["width_coefficient"], 
@@ -145,7 +147,7 @@ print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_all
 sys.path.insert(1, "/home/james/VSCode/DataLoading")
 from DataLoader2 import RonchigramDataset
 
-ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/20_01_22/Single_Aberrations.h5", complexLabels=False)
+ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5", complexLabels=False)
 
 print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(GPU)}")
 
@@ -175,6 +177,7 @@ try:
     mean = calculatedMean
     std = calculatedStd
 except:
+    # TODO: 17th change the below accordingly after running first estimateMeanStd on new simulations (16_02_22/Single_Aberrations.h5)
     mean = 0.500990092754364
     std = 0.2557201385498047
 
@@ -237,11 +240,11 @@ num_epochs = 11
 
 with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     f.write(f"\n\n\n{scriptTime}")
-
     if not pretrainedWeights:
         f.write("\n\nSee model1.py at the date and time this training run was done (see https://github.com/JamesGJ5/Part-II-Hilary-Onward) for weights used.")
 
-    f.write(f"\n\nGPU: {GPU}, Torch seed: {torchSeed}, input datatype: {inputDtype}, numWorkers: {numWorkers}, train:eval:test {trainFraction}:{evalFraction}:{testFraction}\n\n")
+    f.write(f"\n\nGPU: {GPU}, Torch seed: {torchSeed}, input datatype: {inputDtype}, numWorkers: {numWorkers}, train:eval:test {trainFraction}:{evalFraction}:{testFraction}")
+    f.write(f"\nData loaded from {ronchdset.hdf5filename}\n\n")
     f.write(str(trainTransform))
     f.write("\n\n")
     f.write(str(testTransform))
@@ -297,6 +300,7 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 
 # OPTIMISER
 
+# TODO: 17th change the loss criterion of course
 criterion = nn.MSELoss(reduction="mean")
 
 lr = 0.01
@@ -451,9 +455,13 @@ closing_event_name=Events.EPOCH_COMPLETED)
 
 # METRICS TO LOG TO TENSORBOARD
 
+# TODO: 17th by creating custom metrics via method in https://pytorch.org/ignite/metrics.html,
+#   add a percentage error (loss) per element metric; add a MAE per element metric;
+#   add a RMSE per element metric
+#   If desired, can create 
 metrics = {
     'Loss': Loss(criterion),
-    'MeanSquaredError': MeanSquaredError(),
+    'RootMeanSquaredError': RootMeanSquaredError(),
     'MeanAbsoluteError': MeanAbsoluteError(),
 }
 
@@ -510,6 +518,9 @@ trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
 # Implementing a way to show this script that the best model is the one with the lowest MeanSquaredError value
 def default_score_fn(engine):
+    # TODO: 17th make changes mentioned in Google doc 17/02/22 if a better model is allowed to have a lower score 
+    # based on what is done with this score function.
+
     MSE = engine.state.metrics['MeanSquaredError']
     # Further below, ModelCheckpoint retains the model with the highest score_function, so the score output here 
     # must be made higher for lower value of MSE, since we want to save the model with the lowest MSE
@@ -526,6 +537,10 @@ def default_score_fn(engine):
 # TODO: If this script ends up creating a different number of models than 3, may need to change n_saved below from 3 to 
 # something else. The below will result in a file with a number in it that corresponds to 1/MSE (so higher number means 
 # better model). There may be an error with float("inf"), will wait and see if ModelCheckpoint works with it.
+
+# TODO: 17th make changes to the argument passed to score_name below if you end up changing default_score_fn() significantly
+# TODO: rather than checkpointing the model at 3 points, maybe checkpoint at lots of points, depending on how much space there 
+# is and how long this takes. Also, make sure the model present at the end of training is saved too.
 best_model_handler = ModelCheckpoint(dirname=log_path, filename_prefix="best", n_saved=3, score_name="test_recriprocal_MSE",
 score_function=default_score_fn)
 testEvaluator.add_event_handler(Events.COMPLETED, best_model_handler, {'model': model,})
@@ -580,9 +595,8 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
         f.write("\n\nTraining metrics: " + str(list(metrics.keys())))
     except:
         f.write("\n\nTraining metrics from ignite could not be logged.")
-    f.write("\n\nChanges made since last training run: changed criterion from torch.nn.L1Loss back to torch.nn.MSELoss(reduction='mean').")
-    f.write("\nInstantiated a RonchigramDataset object WITHOUT complex labels for training.")
-    f.write("\nAdded functionality to RonchigramDataset to remove phi10 from the label and ensured that'd be the case for this run.")
+    f.write("\n\nChanges made since last training run:")
+    f.write("\nChanged estimateMeanStd from False to True")
 
 
 
@@ -613,6 +627,9 @@ print("\n" + str(checkpoints))
 
 # TODO: automate calculation of the indices of the file names to take the 
 # scores from below
+
+# TODO: 17th replace the number 32 below accordingly if you end up changing score_name earlier in this training 
+# pipeline.
 scores = [eval(c[32:-3]) for c in checkpoints]
 print("\nScores:", scores)
 
@@ -646,6 +663,11 @@ if removeOtherFiles:
     # but not the loss curves, of course.
     os.system(f"rm {log_path}/best_model_test* {log_path}/events*")
 
+# STORING A README.txt FEATURING INFORMATION ABOUT METRICS MENTIONED IN GOOGLE DOC 17/02/22
+# TODO: 17th create a README and save it to same directory as weights. README must feature 
+# evaluator.state.metrics if metrics was able to host all the metrics desired; if not, it 
+# must host evaluator.state.metrics as well as metrics logged in other ways that couldn't 
+# be logged via ignite metrics
 
 
 # PLOTTING AND SAVING LOSS CURVE
