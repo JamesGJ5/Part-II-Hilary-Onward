@@ -529,10 +529,9 @@ def default_score_fn(engine):
 # something else. The below will result in a file with a number in it that corresponds to 1/MSE (so higher number means 
 # better model). There may be an error with float("inf"), will wait and see if ModelCheckpoint works with it.
 
-# TODO: 17th make changes to the argument passed to score_name below if you end up changing default_score_fn() significantly
 # TODO: rather than checkpointing the model at 3 points, maybe checkpoint at lots of points, depending on how much space there 
 # is and how long this takes. Also, make sure the model present at the end of training is saved too.
-best_model_handler = ModelCheckpoint(dirname=log_path, filename_prefix="best", n_saved=3, score_name="test_recriprocal_MSE",
+best_model_handler = ModelCheckpoint(dirname=log_path, filename_prefix="best", n_saved=3, score_name="Loss",
 score_function=default_score_fn)
 testEvaluator.add_event_handler(Events.COMPLETED, best_model_handler, {'model': model,})
 
