@@ -625,14 +625,14 @@ print("\nScores:", scores)
 # some reason I have kept it called that like the Kaggle webpage I first 
 # got this training pipeline from does. I think it actually just refers 
 # to the best model but I could be wrong.
-bestEpoch = np.argmax(scores)
+bestEpoch = np.argmin(scores)
 print("\n" + str(bestEpoch))
 
 if not checkpoints:
     print(f"\nThere are no weight files in {log_path}")
 
 else:
-    modelPath = f"{log_path}/efficientNetBestReciprocalMSE_{scores[bestEpoch]}"
+    modelPath = f"{log_path}/efficientNetLowestLoss_{scores[bestEpoch]}"
     print("\nNew best model weights path:", modelPath)
 
     currentBestModelPath = os.path.join(log_path, checkpoints[bestEpoch])
