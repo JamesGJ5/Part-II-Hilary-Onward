@@ -657,6 +657,10 @@ if removeOtherFiles:
 # must host evaluator.state.metrics as well as metrics logged in other ways that couldn't 
 # be logged via ignite metrics
 
+with open(f"{log_path}/README.txt", "w") as f:
+    f.write(f"trainEvaluator metrics: {trainEvaluator.state.metrics}")
+    f.write(f"\n\ntestEvaluator metrics: {testEvaluator.state.metrics}")
+    
 
 # PLOTTING AND SAVING LOSS CURVE
 
