@@ -618,9 +618,7 @@ print("\n" + str(checkpoints))
 # TODO: automate calculation of the indices of the file names to take the 
 # scores from below
 
-# TODO: 17th replace the number 32 below accordingly if you end up changing score_name earlier in this training 
-# pipeline.
-scores = [eval(c[32:-3]) for c in checkpoints]
+scores = [eval(c[16:-3]) for c in checkpoints]
 print("\nScores:", scores)
 
 # TODO: check the following--I think bestEpoch is a misnomer, but for 
