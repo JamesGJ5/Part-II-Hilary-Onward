@@ -286,6 +286,7 @@ def getMeanAndStd2(ronchdset, trainingResolution, diagnosticBatchSize=4, diagnos
     with open("/home/james/VSCode/DataLoading/MeanStdLog.txt", "a") as f:
         try:
             f.write(f"\n\n{scriptTime}")
+            f.write(f"\n{ronchdset.hdf5filename}")
             f.write(f"\nCalculated mean: {mean}\nCalculated std: {std}")
             f.write(f"\nMean and std calculated from {batchesTested} batches of size {diagnosticBatchSize}")
             f.write(f"\nShuffling was {diagnosticShuffle}; random module's seed and torch's seed were {torchSeed}")
