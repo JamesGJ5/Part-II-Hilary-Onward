@@ -1,5 +1,4 @@
-# PACKAGES
-
+from configparser import ConfigParser
 import torchvision
 import torch
 import torch.nn as nn
@@ -65,6 +64,16 @@ os.chdir("/home/james/VSCode/currentPipelines")
 print(f"Current working directory: {os.getcwd()}")
 
 
+# CONFIG STUFF
+
+config = ConfigParser()
+config.read("config1.ini")
+
+# TODO: 18th write code to get this from Linux terminal
+sectionName = sys.argv[1]
+
+configSection = config[sectionName]
+
 
 # SEED INFORMATION
 
@@ -90,7 +99,8 @@ estimateMeanStd = False  # If want to estimate the mean and std of the data (wit
 
 # GPU STUFF
 
-GPU = 0
+# TODO: 18th put config importation below
+GPU = eval(configSection["GPU"])
 # device = torch.device(f"cuda:{GPU}" if torch.cuda.is_available() else "cpu")
 device = torch.device(f"cuda:{GPU}")
 torch.cuda.set_device(GPU)
@@ -305,7 +315,8 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 # y_predNaNsSum = 0
 # targetNaNsSum = 0
 
-criterion = myMAPE
+# TODO: 18th put config importation below
+criterion = eval(configSection["criterion"])
 
 
 lr = 0.01
@@ -589,6 +600,10 @@ trainer.run(trainLoader, max_epochs=num_epochs)
 
 # SAVING MORE TRAINING INFORMATION
 
+# TODO: 18th below import lossCriterionString from config and replace 
+# line saying "myMAPE" below with the value of lossCriterionString.
+criterionName = configSection["criterion"]
+
 with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     f.write(f"\n\nTraining finished at {datetime.datetime.now()}")
     f.write("\n\n")
@@ -602,7 +617,7 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
         f.write("\n\nTraining metrics from ignite could not be logged.")
     f.write("\n\nChanges made since last training run:")
     f.write("\nChanged estimateMeanStd from False to True")
-    f.write("\nChanged loss criterion to myMAPE")
+    f.write(f"\nLoss criterion is {criterionName}")
     f.write("\nMade changes mentioned on GitHub for training.py on 17/02/22 (after 11:35pm, which is when I began penultimate run)")
     f.write("\nChanged num_epochs to 4 for a short run.")
 
