@@ -34,7 +34,7 @@ def myMAPE(output, target):
     """
     # TODO: make epsilon (10**-13) an array that has different values for each element, according to what makes an element 
     # negligible (see Google doc 16/02/22)
-    loss = torch.mean((output - target).abs() / (target.abs() + 10**-13) * 100)
+    loss = torch.mean((output - target).abs() / (target.abs() + 10**-13)) / 10**7
 
     # NOTE: because the loss is on the CPU (I think) it is hard to simpyl use the if statement below to clip losses 
     # greater than 10**9 to 10**9, so I had to use the below method.
