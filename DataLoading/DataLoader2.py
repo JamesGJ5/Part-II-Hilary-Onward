@@ -33,7 +33,7 @@ class RonchigramDataset(Dataset):
     magnitude/m being its modulus and the angle/rad being its argument. Currently, aberrations are C10, C12, C21 and 
     C23 in Krivanek notation."""
 
-    def __init__(self, hdf5filename: str, transform=None, complexLabels=True, removePhi10=True, upscaleMags=False):
+    def __init__(self, hdf5filename: str, transform=None, complexLabels=True, removePhi10=True, upscaleMags=None):
         """Args:
                 hdf5filename: path to the HDF5 file containing the data as mentioned in the comment under this class' definition
                 transform (callable, optional): transforms being incroporated
@@ -41,7 +41,7 @@ class RonchigramDataset(Dataset):
                 complexLabels: whether the labels will be in complex form or not (True or False)
                 removePhi10: whether the phi10 label should be removed from the non-complex labels (if it has been included) (True 
                     or False)
-                upscaleMags: whether or not to upscale magnitudes by 10**8 if a label of magnitudes & angles is returned
+                upscaleMags: how much to upscale aberration magnitudes by if a label of magnitudes & angles is returned
         """
 
         self.hdf5filename = hdf5filename
@@ -142,7 +142,7 @@ class RonchigramDataset(Dataset):
         else:
 
             if self.upscaleMags:
-                mags *= 10**8
+                mags *= self.upscaleMags
 
             labelsArray = np.concatenate((mags, angs))
             
@@ -346,6 +346,10 @@ if __name__ == "__main__":
 
     ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5")
     ronchdset.complexLabels = False
+
+    # ronchdset.upscaleMags = 10**8
+    # print(ronchdset[0][1])
+    # sys.exit()
 
 
     # Quick check of the numpy array plotting
