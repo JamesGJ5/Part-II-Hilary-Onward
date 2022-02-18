@@ -36,7 +36,15 @@ def myMAPE(output, target):
     # negligible (see Google doc 16/02/22)
     loss = torch.mean((output - target).abs() / (target.abs() + 10**-13) * 100)
 
-    if loss > 10**9:
-        loss[0] = 10**9
+    # NOTE: because the loss is on the CPU (I think) it is hard to simpyl use the if statement below to clip losses 
+    # greater than 10**9 to 10**9, so I had to use the below method.
+    a = loss < 10**9
+    b = loss >= 10**9
+
+    loss = loss * a + b * 10**9
+
+    # if loss.size() != torch.Size([]):
+    #     if loss > 10**9:
+    #         loss[0] = 10**9
 
     return loss
