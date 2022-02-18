@@ -24,7 +24,7 @@ from itertools import chain
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import ExponentialLR
-from modifyMAPE import modifiedMAPE
+from customLossFuncs import modifiedMAPE, myMAPE
 
 # For update_fn definition onward
 from ignite.utils import convert_tensor
@@ -179,8 +179,8 @@ try:
     std = calculatedStd
 except:
     # TODO: 17th change the below accordingly after running first estimateMeanStd on new simulations (16_02_22/Single_Aberrations.h5)
-    mean = 0.500990092754364
-    std = 0.2557201385498047
+    mean = 0.4993818998336792
+    std = 0.2549961507320404
 
 trainTransform = Compose([
     ToTensor(),
@@ -301,6 +301,10 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 
 # OPTIMISER
 
+# j = 0
+# y_predNaNsSum = 0
+# targetNaNsSum = 0
+
 criterion = modifiedMAPE(reduction="mean")
 
 
@@ -377,6 +381,7 @@ def update_fn(engine, batch):
     # Compute loss
     loss = criterion(y_pred, y)
 
+    print(loss)
 
     # print(loss)
 
@@ -388,6 +393,18 @@ def update_fn(engine, batch):
 
     batchloss = loss.item()
 
+    print(batchloss)
+
+    # global i
+    # i += 1
+
+    # if i == 1:
+    #     sys.exit()
+
+    print(model.weight.grad)
+
+    sys.exit()
+
     return {
         "batchloss": batchloss,
     }
@@ -396,17 +413,21 @@ def update_fn(engine, batch):
 
 # CHECKING update_fn
 
-batch = next(iter(trainLoader))
+checkUpdate_fn = True
 
-# Having memory issues so going to, in update_fn, put x on device, calculate y_pred on device, remove x from device, #
-# then add y to device and then calculate loss
-res = update_fn(engine=None, batch=batch)
-# TODO: decomment the below when you want to test update_fn
-# print(res)
+if checkUpdate_fn:
+    batch = next(iter(trainLoader))
 
-# sys.exit()
+    # Having memory issues so going to, in update_fn, put x on device, calculate y_pred on device, remove x from device, #
+    # then add y to device and then calculate loss
+    res = update_fn(engine=None, batch=batch)
+    # TODO: decomment the below when you want to test update_fn
+    # print(res)
 
-batch = None
+    # sys.exit()
+
+    batch = None
+    
 torch.cuda.empty_cache()
 
 # sys.exit()
@@ -587,6 +608,8 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
         f.write("\n\nTraining metrics from ignite could not be logged.")
     f.write("\n\nChanges made since last training run:")
     f.write("\nChanged estimateMeanStd from False to True")
+    f.write("\nChanged the nature of modifiedMAPE in order to keep loss low and also started using modifiedMAPE(reduction='mean') again.")
+    f.write("\nMade changes mentioned on GitHub for training.py on 17/02/22 (after 11:35pm, which is when I began penultimate run)")
 
 
 
@@ -651,16 +674,11 @@ if removeOtherFiles:
     # but not the loss curves, of course.
     os.system(f"rm {log_path}/best_model_test* {log_path}/events*")
 
-# STORING A README.txt FEATURING INFORMATION ABOUT METRICS MENTIONED IN GOOGLE DOC 17/02/22
-# TODO: 17th create a README and save it to same directory as weights. README must feature 
-# evaluator.state.metrics if metrics was able to host all the metrics desired; if not, it 
-# must host evaluator.state.metrics as well as metrics logged in other ways that couldn't 
-# be logged via ignite metrics
 
 with open(f"{log_path}/README.txt", "w") as f:
     f.write(f"trainEvaluator metrics: {trainEvaluator.state.metrics}")
     f.write(f"\n\ntestEvaluator metrics: {testEvaluator.state.metrics}")
-    
+
 
 # PLOTTING AND SAVING LOSS CURVE
 
