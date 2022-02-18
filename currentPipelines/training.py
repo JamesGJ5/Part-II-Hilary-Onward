@@ -23,7 +23,7 @@ from itertools import chain
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import ExponentialLR
-from customLossFuncs import modifiedMAPE, myMAPE
+from customLossFuncs import modifiedMAPE, myMAFE
 
 # For update_fn definition onward
 from ignite.utils import convert_tensor
@@ -158,7 +158,9 @@ print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_all
 sys.path.insert(1, "/home/james/VSCode/DataLoading")
 from DataLoader2 import RonchigramDataset
 
-ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5", complexLabels=False)
+upscaleFactor = eval(configSection["upscaleFactor"])
+
+ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5", complexLabels=False, upscaleMags=upscaleFactor)
 
 print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(GPU)}")
 
@@ -601,7 +603,7 @@ trainer.run(trainLoader, max_epochs=num_epochs)
 # SAVING MORE TRAINING INFORMATION
 
 # TODO: 18th below import lossCriterionString from config and replace 
-# line saying "myMAPE" below with the value of lossCriterionString.
+# line saying "myMAFE" below with the value of lossCriterionString.
 criterionName = configSection["criterion"]
 
 with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
