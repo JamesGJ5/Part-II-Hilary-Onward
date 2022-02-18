@@ -234,7 +234,7 @@ print(f"Memory/bytes allocated after ronchdset splitting: {torch.cuda.memory_all
 batchSize = 16
 numWorkers = 2
 
-num_epochs = 11
+num_epochs = 4
 
 
 # SAVING CURRENT ARCHITECTURE AND BATCH SIZE FOR EASY VIEWING AND REFERENCE
@@ -305,7 +305,7 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 # y_predNaNsSum = 0
 # targetNaNsSum = 0
 
-criterion = modifiedMAPE(reduction="mean")
+criterion = myMAPE
 
 
 lr = 0.01
@@ -381,7 +381,10 @@ def update_fn(engine, batch):
     # Compute loss
     loss = criterion(y_pred, y)
 
-    print(loss)
+    # print(loss)
+    # print(loss.size())
+
+    # sys.exit()
 
     # print(loss)
 
@@ -393,17 +396,8 @@ def update_fn(engine, batch):
 
     batchloss = loss.item()
 
-    print(batchloss)
+    # print(batchloss)
 
-    # global i
-    # i += 1
-
-    # if i == 1:
-    #     sys.exit()
-
-    print(model.weight.grad)
-
-    sys.exit()
 
     return {
         "batchloss": batchloss,
@@ -608,8 +602,9 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
         f.write("\n\nTraining metrics from ignite could not be logged.")
     f.write("\n\nChanges made since last training run:")
     f.write("\nChanged estimateMeanStd from False to True")
-    f.write("\nChanged the nature of modifiedMAPE in order to keep loss low and also started using modifiedMAPE(reduction='mean') again.")
+    f.write("\nChanged loss criterion to myMAPE")
     f.write("\nMade changes mentioned on GitHub for training.py on 17/02/22 (after 11:35pm, which is when I began penultimate run)")
+    f.write("\nChanged num_epochs to 4 for a short run.")
 
 
 
