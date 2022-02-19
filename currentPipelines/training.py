@@ -23,7 +23,7 @@ from itertools import chain
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import ExponentialLR
-from customLossFuncs import modifiedMAPE, myMAFE
+from customLossFuncs import modifiedMAPE, myMAFE, myMAFE2
 
 # For update_fn definition onward
 from ignite.utils import convert_tensor
@@ -246,7 +246,7 @@ print(f"Memory/bytes allocated after ronchdset splitting: {torch.cuda.memory_all
 batchSize = 16
 numWorkers = 2
 
-num_epochs = 4
+num_epochs = eval(configSection["num_epochs"])
 
 
 # SAVING CURRENT ARCHITECTURE AND BATCH SIZE FOR EASY VIEWING AND REFERENCE
@@ -410,6 +410,12 @@ def update_fn(engine, batch):
     batchloss = loss.item()
 
     # print(batchloss)
+
+    global batchesDone
+    batchesDone += 1
+
+    global batchlossVals
+    batchlossVals.append(batchloss)
 
 
     return {
