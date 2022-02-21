@@ -150,6 +150,12 @@ model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficie
 print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_allocated(GPU)}")
 
 
+# LOADING WEIGHTS INTO MODEL
+
+if GPU == 1:
+    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220219-111025/best_model_Loss=81.2453.pt"
+    model.load_state_dict(torch.load(modelPath))
+
 
 # TRANSFORMS, DATASETS AND DATASET SPLITTING, AND DATA LOADERS
 
@@ -321,7 +327,7 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 criterion = eval(configSection["criterion"])
 
 
-lr = 0.01
+lr = eval(configSection["lr"])
 
 # TODO: make sure this, from the Kaggle webpage, is really applicable to your own data (I think it can be, though)
 optimiser = optim.SGD([
