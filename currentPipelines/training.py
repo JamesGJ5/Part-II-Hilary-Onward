@@ -197,6 +197,7 @@ if estimateMeanStd:
     # so I am doing the below without GPU support.
     print(f"Resolution of each Ronchigram for which mean and standard deviation are calculated is {resolution}, which should equal the resolution used in training.")
     calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, batchesTested=320)
+    print(calculatedMean, calculatedStd)
 
 
 # Apply transforms
