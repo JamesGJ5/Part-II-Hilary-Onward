@@ -33,7 +33,9 @@ class RonchigramDataset(Dataset):
     magnitude/m being its modulus and the angle/rad being its argument. Currently, aberrations are C10, C12, C21 and 
     C23 in Krivanek notation."""
 
-    def __init__(self, hdf5filename: str, transform=None, complexLabels=True, removePhi10=True, upscaleMags=None):
+    def __init__(self, hdf5filename: str, transform=None, complexLabels=True, upscaleMags=None,
+                removec10 = True, removec12 = True, removec21 = True, removec23 = True,
+                removephi10 = True, removephi12 = True, removephi21 = True, removephi23 = True):
         """Args:
                 hdf5filename: path to the HDF5 file containing the data as mentioned in the comment under this class' definition
                 transform (callable, optional): transforms being incroporated
@@ -42,13 +44,17 @@ class RonchigramDataset(Dataset):
                 removePhi10: whether the phi10 label should be removed from the non-complex labels (if it has been included) (True 
                     or False)
                 upscaleMags: how much to upscale aberration magnitudes by if a label of magnitudes & angles is returned
+                removecnm: whether or not each cnm is removed from the labels (if complexLabels == False)
+                removephinm: whether or not each phinm is removed from the labels (if complexLabels == False)
         """
 
         self.hdf5filename = hdf5filename
         self.transform = transform
         self.complexLabels = complexLabels
-        self.removePhi10 = removePhi10
+        self.removephi10 = removephi10
         self.upscaleMags = upscaleMags
+        self.removedMagsAngs = [removec10, removec12, removec21, removec23, removephi10, removephi12, removephi21, removephi23]
+        self.removedMagsAngsIndices = [i for i, x in enumerate(self.removedMagsAngs) if x]
 
         with h5py.File(self.hdf5filename, "r") as flen:
             # Ranks refers to each parallel process used to save simulations to HDF5 file
@@ -146,8 +152,12 @@ class RonchigramDataset(Dataset):
 
             labelsArray = np.concatenate((mags, angs))
             
-            if self.removePhi10:
-                labelsArray = np.delete(labelsArray, 4)
+            # if self.removePhi10:
+            #     labelsArray = np.delete(labelsArray, 4)
+
+            labelsArray = np.delete(labelsArray, self.removedMagsAngsIndices)
+
+            
 
             labelsArray = torch.from_numpy(labelsArray)
 
@@ -344,8 +354,12 @@ if __name__ == "__main__":
 
     # Dataset instantiation
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5")
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5",
+    removec10=False, removec12=False, removec21=False, removec23=False, removephi10=True, removephi12=False, removephi21=False, removephi23=False)
     ronchdset.complexLabels = False
+
+    # print(ronchdset[0][1].size())
+    # sys.exit()
 
     # ronchdset.upscaleMags = 10**8
     # print(ronchdset[0][1])
