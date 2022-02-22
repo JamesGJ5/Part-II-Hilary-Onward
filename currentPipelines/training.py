@@ -92,7 +92,7 @@ torch.manual_seed(torchSeed)
 # what the below variable is assigned to
 efficientNetModel = "EfficientNet-B3"
 pretrainedWeights = False
-estimateMeanStd = False  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
+estimateMeanStd = eval(configSection["estimateMeanStd"])  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
                         # transform
 
 
@@ -108,7 +108,7 @@ print(f"torch cuda current device: {torch.cuda.current_device()}")
 
 # MODEL INSTANTIATION
 
-numLabels = 7
+numLabels = eval(configSection["numLabels"])
 
 # TODO: put the below in model1.py instead so you don't have to write it in every script that instantiates an EfficientNet() model
 if efficientNetModel == "EfficientNet-B7":
@@ -152,9 +152,9 @@ print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_all
 
 # LOADING WEIGHTS INTO MODEL
 
-if GPU == 1:
-    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220219-111025/best_model_Loss=81.2453.pt"
-    model.load_state_dict(torch.load(modelPath))
+# if GPU == 1:
+#     modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220219-111025/best_model_Loss=81.2453.pt"
+#     model.load_state_dict(torch.load(modelPath))
 
 
 # TRANSFORMS, DATASETS AND DATASET SPLITTING, AND DATA LOADERS
@@ -166,7 +166,20 @@ from DataLoader2 import RonchigramDataset
 
 upscaleFactor = eval(configSection["upscaleFactor"])
 
-ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5", complexLabels=False, upscaleMags=upscaleFactor)
+simulationsPath = configSection["simulationsPath"]
+
+removec10 = eval(configSection["removec10"])
+removec12 = eval(configSection["removec12"])
+removec21 = eval(configSection["removec21"])
+removec23 = eval(configSection["removec23"])
+removephi10 = eval(configSection["removephi10"])
+removephi12 = eval(configSection["removephi12"])
+removephi21 = eval(configSection["removephi21"])
+removephi23 = eval(configSection["removephi23"])
+
+ronchdset = RonchigramDataset(simulationsPath, complexLabels=False, upscaleMags=upscaleFactor,
+removec10=removec10, removec12=removec12, removec21=removec21, removec23=removec23,
+removephi10=removephi10, removephi12=removephi12, removephi21=removephi21, removephi23=removephi23)
 
 print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(GPU)}")
 
@@ -197,8 +210,8 @@ try:
     std = calculatedStd
 except:
     # TODO: 17th change the below accordingly after running first estimateMeanStd on new simulations (16_02_22/Single_Aberrations.h5)
-    mean = 0.4993818998336792
-    std = 0.2549961507320404
+    mean = eval(configSection["defaultMean"])
+    std = eval(configSection["defaultStd"])
 
 trainTransform = Compose([
     ToTensor(),
@@ -249,7 +262,7 @@ print(f"Memory/bytes allocated after ronchdset splitting: {torch.cuda.memory_all
 # Create data loaders via torch.utils.data.DataLoader
 # num_epochs is here to facilitate saving this information to file in code below, didn't want to move lots of code
 
-batchSize = 16
+batchSize = eval(configSection["batchSize"])
 numWorkers = 2
 
 num_epochs = eval(configSection["num_epochs"])
@@ -719,7 +732,5 @@ def lossCurve(batchAxis, batchlossAxis):
     plt.xlabel("Batch Number")
     plt.ylabel(f"Batch Loss ( {criterion} )")
     plt.savefig(f"{log_path}/lossCurve.png")
-
-    plt.show()
 
 lossCurve(np.linspace(1, batchesDone, batchesDone).astype(int), batchlossVals)
