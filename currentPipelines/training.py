@@ -177,7 +177,7 @@ removephi12 = eval(configSection["removephi12"])
 removephi21 = eval(configSection["removephi21"])
 removephi23 = eval(configSection["removephi23"])
 
-ronchdset = RonchigramDataset(simulationsPath, complexLabels=False, upscaleMags=upscaleFactor,
+ronchdset = RonchigramDataset(hdf5filename=simulationsPath, complexLabels=False, upscaleMags=upscaleFactor,
 removec10=removec10, removec12=removec12, removec21=removec21, removec23=removec23,
 removephi10=removephi10, removephi12=removephi12, removephi21=removephi21, removephi23=removephi23)
 
@@ -429,6 +429,12 @@ def update_fn(engine, batch):
 
     batchloss = loss.item()
 
+    # print(y)
+    # print(y_pred)
+    # print(batchloss)
+
+    # sys.exit()
+
     # print(batchloss)
 
     global batchesDone
@@ -437,6 +443,15 @@ def update_fn(engine, batch):
     global batchlossVals
     batchlossVals.append(batchloss)
 
+    if math.isnan(batchloss):
+        print("batchloss:", batchloss)
+        print("y:\n", y)
+        print("y_pred:\n", y_pred)
+
+    if math.isinf(batchloss):
+        print("batchloss:", batchloss)
+        print("y:\n", y)
+        print("y_pred:\n", y_pred)
 
     return {
         "batchloss": batchloss,
