@@ -26,8 +26,8 @@ if __name__ == "__main__":
     # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
     max_C10 = 100 * 10**-9  # Maximum C10 (defocus) magnitude/m
     max_C12 = 100 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
-    max_C21 = 600 * 10**-9  # Maximum C21 (axial coma) magnitude/m
-    max_C23 = 760 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
+    max_C21 = 10000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
+    max_C23 = 10000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
     # min_Cnm will be 0 since negative values are redundant, I THINK (see lab book's 29/11/2021 entry)
     # phi_n,m will be between 0 and pi/m radians since, I believe, other angles are redundant (see lab book's 29/11/2021 entry)
