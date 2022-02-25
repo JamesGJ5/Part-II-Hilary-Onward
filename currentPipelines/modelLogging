@@ -92531,3 +92531,45 @@ EfficientNet(
     (6): Linear(in_features=1536, out_features=1, bias=True)
   )
 )
+
+Training finished at 2022-02-25 14:50:12.662075
+
+SGD (
+Parameter Group 0
+    dampening: 0
+    initial_lr: 0.001
+    lr: 0.001
+    momentum: 0.9
+    nesterov: True
+    weight_decay: 0.001
+
+Parameter Group 1
+    dampening: 0
+    initial_lr: 0.002
+    lr: 0.002
+    momentum: 0.9
+    nesterov: True
+    weight_decay: 0.001
+
+Parameter Group 2
+    dampening: 0
+    initial_lr: 0.01
+    lr: 0.01
+    momentum: 0.9
+    nesterov: True
+    weight_decay: 0.001
+)
+
+Criterion: MSELoss()
+
+Learning rate scheduler: ExponentialLR(optimiser, gamma=0.975)
+
+Early stopping patience: 10
+
+Training metrics: ['Loss', 'RootMeanSquaredError', 'MeanAbsoluteError']
+
+Changes made since last training run:
+Changed estimateMeanStd from False to True
+Loss criterion is nn.MSELoss(reduction="mean")
+Made changes mentioned on GitHub for training.py on 17/02/22 (after 11:35pm, which is when I began penultimate run)
+Changed num_epochs to 4 for a short run.
