@@ -24,6 +24,7 @@ if __name__ == "__main__":
     max_C23 = 760 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
     # min_Cnm will be 0 since negative values are redundant, I THINK (see lab book's 29/11/2021 entry)
+    # NOTE: the below is incorrect, it should actually be pi/m
     # phi_n,m will be between 0 and pi radians since other angles are redundant, I THINK (see lab book's 29/11/2021 entry)
 
     # NOISE PARAMETER VALUES
