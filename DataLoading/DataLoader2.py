@@ -33,28 +33,36 @@ class RonchigramDataset(Dataset):
     magnitude/m being its modulus and the angle/rad being its argument. Currently, aberrations are C10, C12, C21 and 
     C23 in Krivanek notation."""
 
-    def __init__(self, hdf5filename: str, transform=None, complexLabels=True, upscaleMags=None,
-                removec10 = True, removec12 = True, removec21 = True, removec23 = True,
-                removephi10 = True, removephi12 = True, removephi21 = True, removephi23 = True):
+    def __init__(self, hdf5filename: str, transform=None, complexLabels=False, 
+                c10 = False, c12 = False, c21 = False, c23 = False, 
+                phi10 = False, phi12 = False, phi21 = False, phi23 = False,
+                c10scaling = 1, c12scaling = 1, c21scaling = 1, c23scaling = 1,
+                phi10scaling = 1, phi12scaling = 1, phi21scaling = 1, phi23scaling = 1):
         """Args:
                 hdf5filename: path to the HDF5 file containing the data as mentioned in the comment under this class' definition
+                
                 transform (callable, optional): transforms being incroporated
-                # NOTE: complexLabels should be made False, see Google doc 16/02/22
-                complexLabels: whether the labels will be in complex form or not (True or False)
-                removePhi10: whether the phi10 label should be removed from the non-complex labels (if it has been included) (True 
-                    or False)
-                upscaleMags: how much to upscale aberration magnitudes by if a label of magnitudes & angles is returned
-                removecnm: whether or not each cnm is removed from the labels (if complexLabels == False)
-                removephinm: whether or not each phinm is removed from the labels (if complexLabels == False)
+
+                complexLabels: whether the labels will be in complex form or not
+
+                cnm & phinm: whether or not each cnm and phinm should be included in the label returned, True or False
+
+                # NOTE: cnmscaling & phinmscaling only apply when complexLabels == False
+                cnmscaling & phinmscaling: how much to multiply each cnm and phi by, num
         """
 
         self.hdf5filename = hdf5filename
         self.transform = transform
         self.complexLabels = complexLabels
-        self.removephi10 = removephi10
-        self.upscaleMags = upscaleMags
-        self.removedMagsAngs = [removec10, removec12, removec21, removec23, removephi10, removephi12, removephi21, removephi23]
-        self.removedMagsAngsIndices = [i for i, x in enumerate(self.removedMagsAngs) if x]
+
+        cnm = (c10, c12, c21, c23)
+        phinm = (phi10, phi12, phi21, phi23)
+
+        self.cnmIndices = [i for i, x in enumerate(cnm) if x]
+        self.phinmIndices = [i for i, x in enumerate(phinm) if x]
+
+        self.cnmscaling = np.array([c10scaling, c12scaling, c21scaling, c23scaling])
+        self.phinmscaling = np.array([phi10scaling, phi12scaling, phi21scaling, phi23scaling])
 
         with h5py.File(self.hdf5filename, "r") as flen:
             # Ranks refers to each parallel process used to save simulations to HDF5 file
@@ -99,21 +107,34 @@ class RonchigramDataset(Dataset):
         mags = self.RandMags[rank, itemInRank]
         angs = self.RandAngs[rank, itemInRank]
 
-        # TODO: get rid of the below (see Google doc 16/02/22)
-        if self.complexLabels:
+        if not self.complexLabels:
 
-            # Putting the aberrations into complex form
-            # TODO: see if there is a function that does what you are doing below (i.e. that can take an array of moduli 
-            # and an array of arguments and return an array of complex numbers) without you having to use a for loop
+            mags *= self.cnmscaling
+            angs *= self.phinmscaling
 
-            # Array of aberrations in complex form, where each element will be for C10, C12, C21, and C23 respectively, each 
-            # element being a complex number whose modulus is aberration magnitude/m and whose argument is aberration phi_n,m/rad
+            chosenMags = np.take(mags, self.cnmIndices)
+            chosenAngs = np.take(angs, self.phinmIndices)
+
+            labelsArray = np.concatenate((chosenMags, chosenAngs))
+
+            labelsArray = torch.from_numpy(labelsArray)
+
+        else:
+
+            # If each cnm doesn't have its corresponding phinm present, can't form a complex number whose modulus is 
+            # cnm/unit and whose argument is corresponding phinm
+            assert self.cnmIndices == self.phinmIndices
+
+            chosenMags = np.take(mags, self.cnmIndices)
+            chosenAngs = np.take(angs, self.phinmIndices)
+
             complexArray = np.array([])
 
-            for aber in range(len(mags)):
+            for aber in range(len(chosenMags)):
                 # NOTE: cmath.rect() has an inherent error in it, for example, cmath.rect(1, cmath.pi/2) leads to 
                 # 10**-19 + 1j rather than simply 1j.
-                complexAber = cmath.rect(mags[aber], angs[aber])
+
+                complexAber = cmath.rect(chosenMags[aber], chosenAngs[aber])
 
                 complexArray = np.append(complexArray, complexAber)
 
@@ -135,33 +156,6 @@ class RonchigramDataset(Dataset):
             # torch.DoubleTensor, which MSELoss() in cnns/training.py doesn't seem to be accepting.
             labelsArray = torch.cat((realPart, imagPart)).to(dtype=torch.float32)
 
-            # Decomment if you go back to using the magnitudes and angles themselves as labels, although will have to convert 
-            # magnitude and angle array labels to torch Tensor like above
-            # sample = {"ronchigram": ronch, "aberration magnitudes": mags, "aberration angles": angs}
-
-            # sample = {"ronchigram": ronch, "aberrations": complexArray}
-
-            # NOTE: here I am changing the return to look more like an MNIST return, since the model I am using doesn't seem 
-            # to work well on a dictionary format, but it works on MNIST in My_CNNs/CNN_4.py. See Google Drive > 4th Year > 
-            # CNN Stuff for more details.
-
-        else:
-
-            if self.upscaleMags:
-                mags *= self.upscaleMags
-
-            labelsArray = np.concatenate((mags, angs))
-            
-            # if self.removePhi10:
-            #     labelsArray = np.delete(labelsArray, 4)
-
-            labelsArray = np.delete(labelsArray, self.removedMagsAngsIndices)
-
-            
-
-            labelsArray = torch.from_numpy(labelsArray)
-
-
         # Certain torchvision.transform transforms, like ToTensor(), require numpy arrays to have 3 dimensions 
         # (H x W x C) rather than 2D (as of 5:01pm 08/01/22), hence the below. I assume here that if ronch.ndim == 2, 
         # the numpy array is of the form (H x W), as required. The below in that case makes numpy array have shape 
@@ -175,6 +169,10 @@ class RonchigramDataset(Dataset):
             ronch = ronch.astype(np.uint8)
             
             ronch = self.transform(ronch)
+
+        # NOTE: here I changed the return to look more like an MNIST return, since the model I am using doesn't seem 
+        # to work well on a dictionary format, but it works on MNIST in My_CNNs/CNN_4.py. See electronic lab book 
+        # entry "CNN Stuff 13/01/22, 14/01/22, 15/01/22, 16/01/22, 17/01/22 and 18/01/22" for more details.
 
         sample = (ronch, labelsArray)
 
@@ -354,9 +352,13 @@ if __name__ == "__main__":
 
     # Dataset instantiation
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5",
-    removec10=False, removec12=False, removec21=False, removec23=False, removephi10=True, removephi12=False, removephi21=False, removephi23=False)
-    ronchdset.complexLabels = False
+    # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5",
+    # removec10=False, removec12=False, removec21=False, removec23=False, removephi10=True, removephi12=False, removephi21=False, removephi23=False)
+
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5", 
+    c10 = True, c12 = True, c21 = True, c23 = True, phi12 = True, phi21 = True, phi23 = True)
+
+    # ronchdset.complexLabels = False
 
     # print(ronchdset[0][1].size())
     # sys.exit()
