@@ -58,7 +58,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/25_02_22/Single_C12.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C21.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -88,10 +88,10 @@ if __name__ == "__main__":
                 # NOTE: The below variable is only useful for when the commented-out if statements are being used
                 simulation_number += 1
 
-                C12 = randu(0, max_C12)
+                C21 = randu(0, max_C21)
 
                 C10 = 0
-                C21 = 0
+                C12 = 0
                 C23 = 0
 
                 # if simulation_number <= math.ceil(number_simulations / 4):
