@@ -157,29 +157,46 @@ print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_all
 #     model.load_state_dict(torch.load(modelPath))
 
 
+# TENSORBOARD
+
+from tensorboardX.pytorch_graph import graph
+
+import random
+from IPython.display import clear_output, Image, display, HTML
+
+def show_graph(graph_def):
+    """Visualise TensorFlow graph."""
+
+    if hasattr(graph_def, "as_graph_def"):
+        graph_def = graph_def.as_graph_def()
+
+    strip_def = graph_def
+
+    code = """
+        <script src="//cdnjs.cloudflare.com/ajax/libs/polymer/0.3.3/platform.js"></script>
+        <script>
+          function load() {{
+            document.getElementById("{id}").pbtxt = {data};
+          }}
+        </script>
+        <link rel="import" href="https://tensorboard.appspot.com/tf-graph-basic.build.html" onload=load()>
+        <div style="height:600px">
+          <tf-graph-basic id="{id}"></tf-graph-basic>
+        </div>
+    """.format(data=repr(str(strip_def)), id='graph'+str(random.randint(0, 1000)))
+
+    iframe = """
+        <iframe seamless style="width:1200px;height:620px;border:0" srcdoc="{}"></iframe>
+    """.format(code.replace('"', '&quot;'))
+    display(HTML(iframe))
+
+
 # TRANSFORMS, DATASETS AND DATASET SPLITTING, AND DATA LOADERS
 
 # Import dataset from dataLoader2.py
 
 sys.path.insert(1, "/home/james/VSCode/DataLoading")
 from DataLoader2 import RonchigramDataset
-
-# upscaleFactor = eval(configSection["upscaleFactor"])
-
-# simulationsPath = configSection["simulationsPath"]
-
-# removec10 = eval(configSection["removec10"])
-# removec12 = eval(configSection["removec12"])
-# removec21 = eval(configSection["removec21"])
-# removec23 = eval(configSection["removec23"])
-# removephi10 = eval(configSection["removephi10"])
-# removephi12 = eval(configSection["removephi12"])
-# removephi21 = eval(configSection["removephi21"])
-# removephi23 = eval(configSection["removephi23"])
-
-# ronchdset = RonchigramDataset(hdf5filename=simulationsPath, complexLabels=False, upscaleMags=upscaleFactor,
-# removec10=removec10, removec12=removec12, removec21=removec21, removec23=removec23,
-# removephi10=removephi10, removephi12=removephi12, removephi21=removephi21, removephi23=removephi23)
 
 simulationsPath = configSection["simulationsPath"]
 
@@ -534,7 +551,6 @@ ProgressBar(bar_format="").attach(trainer, metric_names=['batchloss',])
 # Epoch-wise progress bar with display of training losses
 ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['batchloss'], event_name=Events.EPOCH_STARTED,
 closing_event_name=Events.EPOCH_COMPLETED)
-
 
 
 # METRICS TO LOG TO TENSORBOARD
