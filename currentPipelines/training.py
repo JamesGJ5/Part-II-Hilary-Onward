@@ -164,22 +164,36 @@ print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_all
 sys.path.insert(1, "/home/james/VSCode/DataLoading")
 from DataLoader2 import RonchigramDataset
 
-upscaleFactor = eval(configSection["upscaleFactor"])
+# upscaleFactor = eval(configSection["upscaleFactor"])
+
+# simulationsPath = configSection["simulationsPath"]
+
+# removec10 = eval(configSection["removec10"])
+# removec12 = eval(configSection["removec12"])
+# removec21 = eval(configSection["removec21"])
+# removec23 = eval(configSection["removec23"])
+# removephi10 = eval(configSection["removephi10"])
+# removephi12 = eval(configSection["removephi12"])
+# removephi21 = eval(configSection["removephi21"])
+# removephi23 = eval(configSection["removephi23"])
+
+# ronchdset = RonchigramDataset(hdf5filename=simulationsPath, complexLabels=False, upscaleMags=upscaleFactor,
+# removec10=removec10, removec12=removec12, removec21=removec21, removec23=removec23,
+# removephi10=removephi10, removephi12=removephi12, removephi21=removephi21, removephi23=removephi23)
 
 simulationsPath = configSection["simulationsPath"]
 
-removec10 = eval(configSection["removec10"])
-removec12 = eval(configSection["removec12"])
-removec21 = eval(configSection["removec21"])
-removec23 = eval(configSection["removec23"])
-removephi10 = eval(configSection["removephi10"])
-removephi12 = eval(configSection["removephi12"])
-removephi21 = eval(configSection["removephi21"])
-removephi23 = eval(configSection["removephi23"])
+c10, c12, c21, c23 = (eval(configSection[x]) for x in ["c10", "c12", "c21", "c23"])
+phi10, phi12, phi21, phi23 = (eval(configSection[x]) for x in ["phi10", "phi12", "phi21", "phi23"])
 
-ronchdset = RonchigramDataset(hdf5filename=simulationsPath, complexLabels=False, upscaleMags=upscaleFactor,
-removec10=removec10, removec12=removec12, removec21=removec21, removec23=removec23,
-removephi10=removephi10, removephi12=removephi12, removephi21=removephi21, removephi23=removephi23)
+c10scaling, c12scaling, c21scaling, c23scaling = (eval(configSection[x]) for x in ["c10scaling", "c12scaling", "c21scaling", "c23scaling"])
+phi10scaling, phi12scaling, phi21scaling, phi23scaling = (eval(configSection[x]) for x in ["phi10scaling", "phi12scaling", "phi21scaling", "phi23scaling"])
+
+ronchdset = RonchigramDataset(hdf5filename=simulationsPath, complexLabels=False,
+                                c10=c10, c12=c12, c21=c21, c23=c23, 
+                                phi10=phi10, phi12=phi12, phi21=phi21, phi23=phi23,
+                                c10scaling=c10scaling, c12scaling=c12scaling, c21scaling=c21scaling, c23scaling=c23scaling,
+                                phi10scaling=phi10scaling, phi12scaling=phi12scaling, phi21scaling=phi21scaling, phi23scaling=phi23scaling)
 
 print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(GPU)}")
 
