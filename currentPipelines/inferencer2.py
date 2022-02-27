@@ -127,7 +127,7 @@ model.load_state_dict(torch.load(modelPath, map_location = torch.device('cpu')))
 chosenVals = {"c10": True, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
 
 testSet = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/22_02_22/Single_C10.h5", complexLabels=False, 
-                            **chosenVals)
+                            **chosenVals, c10scaling=10**7)
 
 # Set up the test transform; it should be the same as testTransform in training.py (1:48pm 15/02/22), with resolution 
 # of 300 (as is necessary for EfficientNet-B3) for Resize, along with the same mean and std estimated for the training 
