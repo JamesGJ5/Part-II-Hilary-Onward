@@ -40,8 +40,8 @@
 # increase C12 between each of them, while varying the rest of the aberrations randomly, will inference notice this 
 # trend?
 #
-#   To kill two birds with one stone (pardon the idiom) I shall probably simulate Ronchigrams such that the above is 
-#   followed
+#   To kill two birds with one stone (pardon the idiom) I shall probably simulate Ronchigrams that are suitable for both 
+#   Steps 1 & 2 above.
 
 
 # CODE:
@@ -108,7 +108,7 @@ if usingGPU:
 efficientNetModel = "EfficientNet-B3"
 
 if efficientNetModel == "EfficientNet-B3":
-    parameters = {"num_labels": 8, "width_coefficient": 1.2, "depth_coefficient": 1.4, "dropout_rate": 0.3}
+    parameters = {"num_labels": 1, "width_coefficient": 1.2, "depth_coefficient": 1.4, "dropout_rate": 0.3}
     resolution = 300
 
 model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficient=parameters["width_coefficient"], 
@@ -117,13 +117,17 @@ model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficie
 
 # Loading weights
 
-modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220208-161939/efficientNetBestReciprocalMSE_165727167543.3294"
+modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220225-174816/best_model_Loss=0.4529.pt"
 model.load_state_dict(torch.load(modelPath, map_location = torch.device('cpu')))
 
 # Load RonchigramDataset object with filename equal to the file holding new simulations to be inferred
 
-removePhi10 = False
-testSet = RonchigramDataset("/media/rob/hdd2/james/simulations/15_02_22/Single_Aberrations.h5", removePhi10=removePhi10)
+# c10, c12, c21, c23, phi10, phi12, phi21, phi23 = (True,) * 5 + (False, True, True)
+
+chosenVals = {"c10": True, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
+
+testSet = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/22_02_22/Single_C10.h5", complexLabels=False, 
+                            **chosenVals)
 
 # Set up the test transform; it should be the same as testTransform in training.py (1:48pm 15/02/22), with resolution 
 # of 300 (as is necessary for EfficientNet-B3) for Resize, along with the same mean and std estimated for the training 
@@ -133,8 +137,8 @@ testSet = RonchigramDataset("/media/rob/hdd2/james/simulations/15_02_22/Single_A
 #   performance here, more just correct prediction of trends
 # Apply the transform to the RonchigramDataset object too
 
-mean = 0.500990092754364
-std = 0.2557201385498047
+mean = 0.5011
+std = 0.256
 
 testTransform = Compose([
     ToTensor(),
