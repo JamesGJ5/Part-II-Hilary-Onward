@@ -94,8 +94,8 @@ if __name__ == "__main__":
                 # simulation_number += 1
 
                 C10 = randu(0, max_C10)
-                C12 = linearC12[simulation]
-                C21 = randu(0, max_C21)
+                C12 = randu(0, max_C12)
+                C21 = linearC21[simulation]
                 C23 = randu(0, max_C23)
 
                 # if simulation_number <= math.ceil(number_simulations / 4):
