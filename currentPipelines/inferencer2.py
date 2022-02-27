@@ -125,9 +125,10 @@ model.load_state_dict(torch.load(modelPath, map_location = torch.device('cpu')))
 # c10, c12, c21, c23, phi10, phi12, phi21, phi23 = (True,) * 5 + (False, True, True)
 
 chosenVals = {"c10": True, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
+c10scaling = 10**7
 
 testSet = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/22_02_22/Single_C10.h5", complexLabels=False, 
-                            **chosenVals, c10scaling=10**7)
+                            **chosenVals, c10scaling=c10scaling)
 
 # Set up the test transform; it should be the same as testTransform in training.py (1:48pm 15/02/22), with resolution 
 # of 300 (as is necessary for EfficientNet-B3) for Resize, along with the same mean and std estimated for the training 
@@ -195,8 +196,12 @@ with torch.no_grad():
     # yPred is the batch of labels predicted for x
     yPred = model(x[0])
 
-    print("Predicted batch of labels (actualy batch of labels is printed above)\n")
+    print("Predicted batch of labels (batch of actual labels is printed above)\n")
     print(yPred)
+
+    # The below is done because for training, cnm and phinm values are scaled by scaling factors; to see what predictions 
+    # mean physically, must rescale back
+    yPred /= c10scaling
 
 # Use predicted labels to calculate new Numpy Ronchigrams (with resolution 1024)
 
@@ -209,10 +214,20 @@ predictedRonchBatch = np.empty((batchSize, imdim, imdim, 1))
 for labelVectorIndex in range(batchSize):
     labelVector = yPred[labelVectorIndex]
 
-    C10_mag, C10_ang = cmath.polar(labelVector[0] + labelVector[4] * 1j)
-    C12_mag, C12_ang = cmath.polar(labelVector[1] + labelVector[5] * 1j)
-    C21_mag, C21_ang = cmath.polar(labelVector[2] + labelVector[6] * 1j)
-    C23_mag, C23_ang = cmath.polar(labelVector[3] + labelVector[7] * 1j)
+    # If the network was trained using complex labels, the predicted labels must contain predicted real & imaginary 
+    # parts of complex forms of aberrations
+    if testSet.complexLabels:
+
+        C10_mag, C10_ang = cmath.polar(labelVector[0] + labelVector[4] * 1j)
+        C12_mag, C12_ang = cmath.polar(labelVector[1] + labelVector[5] * 1j)
+        C21_mag, C21_ang = cmath.polar(labelVector[2] + labelVector[6] * 1j)
+        C23_mag, C23_ang = cmath.polar(labelVector[3] + labelVector[7] * 1j)
+
+    elif chosenVals["c10"] == True and sum(chosenVals.values()) == 1:
+
+        C10_mag = labelVector.item()
+        C12_mag, C21_mag, C23_mag, C10_ang, C12_ang, C21_ang, C23_ang = (0,) * 7
+
 
     I, t = testSet.getIt(chosenIndices[labelVectorIndex])
     print(I, t)
@@ -221,15 +236,40 @@ for labelVectorIndex in range(batchSize):
     b = 1
 
     # TODO: calculate Ronchigram here from parameters above
-    predictedRonch = None
+    predictedRonch = calc_Ronchigram(imdim=imdim, simdim=simdim,
+                                    C10_mag=C10_mag, C12_mag=C12_mag, C21_mag=C21_mag, C23_mag=C23_mag,
+                                    C10_ang=C10_ang, C12_ang=C12_ang, C21_ang=C21_ang, C23_ang=C23_ang,
+                                    I=I, b=b, t=t)
 
     predictedRonch = np.expand_dims(predictedRonch, 2)
 
+    # print(predictedRonch[0].shape)
+    # print(predictedRonch)
+
     predictedRonchBatch[labelVectorIndex] = predictedRonch
 
-# Get the same indices as before and plot the RonchigramDataset Ronchigrams in numpy form (i.e. without transforms)
+# print(predictedRonchBatch)
+# print(predictedRonchBatch[0].shape)
+
+# Retrieve the data inferred by the network in Numpy form this time (i.e. without transforms)
+
+testSet.transform = None
+testSubset = Subset(testSet, chosenIndices)
+
+print(type(testSubset[0][0]))
+print(testSubset[0][0].shape)
+print(testSubset[0][0])
 
 # Plot calculated Ronchigrams alongside latest ones from RonchigramDataset, using a function like show_data in 
 # DataLoader2.py for inspiration
+
+for i in range(len(testSubset)):
+    plt.subplot(2, len(testSubset), i + 1)
+    plt.imshow(testSubset[i][0], cmap="gray")
+
+    plt.subplot(2, len(testSubset), i + 5)
+    plt.imshow(predictedRonchBatch[i], cmap="gray")
+
+plt.show()
 
 # The above, but for the trend stuff
