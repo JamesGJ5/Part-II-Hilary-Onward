@@ -114,12 +114,34 @@ if usingGPU:
     print(f"torch cuda current device: {torch.cuda.current_device()}")
 
 
-# Model instantiation
+# Options
 
 efficientNetModel = "EfficientNet-B3"
+singleAber = "C10"
+
+chosenVals = {"c10": False, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
+scalingVals = {
+    "c10scaling": 10**7, "c12scaling": 10**7, "c21scaling": 10**5, "c23scaling": 10**5, 
+    "phi10scaling": 1, "phi12scaling": 1 / (np.pi / 2), "phi21scaling": 1 / (np.pi), "phi23scaling": 1 / (np.pi / 3)
+}
+
+if singleAber == "C10":
+
+    numLabels = 1
+    chosenVals["c10"] = True
+    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220225-174816/best_model_Loss=0.4529.pt"
+    testSetPath = "/media/rob/hdd1/james-gj/Simulations/22_02_22/Single_C10.h5"
+
+    # NOTE: mean and std were retrieved from modelLogging
+    mean = 0.5011
+    std = 0.256
+
+    trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C10.h5"
+
+# Model instantiation
 
 if efficientNetModel == "EfficientNet-B3":
-    parameters = {"num_labels": 1, "width_coefficient": 1.2, "depth_coefficient": 1.4, "dropout_rate": 0.3}
+    parameters = {"num_labels": numLabels, "width_coefficient": 1.2, "depth_coefficient": 1.4, "dropout_rate": 0.3}
     resolution = 300
 
 model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficient=parameters["width_coefficient"], 
@@ -129,17 +151,12 @@ model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficie
 
 # Loading weights
 
-modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220225-174816/best_model_Loss=0.4529.pt"
 model.load_state_dict(torch.load(modelPath, map_location = torch.device(f"cuda:{GPU}" if usingGPU else "cpu")))
 
 
 # Load RonchigramDataset object with filename equal to the file holding new simulations to be inferred
 
-chosenVals = {"c10": True, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
-c10scaling = 10**7
-
-testSet = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/22_02_22/Single_C10.h5", complexLabels=False, 
-                            **chosenVals, c10scaling=c10scaling)
+testSet = RonchigramDataset(testSetPath, complexLabels=False, **chosenVals, **scalingVals)
 
 
 # Set up the test transform; it should be the same as testTransform in training.py (1:48pm 15/02/22), with resolution 
@@ -149,9 +166,6 @@ testSet = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/22_02_22/Singl
 #   exactly to the new simulations, but that is probably not too bad since we aren't looking for maximised predictive 
 #   performance here, more just correct prediction of trends
 # Apply the transform to the RonchigramDataset object too
-
-mean = 0.5011
-std = 0.256
 
 testTransform = Compose([
     ToTensor(),
@@ -187,7 +201,7 @@ batch = next(iter(testLoader))
 print(f"Size of Ronchigram batch: {batch[0].size()}")
 print(f"Size of labels batch: {batch[1].size()}")
 
-testingDataLoader = True
+testingDataLoader = False
 
 if testingDataLoader:
     for iBatch, batchedSample in enumerate(testLoader):
@@ -219,7 +233,7 @@ with torch.no_grad():
 
     # The below is done because for training, cnm and phinm values are scaled by scaling factors; to see what predictions 
     # mean physically, must rescale back
-    yPred /= c10scaling
+    yPred /= scalingVals["c10scaling"]
 
 
 # Use predicted labels to calculate new Numpy Ronchigrams (with resolution 1024)
@@ -242,10 +256,32 @@ for labelVectorIndex in range(batchSize):
         C21_mag, C21_ang = cmath.polar(labelVector[2] + labelVector[6] * 1j)
         C23_mag, C23_ang = cmath.polar(labelVector[3] + labelVector[7] * 1j)
 
-    elif chosenVals["c10"] == True and sum(chosenVals.values()) == 1:
+    # TODO: replace the below with a concise generator or something
+    i = 0
 
-        C10_mag = labelVector.item()
-        C12_mag, C21_mag, C23_mag, C10_ang, C12_ang, C21_ang, C23_ang = (0,) * 7
+    C10_mag = labelVector[i].item() if chosenVals["c10"] else 0
+    i = i + 1 if C10_mag != 0 else i
+
+    C12_mag = labelVector[i].item() if chosenVals["c12"] else 0
+    i = i + 1 if C10_mag != 0 else i
+
+    C21_mag = labelVector[i].item() if chosenVals["c21"] else 0
+    i = i + 1 if C10_mag != 0 else i
+
+    C23_mag = labelVector[i].item() if chosenVals["c23"] else 0
+    i = i + 1 if C10_mag != 0 else i
+
+    C10_ang = labelVector[i].item() if chosenVals["phi10"] else 0
+    i = i + 1 if C10_mag != 0 else i
+
+    C12_ang = labelVector[i].item() if chosenVals["phi12"] else 0
+    i = i + 1 if C10_mag != 0 else i
+
+    C21_ang = labelVector[i].item() if chosenVals["phi21"] else 0
+    i = i + 1 if C10_mag != 0 else i
+
+    C23_ang = labelVector[i].item() if chosenVals["phi23"] else 0
+    i = i + 1 if C10_mag != 0 else i
 
 
     I, t = testSet.getIt(chosenIndices[labelVectorIndex])
@@ -312,8 +348,7 @@ plt.show()
 # 5) Plot actual c10 array vs predicted c10 array on the same graph, in different colours/maybe one with a line and one 
 # as scattered dots (the predictions being the dots)
 
-trendSet = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C10.h5", transform=testTransform, 
-                            complexLabels=False, **chosenVals, c10scaling=c10scaling)
+trendSet = RonchigramDataset(trendSetPath, transform=testTransform, complexLabels=False, **chosenVals, **scalingVals)
 
 trendLoader = DataLoader(trendSet, batch_size=batchSize, shuffle=False, num_workers=numWorkers, pin_memory=True, 
                         drop_last=False)
@@ -332,16 +367,16 @@ with torch.no_grad():
         batchedRonchs = convert_tensor(batchedRonchs, device=device, non_blocking=True)
 
         # TODO: change below so that instead of flattening, it reshapes into a different row for each cnm and phinm
-        batchedTargets = batchedTargets.flatten().cpu()
-        predBatch = model(batchedRonchs).flatten().cpu()
+        batchedTargets = batchedTargets[:, 0].cpu()
+        predBatch = model(batchedRonchs)[:, 0].cpu()
 
         targetTensor = torch.cat((targetTensor, batchedTargets))
         predTensor = torch.cat((predTensor, predBatch))
 
-        if batchIdx % 10 == 0: print(batchIdx)
+        if batchIdx % 10 == 0: print(f"{batchIdx} batches done...")
 
-    targetTensor = (targetTensor / c10scaling).numpy()
-    predTensor = (predTensor / c10scaling).numpy()
+    targetTensor = (targetTensor / scalingVals["c10scaling"]).numpy()
+    predTensor = (predTensor / scalingVals["c10scaling"]).numpy()
 
     plt.plot(np.linspace(1, len(targetTensor), len(targetTensor)), targetTensor, 'b')
     plt.plot(np.linspace(1, len(predTensor), len(predTensor)), predTensor, 'ro')
