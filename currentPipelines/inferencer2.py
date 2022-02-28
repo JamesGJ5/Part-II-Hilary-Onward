@@ -44,8 +44,6 @@
 #   Steps 1 & 2 above.
 
 
-# CODE:
-
 # Importations
 
 import os
@@ -64,6 +62,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 import torchvision.utils as vutils
+import datetime
+from ignite.utils import convert_tensor
+
 
 # Seed information (may not use the same test set as in training but might as well set the torch seed to be 17 anyway, 
 # just in case--I don't see how it can hurt)
@@ -73,25 +74,34 @@ fixedSeed = 17
 torchSeed = fixedSeed
 torch.manual_seed(torchSeed)
 
+
+# Date & time
+
+startTime = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+
+
 # Navigating to the correct working directory
 
 os.chdir("/home/james/VSCode/currentPipelines")
 print(f"Current working directory: {os.getcwd()}")
+
 
 # Adding ../DataLoading to PATH (I think) for RonchigramDataset() importation from DataLoader2.py as well as another function
 
 sys.path.insert(1, "/home/james/VSCode/DataLoading")
 from DataLoader2 import RonchigramDataset, showBatch
 
+
 # Adding ../Simulations to PATH (I think) for importation of calc_ronchigram from Primary_Simulations_1.py
 
 sys.path.insert(2, "/home/james/VSCode/Simulations")
 from Primary_Simulation_1 import calc_Ronchigram
 
+
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
 GPU = 1
-usingGPU = False
+usingGPU = True
 
 if not usingGPU:
     os.environ["CUDA_VISIBLE_DEVICES"]=""
@@ -102,6 +112,7 @@ print(f"Device being used by PyTorch (non-CUDA): {device}")
 if usingGPU:
     torch.cuda.set_device(GPU if usingGPU else "cpu")
     print(f"torch cuda current device: {torch.cuda.current_device()}")
+
 
 # Model instantiation
 
@@ -115,20 +126,21 @@ model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficie
                             depth_coefficient=parameters["depth_coefficient"], 
                             dropout_rate=parameters["dropout_rate"]).to(device)
 
+
 # Loading weights
 
 modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220225-174816/best_model_Loss=0.4529.pt"
-model.load_state_dict(torch.load(modelPath, map_location = torch.device('cpu')))
+model.load_state_dict(torch.load(modelPath, map_location = torch.device(f"cuda:{GPU}" if usingGPU else "cpu")))
+
 
 # Load RonchigramDataset object with filename equal to the file holding new simulations to be inferred
-
-# c10, c12, c21, c23, phi10, phi12, phi21, phi23 = (True,) * 5 + (False, True, True)
 
 chosenVals = {"c10": True, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
 c10scaling = 10**7
 
 testSet = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/22_02_22/Single_C10.h5", complexLabels=False, 
                             **chosenVals, c10scaling=c10scaling)
+
 
 # Set up the test transform; it should be the same as testTransform in training.py (1:48pm 15/02/22), with resolution 
 # of 300 (as is necessary for EfficientNet-B3) for Resize, along with the same mean and std estimated for the training 
@@ -149,21 +161,25 @@ testTransform = Compose([
 
 testSet.transform = testTransform
 
+
 # Batch size and number of workers used to load the data
 
 batchSize = 4
 numWorkers = 2
+
 
 # Collecting subset of testSet to make pretty pictures with
 
 chosenIndices = [200, 404, 551, 805]
 testSubset = Subset(testSet, chosenIndices)
 
+
 # Put set to be inferred into DataLoader along with test transform and choose indices to be used from DataLoader (see 
 # oldPipelines/ for how this was done previously)
 
 testLoader = DataLoader(testSubset, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
                         pin_memory=True)
+
 
 # Quick tests ot batched data
 
@@ -186,12 +202,14 @@ if testingDataLoader:
             plt.show()
             break
 
+
 # Carry out inference to get predicted labels
 
 model.eval()
 
 with torch.no_grad():
-    x = batch
+    # NOTE: if this isn't feasible GPU memory-wise, may want to replace batch with batch[0] and instances of x[0] with x
+    x = convert_tensor(batch, device=device, non_blocking=True)
 
     # yPred is the batch of labels predicted for x
     yPred = model(x[0])
@@ -202,6 +220,7 @@ with torch.no_grad():
     # The below is done because for training, cnm and phinm values are scaled by scaling factors; to see what predictions 
     # mean physically, must rescale back
     yPred /= c10scaling
+
 
 # Use predicted labels to calculate new Numpy Ronchigrams (with resolution 1024)
 
@@ -251,14 +270,15 @@ for labelVectorIndex in range(batchSize):
 # print(predictedRonchBatch)
 # print(predictedRonchBatch[0].shape)
 
-# Retrieve the data inferred by the network in Numpy form this time (i.e. without transforms)
+
+# Retrieving the data inferred by the network in Numpy form this time (i.e. without transforms)
 
 testSet.transform = None
 testSubset = Subset(testSet, chosenIndices)
 
-print(type(testSubset[0][0]))
-print(testSubset[0][0].shape)
-print(testSubset[0][0])
+# print(type(testSubset[0][0]))
+# print(testSubset[0][0].shape)
+# print(testSubset[0][0])
 
 # Plot calculated Ronchigrams alongside latest ones from RonchigramDataset, using a function like show_data in 
 # DataLoader2.py for inspiration
@@ -272,4 +292,58 @@ for i in range(len(testSubset)):
 
 plt.show()
 
-# The above, but for the trend stuff
+# sys.exit()
+
+
+# Checking trends
+
+# PLAN:
+#
+# The model weights I use for this part will probably be the same as are used for the previous part
+# REMEMBER THAT SCALING FACTORS ARE A THING, probably best to divide actual and predicted labels by scaling factor just 
+# so the plots are more clear regarding what they represent
+#
+# 1) Instantiate a RonchigramDataset object from the file Linear_C10.h5
+# 2) Use the same testTransform as before, with the same mean and std (I.E. those calculated for the training data), so 
+# set RonchigramDataset object's transform attribute to testTransform
+# 3) Create torch.utils.data.DataLoader using the RonchigramDataset object with shuffle == False
+# 4) Using Kaggle for inspiration, make model predict for each Ronchigram, appending each predicted c10 to a numpy array 
+# with 1 dimension; also, append each actual c10 to a numpy array in the process
+# 5) Plot actual c10 array vs predicted c10 array on the same graph, in different colours/maybe one with a line and one 
+# as scattered dots (the predictions being the dots)
+
+trendSet = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C10.h5", transform=testTransform, 
+                            complexLabels=False, **chosenVals, c10scaling=c10scaling)
+
+trendLoader = DataLoader(trendSet, batch_size=batchSize, shuffle=False, num_workers=numWorkers, pin_memory=True, 
+                        drop_last=False)
+
+# print(trendSet[0][1].size())
+
+# targetArray = np.empty((len(trendSet), *trendSet[0][1].size()))
+# print(targetArray.shape)
+
+targetTensor = torch.tensor([])
+predTensor = torch.tensor([])
+
+with torch.no_grad():
+    for batchIdx, (batchedRonchs, batchedTargets) in enumerate(trendLoader):
+
+        batchedRonchs = convert_tensor(batchedRonchs, device=device, non_blocking=True)
+
+        # TODO: change below so that instead of flattening, it reshapes into a different row for each cnm and phinm
+        batchedTargets = batchedTargets.flatten().cpu()
+        predBatch = model(batchedRonchs).flatten().cpu()
+
+        targetTensor = torch.cat((targetTensor, batchedTargets))
+        predTensor = torch.cat((predTensor, predBatch))
+
+        if batchIdx % 10 == 0: print(batchIdx)
+
+    targetTensor = (targetTensor / c10scaling).numpy()
+    predTensor = (predTensor / c10scaling).numpy()
+
+    plt.plot(np.linspace(1, len(targetTensor), len(targetTensor)), targetTensor, 'b')
+    plt.plot(np.linspace(1, len(predTensor), len(predTensor)), predTensor, 'ro')
+    plt.ylabel("blue: target, red: prediction")
+    plt.savefig(f"/media/rob/hdd1/james-gj/Simulations/forInference/trendGraphs/{startTime}.png")
