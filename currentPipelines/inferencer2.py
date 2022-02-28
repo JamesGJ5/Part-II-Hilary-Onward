@@ -117,7 +117,7 @@ if usingGPU:
 # Options
 
 efficientNetModel = "EfficientNet-B3"
-singleAber = "C10"
+singleAber = "C23"
 
 chosenVals = {"c10": False, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
 scalingVals = {
@@ -134,9 +134,53 @@ if singleAber == "C10":
 
     # NOTE: mean and std were retrieved from modelLogging
     mean = 0.5011
-    std = 0.256
+    std = 0.2560
 
     trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C10.h5"
+
+if singleAber == "C12":
+
+    numLabels = 2
+    chosenVals["c12"] = True
+    chosenVals["phi12"] = True
+    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220226-220806/best_model_Loss=0.1902.pt"
+    testSetPath = "/media/rob/hdd1/james-gj/Simulations/25_02_22/Single_C12.h5"
+
+    # NOTE: mean and std were retrieved from modelLogging
+    mean = 0.5010
+    std = 0.2544
+
+    trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C12.h5"
+
+if singleAber == "C21":
+
+    numLabels = 2
+    chosenVals["c21"] = True
+    chosenVals["phi21"] = True
+    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220227-112003/best_model_Loss=0.0885.pt"
+    testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C21.h5"
+
+    # NOTE: mean and std were retrieved from modelLogging
+    # TODO: change mean and std to that for C21 (this is for C12)
+    mean = 0.5006
+    std = 0.2502
+
+    trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C21.h5"
+
+if singleAber == "C23":
+
+    numLabels = 2
+    chosenVals["c23"] = True
+    chosenVals["phi23"] = True
+    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220228-003811/best_model_Loss=0.1071.pt"
+    testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C23.h5"
+
+    # NOTE: mean and std were retrieved from modelLogging
+    # TODO: change mean and std to that for C21 (this is for C12)
+    mean = 0.5007
+    std = 0.2488
+
+    trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C23.h5"
 
 # Model instantiation
 
