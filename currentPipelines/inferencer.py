@@ -117,7 +117,7 @@ if usingGPU:
 # Options
 
 efficientNetModel = "EfficientNet-B3"
-singleAber = "C10"
+singleAber = "C23"
 
 chosenVals = {"c10": False, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
 scalingVals = {
@@ -288,7 +288,7 @@ with torch.no_grad():
     # The below is done because for training, cnm and phinm values are scaled by scaling factors; to see what predictions 
     # mean physically, must rescale back
     # TODO: generalise the below to other scaling values
-    yPred /= scalingVals["c10scaling"]
+    yPred = yPred.cpu() / usedScalingFactors
 
 
 # Use predicted labels to calculate new Numpy Ronchigrams (with resolution 1024)
@@ -383,7 +383,7 @@ for i in range(len(testSubset)):
 
 plt.show()
 
-# sys.exit()
+sys.exit()
 
 
 # Checking trends
