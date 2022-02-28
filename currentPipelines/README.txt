@@ -7,9 +7,7 @@ Notable Contents:
 
     training.py will be my training pipeline.
 
-    inferencer.py will be my inference pipeline.
-
-    inferencer2.py was created 1:21pm on 15/02/22 for a fresh script for carrying out inference on Ronchigrams and 
+    inferencer.py was created 1:21pm on 15/02/22 for a fresh script for carrying out inference on Ronchigrams and 
     plotting alongside them Ronchigrams calculated from labels predicted
 
     modelLogging logs model architectures used in each training run.
@@ -17,6 +15,10 @@ Notable Contents:
     modifyMAPE.py was made 9:25pm on 17/02/22 to modify the source code for MAPE loss criterion from 
     https://pytorch-forecasting.readthedocs.io/en/latest/api/pytorch_forecasting.metrics.MAPE.html to better suit my 
     needs. I needed to change the epsilon value (1e-8) first of all.
+
+Archived Contents:
+
+    inferencer.py was my initial inference pipeline.
 
 How to Use:
 
