@@ -117,7 +117,7 @@ if usingGPU:
 # Options
 
 efficientNetModel = "EfficientNet-B3"
-singleAber = "C23"
+singleAber = "C10"
 
 chosenVals = {"c10": False, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
 scalingVals = {
@@ -132,7 +132,7 @@ if singleAber == "C10":
     modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220225-174816/best_model_Loss=0.4529.pt"
     testSetPath = "/media/rob/hdd1/james-gj/Simulations/22_02_22/Single_C10.h5"
 
-    # NOTE: mean and std were retrieved from modelLogging
+    # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
     mean = 0.5011
     std = 0.2560
 
@@ -146,7 +146,7 @@ if singleAber == "C12":
     modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220226-220806/best_model_Loss=0.1902.pt"
     testSetPath = "/media/rob/hdd1/james-gj/Simulations/25_02_22/Single_C12.h5"
 
-    # NOTE: mean and std were retrieved from modelLogging
+    # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
     mean = 0.5010
     std = 0.2544
 
@@ -160,8 +160,7 @@ if singleAber == "C21":
     modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220227-112003/best_model_Loss=0.0885.pt"
     testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C21.h5"
 
-    # NOTE: mean and std were retrieved from modelLogging
-    # TODO: change mean and std to that for C21 (this is for C12)
+    # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
     mean = 0.5006
     std = 0.2502
 
@@ -175,12 +174,23 @@ if singleAber == "C23":
     modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220228-003811/best_model_Loss=0.1071.pt"
     testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C23.h5"
 
-    # NOTE: mean and std were retrieved from modelLogging
-    # TODO: change mean and std to that for C21 (this is for C12)
+    # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
     mean = 0.5007
     std = 0.2488
 
     trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C23.h5"
+
+
+# Scaling tensors
+# Just initialising some torch Tensors that will be useful for below calculations
+
+sortedChosenVals = [chosenVals[key] for key in sorted(chosenVals)]
+usedScalingFactors = [scalingVals[sorted(scalingVals)[i]] for i, x in enumerate(sortedChosenVals) if x]
+
+usedScalingFactors = torch.tensor(usedScalingFactors)
+
+# print(usedScalingFactors)
+
 
 # Model instantiation
 
@@ -277,6 +287,7 @@ with torch.no_grad():
 
     # The below is done because for training, cnm and phinm values are scaled by scaling factors; to see what predictions 
     # mean physically, must rescale back
+    # TODO: generalise the below to other scaling values
     yPred /= scalingVals["c10scaling"]
 
 
@@ -419,6 +430,7 @@ with torch.no_grad():
 
         if batchIdx % 10 == 0: print(f"{batchIdx} batches done...")
 
+    # TODO: generalise the below to other scaling values
     targetTensor = (targetTensor / scalingVals["c10scaling"]).numpy()
     predTensor = (predTensor / scalingVals["c10scaling"]).numpy()
 
