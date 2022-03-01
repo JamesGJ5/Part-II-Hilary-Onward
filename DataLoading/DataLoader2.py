@@ -355,8 +355,17 @@ if __name__ == "__main__":
     # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5",
     # removec10=False, removec12=False, removec21=False, removec23=False, removephi10=True, removephi12=False, removephi21=False, removephi23=False)
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5", 
-    c10 = True, c12 = True, c21 = True, c23 = True, phi12 = True, phi21 = True, phi23 = True)
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/01_03_22/singleAberrations.h5", 
+    c10 = True, c12 = True, c21 = True, c23 = True, phi10 = False, phi12 = True, phi21 = True, phi23 = True)
+
+    # print(ronchdset[50000][1])
+
+    # ronchdset.cnmscaling = np.array([1 / (100 * 10**-9), 1 / (100 * 10**-9), 1 / (10000 * 10**-9), 1 / (10000 * 10**-9)])
+    # ronchdset.phinmscaling = np.array([1, 1 / (np.pi / 2), 1 / (np.pi), 1 / (np.pi/3)])
+
+    # print(ronchdset[6000][1])
+
+    # sys.exit()
 
     # ronchdset.complexLabels = False
 
