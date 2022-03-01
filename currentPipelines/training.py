@@ -295,7 +295,7 @@ print(f"Memory/bytes allocated after ronchdset splitting: {torch.cuda.memory_all
 # num_epochs is here to facilitate saving this information to file in code below, didn't want to move lots of code
 
 batchSize = eval(configSection["batchSize"])
-numWorkers = 2
+numWorkers = eval(configSection["numWorkers"])
 
 num_epochs = eval(configSection["num_epochs"])
 
