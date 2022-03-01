@@ -117,7 +117,7 @@ if usingGPU:
 # Options
 
 efficientNetModel = "EfficientNet-B3"
-singleAber = "C23"
+singleAber = "C21"
 
 chosenVals = {"c10": False, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
 scalingVals = {
@@ -254,6 +254,7 @@ testLoader = DataLoader(testSubset, batch_size=batchSize, num_workers=numWorkers
 batch = next(iter(testLoader))
 print(f"Size of Ronchigram batch: {batch[0].size()}")
 print(f"Size of labels batch: {batch[1].size()}")
+print(batch[1])
 
 testingDataLoader = False
 
@@ -289,6 +290,7 @@ with torch.no_grad():
     # mean physically, must rescale back
     # TODO: generalise the below to other scaling values
     yPred = yPred.cpu() / usedScalingFactors
+    print(yPred)
 
 
 # Use predicted labels to calculate new Numpy Ronchigrams (with resolution 1024)
@@ -312,32 +314,34 @@ for labelVectorIndex in range(batchSize):
         C23_mag, C23_ang = cmath.polar(labelVector[3] + labelVector[7] * 1j)
 
     # TODO: replace the below with a concise generator or something
+    # TODO: remember that just because an aberration magnitude is zero doesn't necessarily mean angle is zero? Idk
     i = 0
 
     C10_mag = labelVector[i].item() if chosenVals["c10"] else 0
     i = i + 1 if C10_mag != 0 else i
 
     C12_mag = labelVector[i].item() if chosenVals["c12"] else 0
-    i = i + 1 if C10_mag != 0 else i
+    i = i + 1 if C12_mag != 0 else i
 
     C21_mag = labelVector[i].item() if chosenVals["c21"] else 0
-    i = i + 1 if C10_mag != 0 else i
+    i = i + 1 if C21_mag != 0 else i
 
     C23_mag = labelVector[i].item() if chosenVals["c23"] else 0
-    i = i + 1 if C10_mag != 0 else i
+    i = i + 1 if C23_mag != 0 else i
 
     C10_ang = labelVector[i].item() if chosenVals["phi10"] else 0
-    i = i + 1 if C10_mag != 0 else i
+    i = i + 1 if C10_ang != 0 else i
 
     C12_ang = labelVector[i].item() if chosenVals["phi12"] else 0
-    i = i + 1 if C10_mag != 0 else i
+    i = i + 1 if C12_ang != 0 else i
 
     C21_ang = labelVector[i].item() if chosenVals["phi21"] else 0
-    i = i + 1 if C10_mag != 0 else i
+    i = i + 1 if C21_ang != 0 else i
 
     C23_ang = labelVector[i].item() if chosenVals["phi23"] else 0
-    i = i + 1 if C10_mag != 0 else i
+    i = i + 1 if C23_ang != 0 else i
 
+    print(C10_mag, C12_mag, C21_mag, C23_mag, C10_ang, C12_ang, C21_ang, C23_ang)
 
     I, t = testSet.getIt(chosenIndices[labelVectorIndex])
     print(I, t)
@@ -430,11 +434,14 @@ with torch.no_grad():
 
         if batchIdx % 10 == 0: print(f"{batchIdx} batches done...")
 
+    # usedScalingFactors = torch.reshape(usedScalingFactors, (len(usedScalingFactors), 1))
+
     # TODO: generalise the below to other scaling values
-    targetTensor = (targetTensor / scalingVals["c10scaling"]).numpy()
-    predTensor = (predTensor / scalingVals["c10scaling"]).numpy()
+    targetTensor = (targetTensor / usedScalingFactors[0]).numpy()
+    predTensor = (predTensor / usedScalingFactors[0]).numpy()
 
     plt.plot(np.linspace(1, len(targetTensor), len(targetTensor)), targetTensor, 'b')
     plt.plot(np.linspace(1, len(predTensor), len(predTensor)), predTensor, 'ro')
     plt.ylabel("blue: target, red: prediction")
-    plt.savefig(f"/media/rob/hdd1/james-gj/Simulations/forInference/trendGraphs/{startTime}.png")
+    # plt.savefig(f"/media/rob/hdd1/james-gj/Simulations/forInference/trendGraphs/{startTime}.png")
+    plt.show()
