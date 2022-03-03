@@ -358,6 +358,10 @@ if __name__ == "__main__":
     ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/01_03_22/singleAberrations.h5", 
     c10 = True, c12 = True, c21 = True, c23 = True, phi10 = False, phi12 = True, phi21 = True, phi23 = True)
 
+    print(ronchdset[0][1].size())
+
+    sys.exit()
+
     # print(ronchdset[50000][1])
 
     # ronchdset.cnmscaling = np.array([1 / (100 * 10**-9), 1 / (100 * 10**-9), 1 / (10000 * 10**-9), 1 / (10000 * 10**-9)])
