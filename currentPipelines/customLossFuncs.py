@@ -2,6 +2,9 @@ from pytorch_forecasting.metrics import MultiHorizonMetric
 import torch
 import sys
 
+
+# Loss functions
+
 class modifiedMAPE(MultiHorizonMetric):
     """
     Mean absolute percentage error (in %, unlike pytorch_forecasting.metrics.MAPE where a fraction is computed instead). 
@@ -78,3 +81,59 @@ def myMAFE2(output, target):
     #         loss[0] = 10**9
 
     return loss
+
+
+# Reductions
+
+def neglectNegligiblePhi(y, unredLoss):
+    """
+    Takes the unreduced output of a loss criterion, say torch.nn.MSELoss(reduction="none"), and applies a reduction to 
+    it (to result in a single loss value for backpropagation and gradient descent) that takes a mean over the output 
+    vector for a given sample but neglects in the calculation of this mean the aberration angles whose corresponding 
+    magnitudes are negligible. The rationale for this is that such angles might not be so discernable in this case, so 
+    training the network to recognise such angles might bias it.
+
+    y: the batch of actual labels of the Ronchigrams, from which undiscernable aberration angles can be identified
+    unreducedLoss: unreduced output of loss function
+    """
+
+    # lossOutput, currently, is batchSize number of rows in which each row looks like: c10, c12, c21, c23, phi12, phi21, 
+    # phi23. Going to neglect aberration angles corresponding to aberration magnitudes that are negligible. In the case 
+    # of the simulations /media/rob/hdd1/james-gj/Simulations/forTraining/01_03_22/singleAberrations.h5, these are the 
+    # three aberrations with the smallest magnitudes, since in simulations, magnitudes that were divisions of the 
+    # predominant magnitude will be negligible and there is little chance (I think) of the aberration chosen to be the 
+    # predominant one not being greater than the other two, unless said predominant magnitude is zero.
+
+    # So, identify the largest of the first 4 elements of a row in y (I think it would be a row, at least), then 
+    # take the mean over all 4 of corresponding elements as well as that for the only aberration angle corresponding to said predominant 
+    # magnitude. If predominant magnitude is at index 0, take mean over 0, 1, 2 and 3 of lossOutput row; if 1, take mean over 0, 1, 2, 3 
+    # and 4; if 2, take mean over 0, 1, 2, 3 and 5; if 3, take mean over 0, 1, 2, 3 and 6. So, take mean over 0, 1, 2, 3 
+    # and argmax (out of 0, 1, 2 and 3) + 3 if argmax > 0.
+
+    redLoss = torch.empty((len(y), 1))
+
+    for rowIdx, yRow in enumerate(y):
+
+        unredLossRow = unredLoss[rowIdx]
+
+        bigMagIdx = torch.argmax(yRow[:4])
+
+        if bigMagIdx == 0:
+
+            unredLossRow = unredLossRow[:4]
+
+        else:
+
+            unredLossRow = torch.cat((unredLossRow[:4], unredLossRow[bigMagIdx + 3].view(1)))
+
+        # print(unredLossRow)
+
+        redLoss[rowIdx] = torch.mean(unredLossRow)
+
+    return torch.mean(redLoss)
+
+# Just code I left here to test the function neglectNegligiblePhi
+# y = torch.tensor([[10, 1, 1, 1, 0, 0, 0], [1, 10, 1, 1, 0, 0, 0]])
+# unredLoss = torch.tensor([[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0], [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]])
+
+# neglectNegligiblePhi(y, unredLoss)
