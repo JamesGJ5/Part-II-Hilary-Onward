@@ -129,7 +129,7 @@ if singleAber == "C10":
 
     numLabels = 1
     chosenVals["c10"] = True
-    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220225-174816/best_model_Loss=0.4529.pt"
+    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220303-231102/best_model_Loss=0.1070.pt"
     testSetPath = "/media/rob/hdd1/james-gj/Simulations/22_02_22/Single_C10.h5"
 
     # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
@@ -238,7 +238,7 @@ numWorkers = 2
 
 # Collecting subset of testSet to make pretty pictures with
 
-chosenIndices = [200, 404, 551, 805]
+chosenIndices = [0, 1, 2, 3]
 testSubset = Subset(testSet, chosenIndices)
 
 
