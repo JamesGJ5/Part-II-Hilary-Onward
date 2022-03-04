@@ -58,7 +58,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10Linear.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_75nm_c12_10nm_c21_1000nm_c23_1000nm.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -99,14 +99,14 @@ if __name__ == "__main__":
                 # C23 = linearC23[simulation]
 
                 C10 = linearC10[simulation]
-                C12 = randu(0, max_C12)
-                C21 = randu(0, max_C21)
-                C23 = randu(0, max_C23)
+                C12 = 10 * 10**-9
+                C21 = 1000 * 10**-9
+                C23 = 1000 * 10**-9
 
-                # phi10 = 0
-                # phi12 = 0
-                # phi21 = 0
-                # phi23 = 0
+                phi10 = 0
+                phi12 = 0
+                phi21 = 0
+                phi23 = 0
 
                 # if simulation_number <= math.ceil(number_simulations / 4):
                 #     C10 = randu(0, max_C10)
@@ -136,11 +136,11 @@ if __name__ == "__main__":
                 #     C12 = randu(0, C23/1000)
                 #     C21 = randu(0, C23/100)
 
-                # Below, the ranges for 
-                phi10 = 0   # Defocus has an m-value of 0
-                phi12 = randu(0, np.pi/2)
-                phi21 = randu(0, np.pi)
-                phi23 = randu(0, np.pi/3)
+                # # Below, the ranges for 
+                # phi10 = 0   # Defocus has an m-value of 0
+                # phi12 = randu(0, np.pi/2)
+                # phi21 = randu(0, np.pi)
+                # phi23 = randu(0, np.pi/3)
 
                 I = randu(min_I, max_I)
                 t = randu(min_t, max_t)
@@ -190,7 +190,7 @@ if __name__ == "__main__":
     # sys.exit()
 
     # CPUs AND PROCESSES
-    total_simulations = 1000
+    total_simulations = 4
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
