@@ -1389,3 +1389,66 @@ Calculated mean: 0.4991140365600586
 Calculated std: 0.24779921770095825
 Mean and std calculated from 32 batches of size 4
 Shuffling was True; random module's seed and torch's seed were 22
+
+2022-03-04 13:25:10.783835
+/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_100nm_c21_1000nm.h5
+Calculated mean: 0.49973177909851074
+Calculated std: 0.2591036260128021
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-03-04 13:25:38.043324
+/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_100nm_c21_1000nm.h5
+Calculated mean: 0.49973177909851074
+Calculated std: 0.2591036260128021
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-03-04 13:25:42.192238
+/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_100nm_c21_1000nm.h5
+Calculated mean: 0.49973177909851074
+Calculated std: 0.2591036260128021
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-03-04 13:25:50.815869
+/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_100nm_c21_1000nm.h5
+Calculated mean: 0.49973177909851074
+Calculated std: 0.2591036260128021
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-03-04 13:33:08.052048
+/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_100nm_c23_1000nm.h5
+Calculated mean: 0.4997043013572693
+Calculated std: 0.24822138249874115
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-03-04 13:33:18.004393
+/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_100nm_c23_1000nm.h5
+Calculated mean: 0.4997043013572693
+Calculated std: 0.24822138249874115
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-03-04 14:13:16.750881
+/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_75nm_c12_10nm_c21_1000nm_c23_1000nm.h5
+Calculated mean: 0.5000554919242859
+Calculated std: 0.24903038144111633
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-03-04 14:13:21.062765
+/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_75nm_c12_10nm_c21_1000nm_c23_1000nm.h5
+Calculated mean: 0.5000554919242859
+Calculated std: 0.24903038144111633
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-03-04 14:13:36.655026
+/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_75nm_c12_10nm_c21_1000nm_c23_1000nm.h5
+Calculated mean: 0.5000554919242859
+Calculated std: 0.24903038144111633
+Mean and std calculated from 32 batches of size 4
+Shuffling was True; random module's seed and torch's seed were 22
