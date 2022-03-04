@@ -358,7 +358,9 @@ if __name__ == "__main__":
     ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_75nm_c12_10nm_c21_1000nm_c23_1000nm.h5", 
     c10 = True, c12 = True, c21 = True, c23 = True, phi10 = False, phi12 = True, phi21 = True, phi23 = True)
 
-    print(ronchdset[0][1].size())
+    print(len(ronchdset))
+
+    sys.exit()
 
     # sys.exit()
 
@@ -386,7 +388,7 @@ if __name__ == "__main__":
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
     plt.figure()
-    show_data(ronchdset[1][0], ronchdset[][1])
+    show_data(ronchdset[1][0], ronchdset[1][1])
     plt.show()
 
     # Implementing a way to find the mean and std of the data for Normalize(). 
