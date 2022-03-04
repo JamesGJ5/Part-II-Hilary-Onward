@@ -58,7 +58,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/03_03_22/mixedAberrations.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_100nm_c21_1000nm.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -83,7 +83,7 @@ if __name__ == "__main__":
             # NOTE: The below variable is only useful for certain statements below
             # simulation_number = 0
 
-            # linearC10 = np.linspace(rank / number_processes * max_C10, (rank + 1) / number_processes * max_C10, number_simulations, endpoint=False)
+            linearC10 = np.linspace(rank / number_processes * max_C10, (rank + 1) / number_processes * max_C10, number_simulations, endpoint=False)
             # linearC12 = np.linspace(rank / number_processes * max_C12, (rank + 1) / number_processes * max_C12, number_simulations, endpoint=False)
             # linearC21 = np.linspace(rank / number_processes * max_C21, (rank + 1) / number_processes * max_C21, number_simulations, endpoint=False)
             # linearC23 = np.linspace(rank / number_processes * max_C23, (rank + 1) / number_processes * max_C23, number_simulations, endpoint=False)
@@ -98,10 +98,15 @@ if __name__ == "__main__":
                 # C21 = randu(0, max_C21)
                 # C23 = linearC23[simulation]
 
-                C10 = randu(0, max_C10)
-                C12 = randu(0, max_C12)
-                C21 = randu(0, max_C21)
-                C23 = randu(0, max_C23)
+                C10 = linearC10[simulation]
+                C12 = 0
+                C21 = 1000 * 10**-9
+                C23 = 0
+
+                phi10 = 0
+                phi12 = 0
+                phi21 = 0
+                phi23 = 0
 
                 # if simulation_number <= math.ceil(number_simulations / 4):
                 #     C10 = randu(0, max_C10)
@@ -131,11 +136,11 @@ if __name__ == "__main__":
                 #     C12 = randu(0, C23/1000)
                 #     C21 = randu(0, C23/100)
 
-                # Below, the ranges for 
-                phi10 = 0   # Defocus has an m-value of 0
-                phi12 = randu(0, np.pi/2)
-                phi21 = randu(0, np.pi)
-                phi23 = randu(0, np.pi/3)
+                # # Below, the ranges for 
+                # phi10 = 0   # Defocus has an m-value of 0
+                # phi12 = randu(0, np.pi/2)
+                # phi21 = randu(0, np.pi)
+                # phi23 = randu(0, np.pi/3)
 
                 I = randu(min_I, max_I)
                 t = randu(min_t, max_t)
@@ -185,7 +190,7 @@ if __name__ == "__main__":
     # sys.exit()
 
     # CPUs AND PROCESSES
-    total_simulations = 100000
+    total_simulations = 5
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
