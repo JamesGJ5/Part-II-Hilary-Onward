@@ -1,6 +1,7 @@
 from pytorch_forecasting.metrics import MultiHorizonMetric
 import torch
 import sys
+import torch.nn as nn
 
 
 # Loss functions
@@ -85,14 +86,17 @@ def myMAFE2(output, target):
 
 # Reductions
 
-def neglectNegligiblePhi(y, unredLoss):
+torchCriterion = nn.MSELoss(reduction="none")
+
+def neglectNegligiblePhi(y_pred, y):
     """
-    Takes the unreduced output of a loss criterion, say torch.nn.MSELoss(reduction="none"), and applies a reduction to 
+    Implements torch.nn.MSELoss(reduction="none"), and then applies a reduction to 
     it (to result in a single loss value for backpropagation and gradient descent) that takes a mean over the output 
     vector for a given sample but neglects in the calculation of this mean the aberration angles whose corresponding 
     magnitudes are negligible. The rationale for this is that such angles might not be so discernable in this case, so 
     training the network to recognise such angles might bias it.
 
+    y_pred: the batch of labels of the Ronchigrams predicted by the network
     y: the batch of actual labels of the Ronchigrams, from which undiscernable aberration angles can be identified
     unreducedLoss: unreduced output of loss function
     """
@@ -109,6 +113,8 @@ def neglectNegligiblePhi(y, unredLoss):
     # magnitude. If predominant magnitude is at index 0, take mean over 0, 1, 2 and 3 of lossOutput row; if 1, take mean over 0, 1, 2, 3 
     # and 4; if 2, take mean over 0, 1, 2, 3 and 5; if 3, take mean over 0, 1, 2, 3 and 6. So, take mean over 0, 1, 2, 3 
     # and argmax (out of 0, 1, 2 and 3) + 3 if argmax > 0.
+    
+    unredLoss = torchCriterion(y_pred, y)
 
     redLoss = torch.empty((len(y), 1))
 

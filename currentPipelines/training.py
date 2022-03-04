@@ -23,7 +23,7 @@ from itertools import chain
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import ExponentialLR
-from customLossFuncs import modifiedMAPE, myMAFE, myMAFE2
+from customLossFuncs import modifiedMAPE, myMAFE, myMAFE2, neglectNegligiblePhi
 
 # For update_fn definition onward
 from ignite.utils import convert_tensor
@@ -368,9 +368,14 @@ print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_a
 # y_predNaNsSum = 0
 # targetNaNsSum = 0
 
-# TODO: 18th put config importation below
+torchCriterion = nn.MSELoss(reduction="none")
+
+# criterionReduction = configSection["criterionReduction"]
 criterion = eval(configSection["criterion"])
 
+# if criterionReduction == "none":
+
+#     redFun = eval(configSection["redFun"])
 
 lr = eval(configSection["lr"])
 
@@ -445,6 +450,13 @@ def update_fn(engine, batch):
     # Compute loss
     loss = criterion(y_pred, y)
 
+    # if criterionReduction == "none":
+        
+    #     loss = redFun(criterion, y_pred, y)
+
+    # print(loss)
+    # print(loss.size())
+
     # print(loss)
     # print(loss.size())
 
@@ -459,6 +471,8 @@ def update_fn(engine, batch):
     optimiser.step()
 
     batchloss = loss.item()
+    # print(batchloss)
+    # print(batchloss.shape)
 
     # print(y)
     # print(y_pred)
@@ -474,15 +488,15 @@ def update_fn(engine, batch):
     global batchlossVals
     batchlossVals.append(batchloss)
 
-    if math.isnan(batchloss):
-        print("batchloss:", batchloss)
-        print("y:\n", y)
-        print("y_pred:\n", y_pred)
+    # if math.isnan(batchloss):
+    #     print("batchloss:", batchloss)
+    #     print("y:\n", y)
+    #     print("y_pred:\n", y_pred)
 
-    if math.isinf(batchloss):
-        print("batchloss:", batchloss)
-        print("y:\n", y)
-        print("y_pred:\n", y_pred)
+    # if math.isinf(batchloss):
+    #     print("batchloss:", batchloss)
+    #     print("y:\n", y)
+    #     print("y_pred:\n", y_pred)
 
     return {
         "batchloss": batchloss,
