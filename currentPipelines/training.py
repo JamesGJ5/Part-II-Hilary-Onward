@@ -91,7 +91,7 @@ torch.manual_seed(torchSeed)
 # Creating this variable because in model importation I will only import EfficientNet-B7 if this name in string form is 
 # what the below variable is assigned to
 efficientNetModel = "EfficientNet-B3"
-pretrainedWeights = False
+pretrainedWeights = eval(configSection["pretrainedWeights"])
 estimateMeanStd = eval(configSection["estimateMeanStd"])  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
                         # transform
 
@@ -152,9 +152,12 @@ print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_all
 
 # LOADING WEIGHTS INTO MODEL
 
-# if GPU == 1:
-#     modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220219-111025/best_model_Loss=81.2453.pt"
-#     model.load_state_dict(torch.load(modelPath))
+if pretrainedWeights:
+    weightsPath = configSection["weightsPath"]
+
+    # TODO: if you get an error about cuda weights being wrong or something, use the map_location parameter below as you 
+    # did in inferencer.py
+    model.load_state_dict(torch.load(weightsPath))
 
 
 # TENSORBOARD
@@ -305,7 +308,7 @@ num_epochs = eval(configSection["num_epochs"])
 with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     f.write(f"\n\n\n{scriptTime}")
     if not pretrainedWeights:
-        f.write("\n\nSee model1.py at the date and time this training run was done (see https://github.com/JamesGJ5/Part-II-Hilary-Onward) for weights used.")
+        f.write("\n\nSee config1 at the date and time this training run was done (see https://github.com/JamesGJ5/Part-II-Hilary-Onward) for weights used.")
 
     f.write(f"\n\nGPU: {GPU}, Torch seed: {torchSeed}, input datatype: {inputDtype}, numWorkers: {numWorkers}, train:eval:test {trainFraction}:{evalFraction}:{testFraction}")
     f.write(f"\nData loaded from {ronchdset.hdf5filename}\n\n")
