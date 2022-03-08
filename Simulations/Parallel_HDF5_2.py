@@ -25,9 +25,9 @@ if __name__ == "__main__":
 
     # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
     max_C10 = 100 * 10**-9  # Maximum C10 (defocus) magnitude/m
-    max_C12 = 50 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
-    max_C21 = 5000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
-    max_C23 = 5000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
+    max_C12 = 100 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
+    max_C21 = 10000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
+    max_C23 = 10000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
     # min_Cnm will be 0 since negative values are redundant, I THINK (see lab book's 29/11/2021 entry)
     # phi_n,m will be between 0 and pi/m radians since, I believe, other angles are redundant (see lab book's 29/11/2021 entry)
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/08_03_22/linearC10.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C10.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -99,14 +99,14 @@ if __name__ == "__main__":
                 # C23 = linearC23[simulation]
 
                 C10 = linearC10[simulation]
-                C12 = 25 * 10**-9
-                C21 = 2500 * 10**-9
-                C23 = 2500 * 10**-9
+                C12 = randu(0, max_C12)
+                C21 = randu(0, max_C21)
+                C23 = randu(0, max_C23)
 
                 phi10 = 0
-                phi12 = np.pi/4
-                phi21 = np.pi/2
-                phi23 = np.pi/6
+                phi12 = randu(0, np.pi/2)
+                phi21 = randu(0, np.pi)
+                phi23 = randu(0, np.pi/3)
 
                 # if simulation_number <= math.ceil(number_simulations / 4):
                 #     C10 = randu(0, max_C10)
