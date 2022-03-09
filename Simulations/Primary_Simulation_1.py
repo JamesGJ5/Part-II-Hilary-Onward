@@ -259,10 +259,10 @@ if __name__ == "__main__":
     # RONCHIGRAM CALCULATION
 
     mag_list = (100 * 10**-9,    # C1,0 magnitude/m (defocus)
-                25 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism)
+                10 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism)
 
-                2500 * 10**-9,    # C2,1 magnitude/m (axial coma)
-                2500 * 10**-9)    # C2,3 magnitude/m (3-fold astigmatism)
+                1000 * 10**-9,    # C2,1 magnitude/m (axial coma)
+                1000 * 10**-9)    # C2,3 magnitude/m (3-fold astigmatism)
 
     ang_list = (0,        # C1,0 angle/rad
                 0,    # C1,2 angle/rad
