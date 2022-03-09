@@ -121,40 +121,14 @@ std = eval(config["modelSection"]["std1"])
 # The path of the Ronchigrams which are to be inferred and whose "predicted" Ronchigrams are to be plotted alongside 
 # them.
 
-# 4 Ronchigrams containing only c10 (0, 25nm, 50nm, 75nm), c21 (fixed at 1000nm) and phi21 (fixed at 0)
-testSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_75nm_c21_1000nm.h5"
-
-# # Approx. 1000 Ronchigrams containing only c12 (from 0 to 100nm) and phi12 (from 0 to pi/2 rad)
-# testSetPath = "/media/rob/hdd1/james-gj/Simulations/25_02_22/Single_C12.h5"
-
-# # Approx. 1000 Ronchigrams containing only c21 (from 0 to 10000nm) and phi21 (from 0 to pi rad)
-# testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C21.h5"
-
-# # Approx. 1000 Ronchigrams containing only c23 (from 0 to 10000nm) and phi23 (from 0 to pi/3 rad)
-# testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C23.h5"
+testSetPath = config["testSetPath"]["testSetPath1"]
 
 
 # TREND SET PATH
 
 # The path of Ronchigrams in which there's a trend that I want to see if the model can predict
 
-# This is for models at 20220307-205356/
-trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/08_03_22/linearC10.h5"
-
-# This is for models at 20220305-124423/ and 20220306-164551/
-# trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C10.h5"
-
-# Approx. 1000 Ronchigrams in which c12 varies linearly from 0 to 100nm and other constants are random between 0 and 
-# 100nm for c10, 0 and 10000nm for c21 and c23, 0 and pi/2 rad for c12, and 0 and pi/3 rad for c23.
-# trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/27_02_22/Linear_C12.h5"
-
-# Approx. 1000 Ronchigrams in which c21 varies linearly from 0 to 10000nm and other constants are random between 0 and 
-# 100nm for c10 and c12, 0 and 10000nm for c23, 0 and pi/2 rad for c12, and 0 and pi/3 rad for c23.
-# trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/27_02_22/Linear_C21.h5"
-
-# Approx. 1000 Ronchigrams in which c23 varies linearly from 0 to 10000nm and other constants are random between 0 and 
-# 100nm for c10 and c12, 0 and 10000nm for c21, 0 and pi/2 rad for c12, and 0 and pi/3 rad for c23.
-# trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/27_02_22/Linear_C23.h5"
+trendSetPath = config["trendSetPath"]["trendSetPath1"]
 
 
 # SCALING TENSORS
