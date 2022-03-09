@@ -114,85 +114,208 @@ if usingGPU:
     print(f"torch cuda current device: {torch.cuda.current_device()}")
 
 
-# Options
+# OPTIONS
 
 efficientNetModel = "EfficientNet-B3"
-singleAber = "C21"
 
-chosenVals = {"c10": False, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
+predictSingleAber = True   # I.E. whether only a single aberration is to have its constants predicted from a test aberration
+
+if predictSingleAber:
+    singleAber = "C10"
+
+mixedRonchs = True  # Whether or not the Ronchigrams being inferred from contain more than one aberration
+
+# Choosing which labels are going to be returned alongside the Ronchigrams returned by the RonchigramDataset object that 
+# shall be instantiated.
+chosenVals = {"c10": True, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
 scalingVals = {
     "c10scaling": 10**7, "c12scaling": 10**7, "c21scaling": 10**5, "c23scaling": 10**5, 
     "phi10scaling": 1, "phi12scaling": 1 / (np.pi / 2), "phi21scaling": 1 / (np.pi), "phi23scaling": 1 / (np.pi / 3)
-}
-
-if singleAber == "C10":
-
-    numLabels = 1
-    chosenVals["c10"] = True
-    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220303-231102/best_model_Loss=0.1070.pt"
-    testSetPath = "/media/rob/hdd1/james-gj/Simulations/22_02_22/Single_C10.h5"
-
-    # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
-    mean = 0.5011
-    std = 0.2560
-
-    trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C10.h5"
-
-if singleAber == "C12":
-
-    numLabels = 2
-    chosenVals["c12"] = True
-    chosenVals["phi12"] = True
-    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220226-220806/best_model_Loss=0.1902.pt"
-    testSetPath = "/media/rob/hdd1/james-gj/Simulations/25_02_22/Single_C12.h5"
-
-    # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
-    mean = 0.5010
-    std = 0.2544
-
-    trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C12.h5"
-
-if singleAber == "C21":
-
-    numLabels = 2
-    chosenVals["c21"] = True
-    chosenVals["phi21"] = True
-    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220227-112003/best_model_Loss=0.0885.pt"
-    testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C21.h5"
-
-    # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
-    mean = 0.5006
-    std = 0.2502
-
-    trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C21.h5"
-
-if singleAber == "C23":
-
-    numLabels = 2
-    chosenVals["c23"] = True
-    chosenVals["phi23"] = True
-    modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220228-003811/best_model_Loss=0.1071.pt"
-    testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C23.h5"
-
-    # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
-    mean = 0.5007
-    std = 0.2488
-
-    trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C23.h5"
+} 
 
 
-# Scaling tensors
+# NUMBER OF LABELS FOR MODEL TO PREDICT
+
+# numLabels is essentially the number of elements the model outputs in its prediction for a given Ronchigram. It is of 
+# course best to match this number to the same number that was used in training the model.
+numLabels = 1
+
+
+# MODEL PATH
+
+# This is the path of the model to be used for inference in this script
+# NOTE: mean and std are the mean and standard deviation estimated for the data used to train the model whose path 
+# is modelPath; can be found in modelLogging
+
+# This path is for a model trained to recognise JUST c10 on MIXED-ABERRATION Ronchigrams with max_c10 100nm, max_c12 50nm,
+# max_c21 5000nm, max_c23 5000nm, phi10 0, phi12 0 to pi/2, phi21 0 to pi, and phi23 0 to pi/3.
+modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220307-205356/best_model_Loss=0.1338.pt"
+mean = 0.5011
+std = 0.2492
+
+# This path is for a model trained to recognise JUST c10 on MIXED-ABERRATION Ronchigrams with max_c10 100nm, max_c12 100nm,
+# max_c21 10000nm, max_c23 10000nm, phi10 0, phi12 0 to pi/2, phi21 0 to pi, and phi23 0 to pi/3.
+# modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220305-124423/best_model_Loss=0.1107.pt"
+# mean = 0.5009
+# std = 0.2483
+
+# This path is for a model trained to recognise c10, c12, c21, c23, phi12, phi21, phi23 on MIXED-ABERRATION Ronchigrams 
+# with max_c10 100nm, max_c12 100nm, max_c21 10000nm, max_c23 10000nm, phi10 0, phi12 0 to pi/2, phi21 0 to pi, and phi23 0 to pi/3.
+# modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220306-164551/best_model_Loss=0.0867.pt"
+# mean = 0.5009
+# std = 0.2483
+
+# Model trained on approx. 100,000 Ronchigrams containing JUST C12
+# modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220226-220806/best_model_Loss=0.1902.pt"
+
+# Model trained on approx. 100,000 Ronchigrams containing JUST C21
+# modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220227-112003/best_model_Loss=0.0885.pt"
+
+# Model trained on approx. 100,000 Ronchigrams containing JUST C23
+# modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220228-003811/best_model_Loss=0.1071.pt"
+
+
+# TEST SET PATH
+
+# The path of the Ronchigrams which are to be inferred and whose "predicted" Ronchigrams are to be plotted alongside 
+# them.
+
+# 4 Ronchigrams containing only c10 (0, 25nm, 50nm, 75nm), c21 (fixed at 1000nm) and phi21 (fixed at 0)
+testSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_75nm_c21_1000nm.h5"
+
+# # Approx. 1000 Ronchigrams containing only c12 (from 0 to 100nm) and phi12 (from 0 to pi/2 rad)
+# testSetPath = "/media/rob/hdd1/james-gj/Simulations/25_02_22/Single_C12.h5"
+
+# # Approx. 1000 Ronchigrams containing only c21 (from 0 to 10000nm) and phi21 (from 0 to pi rad)
+# testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C21.h5"
+
+# # Approx. 1000 Ronchigrams containing only c23 (from 0 to 10000nm) and phi23 (from 0 to pi/3 rad)
+# testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C23.h5"
+
+
+# TREND SET PATH
+
+# The path of Ronchigrams in which there's a trend that I want to see if the model can predict
+
+# This is for models at 20220307-205356/
+trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/08_03_22/linearC10.h5"
+
+# This is for models at 20220305-124423/ and 20220306-164551/
+# trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C10.h5"
+
+# Approx. 1000 Ronchigrams in which c12 varies linearly from 0 to 100nm and other constants are random between 0 and 
+# 100nm for c10, 0 and 10000nm for c21 and c23, 0 and pi/2 rad for c12, and 0 and pi/3 rad for c23.
+# trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/27_02_22/Linear_C12.h5"
+
+# Approx. 1000 Ronchigrams in which c21 varies linearly from 0 to 10000nm and other constants are random between 0 and 
+# 100nm for c10 and c12, 0 and 10000nm for c23, 0 and pi/2 rad for c12, and 0 and pi/3 rad for c23.
+# trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/27_02_22/Linear_C21.h5"
+
+# Approx. 1000 Ronchigrams in which c23 varies linearly from 0 to 10000nm and other constants are random between 0 and 
+# 100nm for c10 and c12, 0 and 10000nm for c21, 0 and pi/2 rad for c12, and 0 and pi/3 rad for c23.
+# trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/27_02_22/Linear_C23.h5"
+
+
+
+# if mixedRonchs:
+#     # Just making sure that all aberration constants besides phi10 is returned by RonchigramDataset in label if the 
+#     # Ronchigrams contain multiple aberrations
+#     for constant in chosenVals:
+
+#         if constant == "phi10":
+#             continue
+
+#         chosenVals[constant] = True
+
+# if singleAber == "C10":
+
+#     # numLabels is the number of elements to be returned in the model's prediction
+#     numLabels = 1
+#     chosenVals["c10"] = True
+
+    # # This path is for a model trained to recognise c10 on mixed-aberration Ronchigrams with max_c10 100nm, max_c12 50nm,
+    # # max_c21 5000nm, max_c23 5000nm, phi10 0, phi12 0 to pi/2, phi21 0 to pi, and phi23 0 to pi/3.
+    # modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220307-205356/best_model_Loss=0.1338.pt"
+
+    # # This path is for a model trained to recognise c10 on mixed-aberration Ronchigrams with max_c10 100nm, max_c12 100nm,
+    # # max_c21 10000nm, max_c23 10000nm, phi10 0, phi12 0 to pi/2, phi21 0 to pi, and phi23 0 to pi/3.
+    # # modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220305-124423/best_model_Loss=0.1107.pt"
+
+    # # This path is for a model trained to recognise c10, c12, c21, c23, phi12, phi21, phi23 on mixed-aberration Ronchigrams 
+    # # with max_c10 100nm, max_c12 100nm, max_c21 10000nm, max_c23 10000nm, phi10 0, phi12 0 to pi/2, phi21 0 to pi, and phi23 0 to pi/3.
+    # # modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220306-164551/best_model_Loss=0.0867.pt"
+
+#     testSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/04_03_22/c10_0_to_75nm_c21_1000nm.h5"
+
+#     # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
+#     mean = 0.5011
+#     std = 0.2560
+
+#     # This is for models at 20220307-205356/
+#     trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/08_03_22/linearC10.h5"
+
+#     # This is for models at 20220305-124423/ and 20220306-164551/
+#     # trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/Linear_C10.h5"
+
+# if singleAber == "C12":
+
+#     numLabels = 2
+#     chosenVals["c12"] = True
+#     chosenVals["phi12"] = True
+#     modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220226-220806/best_model_Loss=0.1902.pt"
+#     testSetPath = "/media/rob/hdd1/james-gj/Simulations/25_02_22/Single_C12.h5"
+
+#     # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
+#     mean = 0.5010
+#     std = 0.2544
+
+#     trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/27_02_22/Linear_C12.h5"
+
+# if singleAber == "C21":
+
+#     numLabels = 2
+#     chosenVals["c21"] = True
+#     chosenVals["phi21"] = True
+#     modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220227-112003/best_model_Loss=0.0885.pt"
+#     testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C21.h5"
+
+#     # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
+#     mean = 0.5006
+#     std = 0.2502
+
+#     trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/27_02_22/Linear_C21.h5"
+
+# if singleAber == "C23":
+
+#     numLabels = 2
+#     chosenVals["c23"] = True
+#     chosenVals["phi23"] = True
+#     modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220228-003811/best_model_Loss=0.1071.pt"
+#     testSetPath = "/media/rob/hdd1/james-gj/Simulations/26_02_22/Single_C23.h5"
+
+#     # NOTE: mean and std were retrieved from modelLogging, logged when modelPath was created
+#     mean = 0.5007
+#     std = 0.2488
+
+#     trendSetPath = "/media/rob/hdd1/james-gj/Simulations/forInference/27_02_22/Linear_C23.h5"
+
+
+# SCALING TENSORS
 # Just initialising some torch Tensors that will be useful for below calculations
+# TODO: find a way to do the below more efficiently
 
+# sorted(chosenVals) sorts the keys in chosenVals, chosenVals[key] extracts whether its value is True or False; so, sortedChosenVals is a 
+# list whose elements are either True or False, corresponding to whether the corresponding aberration constatns key in sorted(chosenVals) is 
+# included or not in scaling predicted and target labels to real values for Ronchigram depiction etc.
 sortedChosenVals = [chosenVals[key] for key in sorted(chosenVals)]
+
+# The below returns the scaling factors corresponding to the aberrations being represented by "True"
 usedScalingFactors = [scalingVals[sorted(scalingVals)[i]] for i, x in enumerate(sortedChosenVals) if x]
 
 usedScalingFactors = torch.tensor(usedScalingFactors)
 
-# print(usedScalingFactors)
 
-
-# Model instantiation
+# MODEL INSTANTIATION
 
 if efficientNetModel == "EfficientNet-B3":
     parameters = {"num_labels": numLabels, "width_coefficient": 1.2, "depth_coefficient": 1.4, "dropout_rate": 0.3}
@@ -203,11 +326,12 @@ model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficie
                             dropout_rate=parameters["dropout_rate"]).to(device)
 
 
-# Loading weights
+# LOADING WEIGHTS
 
 model.load_state_dict(torch.load(modelPath, map_location = torch.device(f"cuda:{GPU}" if usingGPU else "cpu")))
 
 
+# TEST DATA IMPORTATION
 # Load RonchigramDataset object with filename equal to the file holding new simulations to be inferred
 
 testSet = RonchigramDataset(testSetPath, complexLabels=False, **chosenVals, **scalingVals)
@@ -249,14 +373,14 @@ testLoader = DataLoader(testSubset, batch_size=batchSize, num_workers=numWorkers
                         pin_memory=True)
 
 
-# Quick tests ot batched data
+# Quick tests on batched data
 
 batch = next(iter(testLoader))
 print(f"Size of Ronchigram batch: {batch[0].size()}")
 print(f"Size of labels batch: {batch[1].size()}")
 print(batch[1])
 
-testingDataLoader = False
+testingDataLoader = True
 
 if testingDataLoader:
     for iBatch, batchedSample in enumerate(testLoader):
@@ -387,8 +511,6 @@ for i in range(len(testSubset)):
 
 plt.show()
 
-sys.exit()
-
 
 # Checking trends
 
@@ -443,5 +565,5 @@ with torch.no_grad():
     plt.plot(np.linspace(1, len(targetTensor), len(targetTensor)), targetTensor, 'b')
     plt.plot(np.linspace(1, len(predTensor), len(predTensor)), predTensor, 'ro')
     plt.ylabel("blue: target, red: prediction")
-    # plt.savefig(f"/media/rob/hdd1/james-gj/Simulations/forInference/trendGraphs/{startTime}.png")
+    # plt.savefig(f"/media/rob/hdd1/james-gj/Simulations/inferenceResults/trendGraphs/{startTime}.png")
     plt.show()
