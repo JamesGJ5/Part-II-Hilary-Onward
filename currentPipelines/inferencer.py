@@ -82,10 +82,10 @@ mixedRonchs = True  # Whether or not the Ronchigrams being inferred from contain
 
 # Choosing which labels are going to be returned alongside the Ronchigrams returned by the RonchigramDataset object that 
 # shall be instantiated.
-chosenVals = {"c10": True, "c12": False, "c21": False, "c23": False, "phi10": False, "phi12": False, "phi21": False, "phi23": False}
+chosenVals = {"c10": True, "c12": True, "c21": True, "c23": True, "phi10": False, "phi12": True, "phi21": True, "phi23": True}
 scalingVals = {
-    "c10scaling": 10**7, "c12scaling": 10**7, "c21scaling": 10**5, "c23scaling": 10**5, 
-    "phi10scaling": 1, "phi12scaling": 1 / (np.pi / 2), "phi21scaling": 1 / (np.pi), "phi23scaling": 1 / (np.pi / 3)
+    "c10scaling": 10**7, "c12scaling": 2 * 10**7, "c21scaling": 2 * 10**5, "c23scaling": 2 * 10**5, 
+    "phi10scaling": 1, "phi12scaling": 1 / (np.pi / 4), "phi21scaling": 1 / (np.pi / 2), "phi23scaling": 1 / (np.pi / 6)
 } 
 
 
@@ -111,9 +111,9 @@ config.read("config2.ini")
 # NOTE: mean and std are the mean and standard deviation estimated for the data used to train the model whose path 
 # is modelPath; can be found in modelLogging
 
-modelPath = config["modelSection"]["modelPath1"]
-mean = eval(config["modelSection"]["mean1"])
-std = eval(config["modelSection"]["std1"])
+modelPath = config["modelSection"]["modelPath"]
+mean = eval(config["modelSection"]["mean"])
+std = eval(config["modelSection"]["std"])
 
 
 # TEST SET PATH
@@ -121,14 +121,14 @@ std = eval(config["modelSection"]["std1"])
 # The path of the Ronchigrams which are to be inferred and whose "predicted" Ronchigrams are to be plotted alongside 
 # them.
 
-testSetPath = config["testSetPath"]["testSetPath1"]
+testSetPath = config["testSetPath"]["testSetPath"]
 
 
 # TREND SET PATH
 
 # The path of Ronchigrams in which there's a trend that I want to see if the model can predict
 
-trendSetPath = config["trendSetPath"]["trendSetPath1"]
+trendSetPath = config["trendSetPath"]["trendSetPath"]
 
 
 # SCALING TENSORS
