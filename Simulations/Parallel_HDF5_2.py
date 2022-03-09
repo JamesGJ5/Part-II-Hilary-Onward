@@ -58,7 +58,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/09_03_22/c10Linear_1.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/09_03_22/c10Linear_5.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -99,14 +99,14 @@ if __name__ == "__main__":
                 # C23 = linearC23[simulation]
 
                 C10 = linearC10[simulation]
-                C12 = 10 * 10**-9
-                C21 = 1000 * 10**-9
-                C23 = 1000 * 10**-9
+                C12 = 50 * 10**-9
+                C21 = 5000 * 10**-9
+                C23 = 5000 * 10**-9
 
                 phi10 = 0
-                phi12 = np.pi/2
+                phi12 = np.pi/4
                 phi21 = np.pi/2
-                phi23 = np.pi/2
+                phi23 = np.pi/6
 
                 # if simulation_number <= math.ceil(number_simulations / 4):
                 #     C10 = randu(0, max_C10)
