@@ -18,6 +18,7 @@ import time
 import torchvision.utils as vutils
 import datetime
 from ignite.utils import convert_tensor
+from configparser import ConfigParser
 
 
 # Seed information (may not use the same test set as in training but might as well set the torch seed to be 17 anyway, 
@@ -95,38 +96,24 @@ scalingVals = {
 numLabels = 1
 
 
+# CONFIG STUFF
+
+# Here, I am only putting things in config2.ini for which there are many options with a lot of accompanying commentary, 
+# e.g. in the case of model paths next to which I state where the model is from.
+
+config = ConfigParser()
+config.read("config2.ini")
+
+
 # MODEL PATH
 
 # This is the path of the model to be used for inference in this script
 # NOTE: mean and std are the mean and standard deviation estimated for the data used to train the model whose path 
 # is modelPath; can be found in modelLogging
 
-# This path is for a model trained to recognise JUST c10 on MIXED-ABERRATION Ronchigrams with max_c10 100nm, max_c12 50nm,
-# max_c21 5000nm, max_c23 5000nm, phi10 0, phi12 0 to pi/2, phi21 0 to pi, and phi23 0 to pi/3.
-modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220307-205356/best_model_Loss=0.1338.pt"
-mean = 0.5011
-std = 0.2492
-
-# This path is for a model trained to recognise JUST c10 on MIXED-ABERRATION Ronchigrams with max_c10 100nm, max_c12 100nm,
-# max_c21 10000nm, max_c23 10000nm, phi10 0, phi12 0 to pi/2, phi21 0 to pi, and phi23 0 to pi/3.
-# modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220305-124423/best_model_Loss=0.1107.pt"
-# mean = 0.5009
-# std = 0.2483
-
-# This path is for a model trained to recognise c10, c12, c21, c23, phi12, phi21, phi23 on MIXED-ABERRATION Ronchigrams 
-# with max_c10 100nm, max_c12 100nm, max_c21 10000nm, max_c23 10000nm, phi10 0, phi12 0 to pi/2, phi21 0 to pi, and phi23 0 to pi/3.
-# modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220306-164551/best_model_Loss=0.0867.pt"
-# mean = 0.5009
-# std = 0.2483
-
-# Model trained on approx. 100,000 Ronchigrams containing JUST C12
-# modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220226-220806/best_model_Loss=0.1902.pt"
-
-# Model trained on approx. 100,000 Ronchigrams containing JUST C21
-# modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220227-112003/best_model_Loss=0.0885.pt"
-
-# Model trained on approx. 100,000 Ronchigrams containing JUST C23
-# modelPath = "/media/rob/hdd2/james/training/fineTuneEfficientNet/20220228-003811/best_model_Loss=0.1071.pt"
+modelPath = config["modelSection"]["modelPath1"]
+mean = eval(config["modelSection"]["mean1"])
+std = eval(config["modelSection"]["std1"])
 
 
 # TEST SET PATH
