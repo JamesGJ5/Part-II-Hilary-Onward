@@ -8,7 +8,14 @@ import ignite # Installed via "conda install ignite -c pytorch"
 import model1
 import datetime
 
-# If haven't done already, run "conda install -c conda-forge tensorboardx==1.6"
+
+# Tensorboard stuff
+from torch.utils.tensorboard import SummaryWriter
+
+# TODO: change the below log directory to the same one being used in the 
+# kaggle code.
+writer = SummaryWriter("runs/mnist")
+
 
 # For data loading onward
 import sys
@@ -18,6 +25,7 @@ from torch.utils.data import Dataset, DataLoader, random_split
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize
 from torchvision import utils
 
+
 # For optimiser onward
 from itertools import chain
 import torch.optim as optim
@@ -25,8 +33,10 @@ import torch.nn.functional as F
 from torch.optim.lr_scheduler import ExponentialLR
 from customLossFuncs import modifiedMAPE, myMAFE, myMAFE2, neglectNegligiblePhi
 
+
 # For update_fn definition onward
 from ignite.utils import convert_tensor
+
 
 # For Output_transform and tensorboard stuff definition onward
 from ignite.engine import Engine, Events, create_supervised_evaluator
@@ -35,13 +45,16 @@ from ignite.contrib.handlers import TensorboardLogger
 from ignite.contrib.handlers.tensorboard_logger import OutputHandler, OptimizerParamsHandler
 from ignite.contrib.handlers import ProgressBar
 
+
 # For logger onward
 from ignite.contrib.handlers import CustomPeriodicEvent
 from ignite.handlers import global_step_from_engine
 import logging
 
+
 # Model checkpointing onward
 from ignite.handlers import ModelCheckpoint, EarlyStopping, TerminateOnNan
+
 
 # For loss curve
 import matplotlib.pyplot as plt
@@ -158,40 +171,6 @@ if pretrainedWeights:
     # TODO: if you get an error about cuda weights being wrong or something, use the map_location parameter below as you 
     # did in inferencer.py
     model.load_state_dict(torch.load(weightsPath))
-
-
-# TENSORBOARD
-
-from tensorboardX.pytorch_graph import graph
-
-import random
-from IPython.display import clear_output, Image, display, HTML
-
-def show_graph(graph_def):
-    """Visualise TensorFlow graph."""
-
-    if hasattr(graph_def, "as_graph_def"):
-        graph_def = graph_def.as_graph_def()
-
-    strip_def = graph_def
-
-    code = """
-        <script src="//cdnjs.cloudflare.com/ajax/libs/polymer/0.3.3/platform.js"></script>
-        <script>
-          function load() {{
-            document.getElementById("{id}").pbtxt = {data};
-          }}
-        </script>
-        <link rel="import" href="https://tensorboard.appspot.com/tf-graph-basic.build.html" onload=load()>
-        <div style="height:600px">
-          <tf-graph-basic id="{id}"></tf-graph-basic>
-        </div>
-    """.format(data=repr(str(strip_def)), id='graph'+str(random.randint(0, 1000)))
-
-    iframe = """
-        <iframe seamless style="width:1200px;height:620px;border:0" srcdoc="{}"></iframe>
-    """.format(code.replace('"', '&quot;'))
-    display(HTML(iframe))
 
 
 # TRANSFORMS, DATASETS AND DATASET SPLITTING, AND DATA LOADERS
@@ -402,6 +381,18 @@ optimiser = optim.SGD([
 # instantiating the string first
 lr_scheduler_string = "ExponentialLR(optimiser, gamma=0.975)"
 lr_scheduler = eval(lr_scheduler_string)
+
+
+# TENSORBOARD
+
+batch = next(iter(trainLoader))
+
+example_data = convert_tensor(batch[0], device=device, non_blocking=True)
+
+writer.add_graph(model, example_data)
+writer.close()
+
+sys.exit()
 
 
 # update_fn DEFINITION
