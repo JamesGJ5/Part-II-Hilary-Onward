@@ -261,7 +261,7 @@ if __name__ == "__main__":
     mag_list = (100 * 10**-9,    # C1,0 magnitude/m (defocus)
                 10 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism)
 
-                1000 * 10**-9,    # C2,1 magnitude/m (axial coma)
+                0 * 10**-9,    # C2,1 magnitude/m (axial coma)
                 1000 * 10**-9)    # C2,3 magnitude/m (3-fold astigmatism)
 
     ang_list = (0,        # C1,0 angle/rad
@@ -270,7 +270,7 @@ if __name__ == "__main__":
                 0)    # C2,3 angle/rad
 
     imdim = 1024
-    simdim = 150 * 10**-3
+    simdim = 100 * 10**-3
 
     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1)
 
@@ -284,11 +284,11 @@ if __name__ == "__main__":
     ax.axis("off")
     ax.imshow(ronch, cmap="gray", interpolation="nearest")
 
-    scale = 2*simdim/imdim    # radians per pixel
-    scale_mrad = scale * 10**3  # mrad per pixel
-    scalebar = ScaleBar(scale_mrad, units="m", dimension="si-length")
+    # scale = 2*simdim/imdim    # radians per pixel
+    # scale_mrad = scale * 10**3  # mrad per pixel
+    # scalebar = ScaleBar(scale_mrad, units="m", dimension="si-length")
 
-    ax.add_artist(scalebar)
+    # ax.add_artist(scalebar)
 
     dominantcnm = "c12"
     saveFig = False
