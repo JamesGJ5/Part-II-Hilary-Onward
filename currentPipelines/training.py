@@ -630,7 +630,7 @@ trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 # Implementing a way to show this script that the best model is the one with the lowest MeanSquaredError value
 def default_score_fn(engine):
 
-    score = engine.state.metrics['Loss']
+    score = 1 / engine.state.metrics['Loss']
 
     return score
 
@@ -641,8 +641,11 @@ def default_score_fn(engine):
 
 # TODO: rather than checkpointing the model at 3 points, maybe checkpoint at lots of points, depending on how much space there 
 # is and how long this takes. Also, make sure the model present at the end of training is saved too.
-best_model_handler = ModelCheckpoint(dirname=log_path, filename_prefix="best", n_saved=3, score_name="Loss",
+best_model_handler = ModelCheckpoint(dirname=log_path, filename_prefix="best", n_saved=3, score_name="reciprocalLoss",
 score_function=default_score_fn)
+
+# Each time n_epochs (see earlier in script for what n_epochs is) epochs end, I believe checkpointing is done if the 
+# score function is low enough; the dictionary below provides the model's state at that point.
 testEvaluator.add_event_handler(Events.COMPLETED, best_model_handler, {'model': model,})
 
 
@@ -717,7 +720,7 @@ print(f"testEvaluator metrics: {testEvaluator.state.metrics}")
 
 # HIGHLIGHTING THE BEST-SCORE MODEL FROM TRAINING
 
-renamingBestModel = False
+renamingBestModel = True
 
 if renamingBestModel:
     os.system(f"ls {log_path}")
@@ -737,21 +740,19 @@ if renamingBestModel:
     # TODO: automate calculation of the indices of the file names to take the 
     # scores from below
 
-    scores = [eval(c[16:-3]) for c in checkpoints]
+    scores = [eval(c[26:-3]) for c in checkpoints]
     print("\nScores:", scores)
 
-    # TODO: check the following--I think bestEpoch is a misnomer, but for 
-    # some reason I have kept it called that like the Kaggle webpage I first 
-    # got this training pipeline from does. I think it actually just refers 
-    # to the best model but I could be wrong.
-    bestEpoch = np.argmin(scores)
+    # Taking the highest reciprocal loss
+    bestEpoch = np.argmax(scores)
     print("\n" + str(bestEpoch))
 
     if not checkpoints:
         print(f"\nThere are no weight files in {log_path}")
 
     else:
-        modelPath = f"{log_path}/efficientNetLowestLoss_{scores[bestEpoch]}"
+        # The suffix of the file name is the loss corresponding to the copied file
+        modelPath = f"{log_path}/efficientNetLowestLoss_{1 / scores[bestEpoch]}"
         print("\nNew best model weights path:", modelPath)
 
         currentBestModelPath = os.path.join(log_path, checkpoints[bestEpoch])
