@@ -58,7 +58,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/09_03_22/c10Linear_5.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/14_03_22/mixedAbers.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -93,20 +93,20 @@ if __name__ == "__main__":
                 # NOTE: The below variable is only useful for certain statements below
                 # simulation_number += 1
 
-                # C10 = randu(0, max_C10)
-                # C12 = randu(0, max_C12)
-                # C21 = randu(0, max_C21)
-                # C23 = linearC23[simulation]
+                C10 = randu(0, max_C10)
+                C12 = randu(0, max_C12)
+                C21 = randu(0, max_C21)
+                C23 = randu(0, max_C23)
 
-                C10 = linearC10[simulation]
-                C12 = 50 * 10**-9
-                C21 = 5000 * 10**-9
-                C23 = 5000 * 10**-9
+                # C10 = linearC10[simulation]
+                # C12 = 50 * 10**-9
+                # C21 = 5000 * 10**-9
+                # C23 = 5000 * 10**-9
 
-                phi10 = 0
-                phi12 = np.pi/4
-                phi21 = np.pi/2
-                phi23 = np.pi/6
+                # phi10 = 0
+                # phi12 = np.pi/4
+                # phi21 = np.pi/2
+                # phi23 = np.pi/6
 
                 # if simulation_number <= math.ceil(number_simulations / 4):
                 #     C10 = randu(0, max_C10)
@@ -136,11 +136,11 @@ if __name__ == "__main__":
                 #     C12 = randu(0, C23/1000)
                 #     C21 = randu(0, C23/100)
 
-                # # Below, the ranges for 
-                # phi10 = 0   # Defocus has an m-value of 0
-                # phi12 = randu(0, np.pi/2)
-                # phi21 = randu(0, np.pi)
-                # phi23 = randu(0, np.pi/3)
+                # Below, the ranges for 
+                phi10 = 0   # Defocus has an m-value of 0
+                phi12 = randu(0, np.pi/2)
+                phi21 = randu(0, np.pi)
+                phi23 = randu(0, np.pi/3)
 
                 I = randu(min_I, max_I)
                 t = randu(min_t, max_t)
