@@ -233,6 +233,8 @@ trainTransform = Compose([
     Normalize(mean=[mean], std=[std])
 ])
 
+# TODO: if you ever change testTransform so it's not the same as trainTransform, make sure that testSet has self.transform = testTransform 
+# rather than trainTransform
 testTransform = Compose([
     ToTensor(),
     Resize(resolution, F2.InterpolationMode.BICUBIC),
@@ -268,6 +270,8 @@ print(f"trainFraction:evalFraction:testFraction {trainFraction}:{evalFraction}:{
 
 # Split up dataset into train, eval and test
 
+# TODO: if you ever change testTransform so it's not the same as trainTransform, make sure that testSet has self.transform = testTransform 
+# rather than trainTransform
 trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
 
 print(f"Memory/bytes allocated after ronchdset splitting: {torch.cuda.memory_allocated(GPU)}")
@@ -381,18 +385,6 @@ optimiser = optim.SGD([
 # instantiating the string first
 lr_scheduler_string = "ExponentialLR(optimiser, gamma=0.975)"
 lr_scheduler = eval(lr_scheduler_string)
-
-
-# TENSORBOARD
-
-batch = next(iter(trainLoader))
-
-example_data = convert_tensor(batch[0], device=device, non_blocking=True)
-
-writer.add_graph(model, example_data)
-writer.close()
-
-sys.exit()
 
 
 # update_fn DEFINITION
@@ -521,6 +513,7 @@ torch.cuda.empty_cache()
 
 # Output_transform definition
 
+# See https://pytorch.org/ignite/quickstart.html for what is happening below
 trainer = Engine(update_fn)
 
 def output_transform(out):
@@ -577,7 +570,8 @@ metrics = {
 
 # EVALUATOR INSTANTIATION
 
-# Creating two evaluators to compute metrics on train/test images and log them to Tensorboard
+# Creating two evaluators to compute metrics on evaluation/test images and log them to Tensorboard
+# Below, create_supervised_evaluator is used to facilitate the logging of the metrics, as in https://pytorch.org/ignite/quickstart.html
 trainEvaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
 testEvaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
 
@@ -587,16 +581,25 @@ testEvaluator = create_supervised_evaluator(model, metrics=metrics, device=devic
 
 from ignite.contrib.handlers import CustomPeriodicEvent
 
+# Below, creating a custom periodic event that occurs every 3 epochs
 cpe = CustomPeriodicEvent(n_epochs=3)
+
+# Below, making sure that this custom periodic event is attached to the trainer Engine
 cpe.attach(trainer)
 
+# Defining a function that permits evaluation on evalLoader (to be used now) and testLoader (not really to be used for now)
 def run_evaluation(engine):
     trainEvaluator.run(evalLoader)
     testEvaluator.run(testLoader)
 
 
-# Evaluation occurs after the 3rd epoch begins, I believe
+# NOTE: Evaluation occurs at every 3rd epoch, I believe, starting with the first I think--this may be why there has always been a waiting 
+# period before training begins. It could be that changing to EPOCHS_3_COMPLETED might be better but not so sure, it may be that the 
+# second line is doing that.
 trainer.add_event_handler(cpe.Events.EPOCHS_3_STARTED, run_evaluation)
+
+# Hover over Events and you see that Events.COMPLETED means that run_evaluation here is being triggered when the engine's (trainer's) run is 
+# completed, so after the final epoch. This is worth keeping, of course.
 trainer.add_event_handler(Events.COMPLETED, run_evaluation)
 
 
