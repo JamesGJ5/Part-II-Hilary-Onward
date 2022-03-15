@@ -519,7 +519,7 @@ def output_transform(out):
 # This is mostly so batchloss can be displayed during training
 # NOTE: below, the first mention of "output_transform" is one of RunningAverage's parameters, its argument is the 
 # function defined above
-RunningAverage(output_transform=output_transform).attach(trainer, "batchloss")
+RunningAverage(output_transform=output_transform).attach(trainer, "runningAvgBatchloss")
 
 
 
@@ -530,7 +530,7 @@ log_path = f"/media/rob/hdd2/james/training/fineTuneEfficientNet/{exp_name}"
 
 tb_logger = TensorboardLogger(log_dir=log_path)
 
-tb_logger.attach(trainer, log_handler=OutputHandler('training', ['batchloss', ]), event_name=Events.ITERATION_COMPLETED)
+tb_logger.attach(trainer, log_handler=OutputHandler('training', ['runningAvgBatchloss', ]), event_name=Events.ITERATION_COMPLETED)
 print("Experiment name: ", exp_name)
 
 # Learning rate scheduling
@@ -542,11 +542,12 @@ tb_logger.attach(trainer, log_handler=OptimizerParamsHandler(optimiser, "lr"), e
 
 
 # Interaction-wise progress bar
-ProgressBar(bar_format="").attach(trainer, metric_names=['batchloss',])
+ProgressBar(bar_format="").attach(trainer, metric_names=['runningAvgBatchloss',])
 
 
 # Epoch-wise progress bar with display of training losses
-ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['batchloss'], event_name=Events.EPOCH_STARTED,
+# TODO: figure out if it matters that below, metric_names' value doesn't contain a comma as it does above
+ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['runningAvgBatchloss'], event_name=Events.EPOCH_STARTED,
 closing_event_name=Events.EPOCH_COMPLETED)
 
 
