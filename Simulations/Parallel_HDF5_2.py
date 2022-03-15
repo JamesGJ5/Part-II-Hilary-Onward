@@ -21,13 +21,13 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 100 * 10**-3
+    simdim = 50 * 10**-3
 
     # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
-    max_C10 = 100 * 10**-9  # Maximum C10 (defocus) magnitude/m
-    max_C12 = 100 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
-    max_C21 = 10000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
-    max_C23 = 10000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
+    max_C10 = 10 * 10**-9  # Maximum C10 (defocus) magnitude/m
+    max_C12 = 10 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
+    max_C21 = 1000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
+    max_C23 = 1000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
     # min_Cnm will be 0 since negative values are redundant, I THINK (see lab book's 29/11/2021 entry)
     # phi_n,m will be between 0 and pi/m radians since, I believe, other angles are redundant (see lab book's 29/11/2021 entry)
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/14_03_22/mixedAbers.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/15_03_22/mixedAbers.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -190,7 +190,7 @@ if __name__ == "__main__":
     # sys.exit()
 
     # CPUs AND PROCESSES
-    total_simulations = 1000
+    total_simulations = 100000
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
