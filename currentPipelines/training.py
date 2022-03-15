@@ -482,6 +482,7 @@ def update_fn(engine, batch):
 
     return {
         "batchloss": batchloss,
+        "validationLoss": 1
     }
 
 
@@ -532,6 +533,8 @@ tb_logger = TensorboardLogger(log_dir=log_path)
 
 tb_logger.attach(trainer, log_handler=OutputHandler('training', ['runningAvgBatchloss', ]), event_name=Events.ITERATION_COMPLETED)
 print("Experiment name: ", exp_name)
+
+tb_logger.attach(trainer, log_handler=OutputHandler('training', output_transform = lambda out: out["validationLoss"]), event_name=Events.ITERATION_COMPLETED)
 
 # Learning rate scheduling
 trainer.add_event_handler(Events.EPOCH_COMPLETED, lambda engine: lr_scheduler.step())
