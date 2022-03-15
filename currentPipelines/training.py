@@ -12,10 +12,6 @@ import datetime
 # Tensorboard stuff
 from torch.utils.tensorboard import SummaryWriter
 
-# TODO: change the below log directory to the same one being used in the 
-# kaggle code.
-writer = SummaryWriter("runs/mnist")
-
 
 # For data loading onward
 import sys
