@@ -54,6 +54,8 @@ def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C10_ang, 
                 C12_mag,    # C1,2 magnitude/m (2-fold astigmatism)
                 C21_mag,    # C2,1 magnitude/m (axial coma)
                 C23_mag)    # C2,3 magnitude/m (3-fold astigmatism)
+    # NOTE: in https://github.com/noahschnitzer/ronchigram-matlab/blob/master/simulation/aberration_generator.m there is 
+    # mention of a variable called "ang" being the unit for defocus' magnitude; this stands for Angstrom, not angle.
 
     # TODO: discern what type of lens (e.g. over or under-focussed) the signs allude to in the later aberration function
     #   equation
