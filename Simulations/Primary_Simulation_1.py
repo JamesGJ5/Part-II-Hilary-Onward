@@ -176,7 +176,9 @@ def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C10_ang, 
 
     # NOISE CALCULATIONS FROM (Schnitzer, 2020c)
 
-    nnoise = 1  # Presumably the number of noise functions
+    # From the below code, nnoise seems to be the number of times we add white noise to our noise kernel; nnoise > 1 
+    # would mean doing this multiple times, leading to a more white-noisy noise kernel.
+    nnoise = 1
     noisefact = 16
 
     assert imdim % noisefact == 0
@@ -189,8 +191,12 @@ def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C10_ang, 
     for i in range(nnoise):
         noise_fn += standard_normal(size=(noise_kernel_size, noise_kernel_size))
 
-    # todo: figure out where they cut off frequencies above Kmax/2
+    # TODO: figure out where they cut off frequencies above Kmax/2
 
+    # The below is done in order to roughly get noise_fn into a distribution that leads to an expectation value of 1/2 
+    # in noise_fun's distribution, then an expectation value of about pi/8 (in between pi/16 and pi/4, which Zhiyuan 
+    # Ding (on 16/03/22, over Teams) suggests is reasonable for a carbon thin film) when pi/4 is multiplied by 
+    # noise_fun in calculations further below (i.e. in projected potential calculations).
     noise_fn /= nnoise
     noise_fn += 1
     noise_fn /= 2
@@ -212,7 +218,7 @@ def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C10_ang, 
 
     # Schnitzer's, from (Schnitzer, 2020c)
     inter_param_schnitzer = 2*pi/(calc_wavlen(av)*kev/e*1000)*(m_e*c**2+kev*1000)/(2*m_e*c**2+kev*1000)
-    exp_part = np.exp(-1j * np.pi/4 * inter_param_schnitzer * noise_fun / (1.7042*10**-12))   # Schnitzer's
+    exp_part = np.exp(-1j * np.pi/4 * noise_fun * inter_param_schnitzer / (1.7042*10**-12))   # Schnitzer's
 
     # Transmission wavefunction under the eikonal approximation (Schnitzer, Sung and Hovden, 2019)
     psi_t = fft_psi_p * exp_part
