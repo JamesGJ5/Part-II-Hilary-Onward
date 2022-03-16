@@ -258,19 +258,19 @@ if __name__ == "__main__":
 
     # RONCHIGRAM CALCULATION
 
-    mag_list = (10 * 10**-9,    # C1,0 magnitude/m (defocus)
-                10 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism)
+    mag_list = (100 * 10**-9,    # C1,0 magnitude/m (defocus)
+                100 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism)
 
-                1000 * 10**-9,    # C2,1 magnitude/m (axial coma)
+                1500 * 10**-9,    # C2,1 magnitude/m (axial coma)
                 1000 * 10**-9)    # C2,3 magnitude/m (3-fold astigmatism)
 
     ang_list = (0,        # C1,0 angle/rad
-                np.pi/2,    # C1,2 angle/rad
-                np.pi/1,    # C2,1 angle/rad
-                np.pi/3)    # C2,3 angle/rad
+                0,    # C1,2 angle/rad
+                0,    # C2,1 angle/rad
+                0)    # C2,3 angle/rad
 
     imdim = 1024
-    simdim = 50 * 10**-3
+    simdim = 100 * 10**-3
 
     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1)
 
