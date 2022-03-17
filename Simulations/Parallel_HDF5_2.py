@@ -58,7 +58,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/17_03_22/linear_c12", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/17_03_22/linearPhi23", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -88,12 +88,16 @@ if __name__ == "__main__":
             linearC21 = np.linspace(rank / number_processes * max_C21, (rank + 1) / number_processes * max_C21, number_simulations, endpoint=False)
             linearC23 = np.linspace(rank / number_processes * max_C23, (rank + 1) / number_processes * max_C23, number_simulations, endpoint=False)
 
+            linearPhi12 = np.linspace(rank / number_processes * np.pi/2, (rank + 1) / number_processes * np.pi/2, number_simulations, endpoint=False)
+            linearPhi21 = np.linspace(rank / number_processes * np.pi, (rank + 1) / number_processes * np.pi, number_simulations, endpoint=False)
+            linearPhi23 = np.linspace(rank / number_processes * np.pi/3, (rank + 1) / number_processes * np.pi/3, number_simulations, endpoint=False)
+
             # See Google doc 4th Year > 16/02/22 for how the below ranges were chosen
             for simulation in range(number_simulations):
                 # NOTE: The below variable is only useful for certain statements below
                 # simulation_number += 1
 
-                C10 = linearC10
+                C10 = randu(0, max_C10)
                 C12 = randu(0, max_C12)
                 C21 = randu(0, max_C21)
                 C23 = randu(0, max_C23)
@@ -140,7 +144,7 @@ if __name__ == "__main__":
                 phi10 = 0   # Defocus has an m-value of 0
                 phi12 = randu(0, np.pi/2)
                 phi21 = randu(0, np.pi)
-                phi23 = randu(0, np.pi/3)
+                phi23 = linearPhi23[simulation]
 
                 I = randu(min_I, max_I)
                 t = randu(min_t, max_t)
