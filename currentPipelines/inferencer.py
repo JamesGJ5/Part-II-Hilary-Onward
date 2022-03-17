@@ -118,19 +118,12 @@ std = eval(config["modelSection"]["std"])
 testSetPath = config["testSetPath"]["testSetPath"]
 
 
-# TREND SET PATH
-
-# The path of Ronchigrams in which there's a trend that I want to see if the model can predict
-
-trendSetPath = config["trendSetPath"]["trendSetPath"]
-
-
 # SCALING TENSORS
 # Just initialising some torch Tensors that will be useful for below calculations
 # TODO: find a way to do the below more efficiently
 
 # sorted(chosenVals) sorts the keys in chosenVals, chosenVals[key] extracts whether its value is True or False; so, sortedChosenVals is a 
-# list whose elements are either True or False, corresponding to whether the corresponding aberration constatns key in sorted(chosenVals) is 
+# list whose elements are either True or False, corresponding to whether the corresponding aberration constants key in sorted(chosenVals) is 
 # included or not in scaling predicted and target labels to real values for Ronchigram depiction etc.
 sortedChosenVals = [chosenVals[key] for key in sorted(chosenVals)]
 
@@ -347,7 +340,6 @@ for i in range(len(testSubset)):
 
 plt.show()
 
-sys.exit()
 
 # Checking trends
 
@@ -366,49 +358,61 @@ sys.exit()
 # 5) Plot actual c10 array vs predicted c10 array on the same graph, in different colours/maybe one with a line and one 
 # as scattered dots (the predictions being the dots)
 
-trendSet = RonchigramDataset(trendSetPath, transform=testTransform, complexLabels=False, **chosenVals, **scalingVals)
+constants = ["c10", "c12", "c21", "c23", "phi12", "phi21", "phi23"]
+constUnits = ["m"] * 4 + ["rad"] * 3
 
-trendLoader = DataLoader(trendSet, batch_size=batchSize, shuffle=False, num_workers=numWorkers, pin_memory=True, 
-                        drop_last=False)
+for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
 
-# print(trendSet[0][1].size())
+    trendSetPath = config["trendSetPath"][const]
 
-# targetArray = np.empty((len(trendSet), *trendSet[0][1].size()))
-# print(targetArray.shape)
+    trendSet = RonchigramDataset(trendSetPath, transform=testTransform, complexLabels=False, **chosenVals, **scalingVals)
 
-targetTensor = torch.tensor([])
-predTensor = torch.tensor([])
+    trendLoader = DataLoader(trendSet, batch_size=batchSize, shuffle=False, num_workers=numWorkers, pin_memory=True, 
+                            drop_last=False)
 
-with torch.no_grad():
-    for batchIdx, (batchedRonchs, batchedTargets) in enumerate(trendLoader):
+    # print(trendSet[0][1].size())
 
-        batchedRonchs = convert_tensor(batchedRonchs, device=device, non_blocking=True)
+    # targetArray = np.empty((len(trendSet), *trendSet[0][1].size()))
+    # print(targetArray.shape)
 
-        # if batchIdx % 10 == 0:
-        #     print(batchedTargets.size())
-        #     print(batchedRonchs.size())
+    targetTensor = torch.tensor([])
+    predTensor = torch.tensor([])
 
-        # TODO: change below so that instead of flattening, it reshapes into a different row for each cnm and phinm
-        batchedTargets = batchedTargets[:, 0].cpu()
-        predBatch = model(batchedRonchs)[:, 0].cpu()
 
-        # if batchIdx % 10 == 0:
-        #     print(batchedTargets)
-        #     print(predBatch)
+    with torch.no_grad():
+        for batchIdx, (batchedRonchs, batchedTargets) in enumerate(trendLoader):
 
-        targetTensor = torch.cat((targetTensor, batchedTargets))
-        predTensor = torch.cat((predTensor, predBatch))
+            batchedRonchs = convert_tensor(batchedRonchs, device=device, non_blocking=True)
 
-        if batchIdx % 10 == 0: print(f"{batchIdx} batches done...")
+            # if batchIdx % 10 == 0:
+            #     print(batchedTargets.size())
+            #     print(batchedRonchs.size())
 
-    # usedScalingFactors = torch.reshape(usedScalingFactors, (len(usedScalingFactors), 1))
+            # TODO: change below so that instead of flattening, it reshapes into a different row for each cnm and phinm
+            # NOTE: the 0 below is for c10; change accordingly if wanting to check if model sees trends for other cnm and 
+            # for phinm
+            batchedTargets = torch.flatten(batchedTargets[:, constIdx].cpu())
+            predBatch = torch.flatten(model(batchedRonchs)[:, constIdx].cpu())
 
-    # TODO: generalise the below to other scaling values
-    targetTensor = (targetTensor / usedScalingFactors[0]).numpy()
-    predTensor = (predTensor / usedScalingFactors[0]).numpy()
+            # if batchIdx % 10 == 0:
+            #     print(batchedTargets)
+            #     print(predBatch)
 
-    plt.plot(np.linspace(1, len(targetTensor), len(targetTensor)), targetTensor, 'b')
-    plt.plot(np.linspace(1, len(predTensor), len(predTensor)), predTensor, 'ro')
-    plt.ylabel("blue: target, red: prediction")
-    # plt.savefig(f"/media/rob/hdd1/james-gj/Simulations/inferenceResults/trendGraphs/{startTime}.png")
-    plt.show()
+            targetTensor = torch.cat((targetTensor, batchedTargets))
+            predTensor = torch.cat((predTensor, predBatch))
+
+            if batchIdx % 10 == 0: print(f"{batchIdx} batches  of size {batchSize} done...")
+
+        # usedScalingFactors = torch.reshape(usedScalingFactors, (len(usedScalingFactors), 1))
+
+        # TODO: generalise the below to other scaling values
+        targetTensor = (targetTensor / usedScalingFactors[constIdx]).numpy()
+        predTensor = (predTensor / usedScalingFactors[constIdx]).numpy()
+
+        plt.plot(np.linspace(1, len(targetTensor), len(targetTensor)), targetTensor, 'b')
+        plt.plot(np.linspace(1, len(predTensor), len(predTensor)), predTensor, 'ro')
+        plt.xlabel("Ronchigram Index")
+        plt.ylabel(f"{const} / {constUnit}")
+        plt.title("Blue points target values, red points predictions")
+        plt.savefig(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/17_03_22/linear_{const}.png")
+        plt.show()
