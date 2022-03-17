@@ -100,10 +100,17 @@ torch.manual_seed(torchSeed)
 # Creating this variable because in model importation I will only import EfficientNet-B7 if this name in string form is 
 # what the below variable is assigned to
 efficientNetModel = "EfficientNet-B3"
+
 pretrainedWeights = eval(configSection["pretrainedWeights"])
+
+# The below is whether the last lr computed in preTrainedWeights' run will be returned (see 
+# https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ExponentialLR.html for more on this)
+# TODO: figure out how to actually implement getting last lr in state_dict like the above link says is doable
+if pretrainedWeights:
+    useLast_lr = eval(configSection["useLast_lr"])
+
 estimateMeanStd = eval(configSection["estimateMeanStd"])  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
                         # transform
-
 
 
 # GPU STUFF
@@ -379,7 +386,8 @@ optimiser = optim.SGD([
 
 # TODO: I have put this here to conveniently save the string to a logging file, must find a way to do this without 
 # instantiating the string first
-lr_scheduler_string = "ExponentialLR(optimiser, gamma=0.975)"
+gamma = eval(configSection["gamma"])
+lr_scheduler_string = f"ExponentialLR(optimiser, gamma={gamma})"
 lr_scheduler = eval(lr_scheduler_string)
 
 
