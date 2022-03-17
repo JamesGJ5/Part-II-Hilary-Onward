@@ -582,7 +582,7 @@ testEvaluator = create_supervised_evaluator(model, metrics=metrics, device=devic
 from ignite.contrib.handlers import CustomPeriodicEvent
 
 # Below, creating a custom periodic event that occurs every 3 epochs
-cpe = CustomPeriodicEvent(n_epochs=3)
+cpe = CustomPeriodicEvent(n_epochs=2)
 
 # Below, making sure that this custom periodic event is attached to the trainer Engine
 cpe.attach(trainer)
@@ -596,7 +596,7 @@ def run_evaluation(engine):
 # NOTE: Evaluation occurs at every 3rd epoch, I believe, starting with the first I think--this may be why there has always been a waiting 
 # period before training begins. It could be that changing to EPOCHS_3_COMPLETED might be better but not so sure, it may be that the 
 # second line is doing that.
-trainer.add_event_handler(cpe.Events.EPOCHS_3_STARTED, run_evaluation)
+trainer.add_event_handler(cpe.Events.EPOCHS_2_STARTED, run_evaluation)
 
 # Hover over Events and you see that Events.COMPLETED means that run_evaluation here is being triggered when the engine's (trainer's) run is 
 # completed, so after the final epoch. This is worth keeping, of course.
