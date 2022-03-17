@@ -56,7 +56,7 @@ from Primary_Simulation_1 import calc_Ronchigram
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
 GPU = 1
-usingGPU = True
+usingGPU = False
 
 if not usingGPU:
     os.environ["CUDA_VISIBLE_DEVICES"]=""
@@ -73,19 +73,13 @@ if usingGPU:
 
 efficientNetModel = "EfficientNet-B3"
 
-predictSingleAber = True   # I.E. whether only a single aberration is to have its constants predicted from a test aberration
-
-if predictSingleAber:
-    singleAber = "C10"
-
-mixedRonchs = True  # Whether or not the Ronchigrams being inferred from contain more than one aberration
 
 # Choosing which labels are going to be returned alongside the Ronchigrams returned by the RonchigramDataset object that 
 # shall be instantiated.
 chosenVals = {"c10": True, "c12": True, "c21": True, "c23": True, "phi10": False, "phi12": True, "phi21": True, "phi23": True}
 scalingVals = {
-    "c10scaling": 10**7, "c12scaling": 2 * 10**7, "c21scaling": 2 * 10**5, "c23scaling": 2 * 10**5, 
-    "phi10scaling": 1, "phi12scaling": 1 / (np.pi / 4), "phi21scaling": 1 / (np.pi / 2), "phi23scaling": 1 / (np.pi / 6)
+    "c10scaling": 1 / (10 * 10**-9), "c12scaling": 1 / (10 * 10**-9), "c21scaling": 1 / (1000 * 10**-9), "c23scaling": 1 / (1000 * 10**-9), 
+    "phi10scaling": 1, "phi12scaling": 1 / (np.pi / 2), "phi21scaling": 1 / (np.pi / 1), "phi23scaling": 1 / (np.pi / 3)
 } 
 
 
@@ -378,9 +372,17 @@ with torch.no_grad():
 
         batchedRonchs = convert_tensor(batchedRonchs, device=device, non_blocking=True)
 
+        # if batchIdx % 10 == 0:
+        #     print(batchedTargets.size())
+        #     print(batchedRonchs.size())
+
         # TODO: change below so that instead of flattening, it reshapes into a different row for each cnm and phinm
         batchedTargets = batchedTargets[:, 0].cpu()
         predBatch = model(batchedRonchs)[:, 0].cpu()
+
+        # if batchIdx % 10 == 0:
+        #     print(batchedTargets)
+        #     print(predBatch)
 
         targetTensor = torch.cat((targetTensor, batchedTargets))
         predTensor = torch.cat((predTensor, predBatch))
