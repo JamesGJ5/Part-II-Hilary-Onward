@@ -227,20 +227,19 @@ model.eval()
 
 with torch.no_grad():
     # NOTE: if this isn't feasible GPU memory-wise, may want to replace batch with batch[0] and instances of x[0] with x
-    x = convert_tensor(batch, device=device, non_blocking=True)
+    x = convert_tensor(batch[0], device=device, non_blocking=True)
 
     # yPred is the batch of labels predicted for x
-    yPred = model(x[0])
+    yPred = model(x)
 
-    print("Predicted batch of labels (batch of actual labels is printed above)\n")
+    print("Batch of predicted labels:")
     print(yPred)
 
-    # The below is done because for training, cnm and phinm values are scaled by scaling factors; to see what predictions 
-    # mean physically, must rescale back
-    # TODO: generalise the below to other scaling values
+    # The below is done because before input, cnm and phinm values are scaled by scaling factors; to see what predictions 
+    # mean physically, must rescale back as is done below.
     yPred = yPred.cpu() / usedScalingFactors
     print(yPred)
-
+    
 
 # Use predicted labels to calculate new Numpy Ronchigrams (with resolution 1024)
 
