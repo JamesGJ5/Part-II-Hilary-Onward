@@ -55,8 +55,8 @@ from Primary_Simulation_1 import calc_Ronchigram
 
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
-GPU = 1
-usingGPU = False
+GPU = 0
+usingGPU = True
 
 if not usingGPU:
     os.environ["CUDA_VISIBLE_DEVICES"]=""
@@ -87,7 +87,7 @@ scalingVals = {
 
 # numLabels is essentially the number of elements the model outputs in its prediction for a given Ronchigram. It is of 
 # course best to match this number to the same number that was used in training the model.
-numLabels = 1
+numLabels = 7
 
 
 # CONFIG STUFF
