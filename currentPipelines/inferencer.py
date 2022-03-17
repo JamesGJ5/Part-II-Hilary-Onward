@@ -187,12 +187,8 @@ numWorkers = 2
 
 # Collecting subset of testSet to make pretty pictures with
 
-chosenIndices = [0, 1, 2, 3]
+chosenIndices = [0, 250, 500, 750]
 testSubset = Subset(testSet, chosenIndices)
-
-
-# Put set to be inferred into DataLoader along with test transform and choose indices to be used from DataLoader (see 
-# oldPipelines/ for how this was done previously)
 
 testLoader = DataLoader(testSubset, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
                         pin_memory=True)
@@ -201,23 +197,27 @@ testLoader = DataLoader(testSubset, batch_size=batchSize, num_workers=numWorkers
 # Quick tests on batched data
 
 batch = next(iter(testLoader))
-print(f"Size of Ronchigram batch: {batch[0].size()}")
-print(f"Size of labels batch: {batch[1].size()}")
-print(batch[1])
+
 
 testingDataLoader = True
 
 if testingDataLoader:
     for iBatch, batchedSample in enumerate(testLoader):
-        print(iBatch, batchedSample[0].size(),
-                batchedSample[1].size())
+
+        print(f"\nBatch index: {iBatch}")
+        print(f"Ronchigram batch size: {batchedSample[0].size()}")
+        print(f"Labels batch size: {batchedSample[1].size()}\n")
 
         if iBatch == 0:
             plt.figure()
+
+            # In batchedSample, labels get printed, hence the below print statement
+            print("Labels batch:")
             showBatch(batchedSample)
-            # print(batchedSample["aberrations"])
+
             plt.ioff()
             plt.show()
+
             break
 
 
