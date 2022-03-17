@@ -212,7 +212,7 @@ if testingDataLoader:
             plt.figure()
 
             # In batchedSample, labels get printed, hence the below print statement
-            print("Labels batch:")
+            print("Batch of target labels:")
             showBatch(batchedSample)
 
             plt.ioff()
@@ -232,19 +232,27 @@ with torch.no_grad():
     # yPred is the batch of labels predicted for x
     yPred = model(x)
 
-    print("Batch of predicted labels:")
+    print("\nBatch of predicted labels:")
     print(yPred)
 
     # The below is done because before input, cnm and phinm values are scaled by scaling factors; to see what predictions 
     # mean physically, must rescale back as is done below.
     yPred = yPred.cpu() / usedScalingFactors
-    print(yPred)
+
+
+print("\nBatch of target labels but un-normalised:")
+print(batch[1] / usedScalingFactors)
+
+print("\nBatch of predicted labels but un-normalised:")
+print(yPred)
     
 
 # Use predicted labels to calculate new Numpy Ronchigrams (with resolution 1024)
 
 imdim = 1024    # Output Ronchigram will have an array size of imdim x imdim elements
-simdim = 100 * 10**-3   # Convergence semi-angle/rad
+
+# TODO: make simdim importable alongside the simulations path that is imported
+simdim = 50 * 10**-3   # Convergence semi-angle/rad
 
 # NOTE: this will contain numpy arrays, not torch Tensors
 predictedRonchBatch = np.empty((batchSize, imdim, imdim, 1))
@@ -252,17 +260,19 @@ predictedRonchBatch = np.empty((batchSize, imdim, imdim, 1))
 for labelVectorIndex in range(batchSize):
     labelVector = yPred[labelVectorIndex]
 
-    # If the network was trained using complex labels, the predicted labels must contain predicted real & imaginary 
-    # parts of complex forms of aberrations
-    if testSet.complexLabels:
+    # # If the network was trained using complex labels, the predicted labels must contain predicted real & imaginary 
+    # # parts of complex forms of aberrations
+    # if testSet.complexLabels:
 
-        C10_mag, C10_ang = cmath.polar(labelVector[0] + labelVector[4] * 1j)
-        C12_mag, C12_ang = cmath.polar(labelVector[1] + labelVector[5] * 1j)
-        C21_mag, C21_ang = cmath.polar(labelVector[2] + labelVector[6] * 1j)
-        C23_mag, C23_ang = cmath.polar(labelVector[3] + labelVector[7] * 1j)
+    #     C10_mag, C10_ang = cmath.polar(labelVector[0] + labelVector[4] * 1j)
+    #     C12_mag, C12_ang = cmath.polar(labelVector[1] + labelVector[5] * 1j)
+    #     C21_mag, C21_ang = cmath.polar(labelVector[2] + labelVector[6] * 1j)
+    #     C23_mag, C23_ang = cmath.polar(labelVector[3] + labelVector[7] * 1j)
 
     # TODO: replace the below with a concise generator or something
-    # TODO: remember that just because an aberration magnitude is zero doesn't necessarily mean angle is zero? Idk
+    # NOTE: remember that just because an aberration magnitude is zero doesn't necessarily mean angle is zero? Idk
+    # TODO: implement a way to, when prediction doesn't contain a certain value but the inferred-from Ronchigram does, 
+    # get that value from the inferred-from Ronchigram to go into the predicted Ronchigram
     i = 0
 
     C10_mag = labelVector[i].item() if chosenVals["c10"] else 0
@@ -289,10 +299,10 @@ for labelVectorIndex in range(batchSize):
     C23_ang = labelVector[i].item() if chosenVals["phi23"] else 0
     i = i + 1 if C23_ang != 0 else i
 
-    print(C10_mag, C12_mag, C21_mag, C23_mag, C10_ang, C12_ang, C21_ang, C23_ang)
+    # print(C10_mag, C12_mag, C21_mag, C23_mag, C10_ang, C12_ang, C21_ang, C23_ang)
 
     I, t = testSet.getIt(chosenIndices[labelVectorIndex])
-    print(I, t)
+    # print(I, t)
 
     # NOTE: for now, haven't been saving b, it will probably just remain as 1 but I may change it so be careful
     b = 1
@@ -326,6 +336,8 @@ testSubset = Subset(testSet, chosenIndices)
 # Plot calculated Ronchigrams alongside latest ones from RonchigramDataset, using a function like show_data in 
 # DataLoader2.py for inspiration
 
+# TODO: attach labels to the below plot in some way, even if it is a README.txt or something like that; just gotta 
+# show labels to Chen in presentation so maybe they need not be in the plot itself.
 for i in range(len(testSubset)):
     plt.subplot(2, len(testSubset), i + 1)
     plt.imshow(testSubset[i][0], cmap="gray")
@@ -335,6 +347,7 @@ for i in range(len(testSubset)):
 
 plt.show()
 
+sys.exit()
 
 # Checking trends
 
