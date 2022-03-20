@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 50 * 10**-3
+    simdim = 75 * 10**-3
 
     # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
     max_C10 = 10 * 10**-9  # Maximum C10 (defocus) magnitude/m
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/17_03_22/linearPhi23", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/19_03_22/mixedAbers", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -142,9 +142,9 @@ if __name__ == "__main__":
 
                 # Below, the ranges for 
                 phi10 = 0   # Defocus has an m-value of 0
-                phi12 = randu(0, np.pi/2)
-                phi21 = randu(0, np.pi)
-                phi23 = linearPhi23[simulation]
+                phi12 = randu(0, np.pi / 2)
+                phi21 = randu(0, np.pi / 1)
+                phi23 = randu(0, np.pi / 3)
 
                 I = randu(min_I, max_I)
                 t = randu(min_t, max_t)
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     # sys.exit()
 
     # CPUs AND PROCESSES
-    total_simulations = 1000
+    total_simulations = 100000
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
