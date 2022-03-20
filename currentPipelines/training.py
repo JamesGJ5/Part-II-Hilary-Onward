@@ -369,7 +369,23 @@ criterion = eval(configSection["criterion"])
 lr = eval(configSection["lr"])
 
 # TODO: make sure this, from the Kaggle webpage, is really applicable to your own data (I think it can be, though)
-optimiser = optim.SGD([
+# optimiser = optim.SGD([
+#     {
+#         "params": chain(model.stem.parameters(), model.blocks.parameters()),
+#         "lr": lr * 0.1,
+#     },
+#     {
+#         "params": model.head[:6].parameters(),
+#         "lr": lr * 0.2
+#     },
+#     {
+#         "params": model.head[6].parameters(),
+#         "lr": lr
+#     }],
+#     momentum=0.9, weight_decay=1e-3, nesterov=True)
+
+
+optimiser = optim.Adam([
     {
         "params": chain(model.stem.parameters(), model.blocks.parameters()),
         "lr": lr * 0.1,
@@ -382,13 +398,14 @@ optimiser = optim.SGD([
         "params": model.head[6].parameters(),
         "lr": lr
     }],
-    momentum=0.9, weight_decay=1e-3, nesterov=True)
+    weight_decay=1e-3)
+
 
 # TODO: I have put this here to conveniently save the string to a logging file, must find a way to do this without 
 # instantiating the string first
-gamma = eval(configSection["gamma"])
-lr_scheduler_string = f"ExponentialLR(optimiser, gamma={gamma})"
-lr_scheduler = eval(lr_scheduler_string)
+# gamma = eval(configSection["gamma"])
+# lr_scheduler_string = f"ExponentialLR(optimiser, gamma={gamma})"
+# lr_scheduler = eval(lr_scheduler_string)
 
 
 # update_fn DEFINITION
@@ -545,11 +562,11 @@ print("Experiment name: ", exp_name)
 # tb_logger.attach(trainer, log_handler=OutputHandler('training', output_transform = lambda out: out["validationLoss"]), event_name=Events.ITERATION_COMPLETED)
 
 # Learning rate scheduling
-trainer.add_event_handler(Events.EPOCH_COMPLETED, lambda engine: lr_scheduler.step())
+# trainer.add_event_handler(Events.EPOCH_COMPLETED, lambda engine: lr_scheduler.step())
 
 
 # Log optimiser parameters
-tb_logger.attach(trainer, log_handler=OptimizerParamsHandler(optimiser, "lr"), event_name=Events.EPOCH_STARTED)
+# tb_logger.attach(trainer, log_handler=OptimizerParamsHandler(optimiser, "lr"), event_name=Events.EPOCH_STARTED)
 
 
 # Interaction-wise progress bar
@@ -590,7 +607,7 @@ testEvaluator = create_supervised_evaluator(model, metrics=metrics, device=devic
 from ignite.contrib.handlers import CustomPeriodicEvent
 
 # Below, creating a custom periodic event that occurs every 3 epochs
-cpe = CustomPeriodicEvent(n_epochs=2)
+cpe = CustomPeriodicEvent(n_epochs=3)
 
 # Below, making sure that this custom periodic event is attached to the trainer Engine
 cpe.attach(trainer)
@@ -604,7 +621,7 @@ def run_evaluation(engine):
 # NOTE: Evaluation occurs at every 3rd epoch, I believe, starting with the first I think--this may be why there has always been a waiting 
 # period before training begins. It could be that changing to EPOCHS_3_COMPLETED might be better but not so sure, it may be that the 
 # second line is doing that.
-trainer.add_event_handler(cpe.Events.EPOCHS_2_STARTED, run_evaluation)
+trainer.add_event_handler(cpe.Events.EPOCHS_3_STARTED, run_evaluation)
 
 # Hover over Events and you see that Events.COMPLETED means that run_evaluation here is being triggered when the engine's (trainer's) run is 
 # completed, so after the final epoch. This is worth keeping, of course.
@@ -704,7 +721,7 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     f.write("\n\n")
     f.write(str(optimiser))
     f.write("\n\nCriterion: " + str(criterion))
-    f.write("\n\nLearning rate scheduler: " + lr_scheduler_string)
+    # f.write("\n\nLearning rate scheduler: " + lr_scheduler_string)
     f.write(f"\n\nEarly stopping patience: {es_patience}")
     try:
         f.write("\n\nTraining metrics: " + str(list(metrics.keys())))
