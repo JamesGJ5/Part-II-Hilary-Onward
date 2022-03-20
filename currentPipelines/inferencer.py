@@ -333,9 +333,17 @@ testSubset = Subset(testSet, chosenIndices)
 # show labels to Chen in presentation so maybe they need not be in the plot itself.
 for i in range(len(testSubset)):
     plt.subplot(2, len(testSubset), i + 1)
+
+    plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    plt.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+
     plt.imshow(testSubset[i][0], cmap="gray")
 
     plt.subplot(2, len(testSubset), i + 5)
+
+    plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    plt.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+
     plt.imshow(predictedRonchBatch[i], cmap="gray")
 
 plt.show()
