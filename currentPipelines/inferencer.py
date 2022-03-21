@@ -422,5 +422,5 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
         plt.xlabel("Ronchigram Index")
         plt.ylabel(f"{const} / {constUnit}")
         plt.title("Blue points target values, red points predictions")
-        plt.savefig(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/17_03_22/linear_{const}.png")
+        plt.savefig(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/20_03_22/linear_{const}.png")
         plt.show()
