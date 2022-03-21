@@ -559,6 +559,8 @@ tb_logger = TensorboardLogger(log_dir=log_path)
 tb_logger.attach(trainer, log_handler=OutputHandler('training', ['runningAvgBatchloss', ]), event_name=Events.ITERATION_COMPLETED)
 print("Experiment name: ", exp_name)
 
+tb_logger.attach(trainer, log_handler=OutputHandler('training', output_transform=output_transform), event_name=Events.ITERATION_COMPLETED)
+
 # tb_logger.attach(trainer, log_handler=OutputHandler('training', output_transform = lambda out: out["validationLoss"]), event_name=Events.ITERATION_COMPLETED)
 
 # Learning rate scheduling
@@ -570,12 +572,12 @@ print("Experiment name: ", exp_name)
 
 
 # Interaction-wise progress bar
-ProgressBar(bar_format="").attach(trainer, metric_names=['runningAvgBatchloss',])
+ProgressBar(bar_format="").attach(trainer, metric_names=['runningAvgBatchloss', output_transform=output_transform])
 
 
 # Epoch-wise progress bar with display of training losses
 # TODO: figure out if it matters that below, metric_names' value doesn't contain a comma as it does above
-ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['runningAvgBatchloss'], event_name=Events.EPOCH_STARTED,
+ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['runningAvgBatchloss', output_transform=out], event_name=Events.EPOCH_STARTED,
 closing_event_name=Events.EPOCH_COMPLETED)
 
 
@@ -621,7 +623,7 @@ def run_evaluation(engine):
 # NOTE: Evaluation occurs at every 3rd epoch, I believe, starting with the first I think--this may be why there has always been a waiting 
 # period before training begins. It could be that changing to EPOCHS_3_COMPLETED might be better but not so sure, it may be that the 
 # second line is doing that.
-trainer.add_event_handler(cpe.Events.EPOCHS_3_STARTED, run_evaluation)
+trainer.add_event_handler(cpe.Events.EPOCHS_3_COMPLETED, run_evaluation)
 
 # Hover over Events and you see that Events.COMPLETED means that run_evaluation here is being triggered when the engine's (trainer's) run is 
 # completed, so after the final epoch. This is worth keeping, of course.
