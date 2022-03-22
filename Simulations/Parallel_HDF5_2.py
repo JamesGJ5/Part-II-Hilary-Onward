@@ -21,13 +21,13 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 50 * 10**-3
+    simdim = 30 * 10**-3
 
     # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
-    max_C10 = 10 * 10**-9  # Maximum C10 (defocus) magnitude/m
-    max_C12 = 10 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
-    max_C21 = 1000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
-    max_C23 = 1000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
+    max_C10 = 280 * 10**-9  # Maximum C10 (defocus) magnitude/m
+    max_C12 = 280 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
+    max_C21 = 24000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
+    max_C23 = 16000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
     # min_Cnm will be 0 since negative values are redundant, I THINK (see lab book's 29/11/2021 entry)
     # phi_n,m will be between 0 and pi/m radians since, I believe, other angles are redundant (see lab book's 29/11/2021 entry)
@@ -58,7 +58,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/22_03_22/mixedAbers.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/22_03_22/abersWithC30.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -106,7 +106,7 @@ if __name__ == "__main__":
                 C12 = randu(0, max_C12)
                 C21 = randu(0, max_C21)
                 C23 = randu(0, max_C23)
-                C30 = 0
+                C30 = 0.7 * 10**-3
 
                 # C10 = linearC10[simulation]
                 # C12 = 50 * 10**-9
@@ -180,18 +180,16 @@ if __name__ == "__main__":
 
                 # To make sure things are running properly (only want to do for one process lest we get an overflowing terminal)
                 # if processnum == 0:
-                #     if simulation_number == 1:
-                #         print("\n")
-                #         print(random_mags_dset[simulation])
-                #         print(random_angs_dset[simulation])
-                #         print(random_I_dset[simulation])
-                #         print(ronch_dset[simulation])
+                    # if simulation_number == 1:
+                    #     print("\n")
+                    #     print(random_mags_dset[simulation])
+                    #     print(random_angs_dset[simulation])
+                    #     print(random_I_dset[simulation])
+                    #     print(ronch_dset[simulation])
 
-                #     if simulation_number % 100 == 0:
-                #         tested_at = time.perf_counter()
-                #         time_to_test = round(tested_at - start, 2)
-                #         print(f"\n{simulation_number} simulations complete for process number {processnum}")
-                #         print(f"{time_to_test} seconds elapsed since script began running")
+                    if simulation_number % math.ceil(number_simulations / 10) == 0:
+                        print(f"\n{simulation_number} simulations complete for process number {processnum} at" \
+                            f"{datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}")
 
     # This code was here to make a small practice file (/media/rob/hdd2/james/simulations/17_01_22/Single_Aberrations_Lite.h5)
     # number_processes = 1
