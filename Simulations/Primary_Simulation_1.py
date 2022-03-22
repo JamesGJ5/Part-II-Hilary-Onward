@@ -11,8 +11,8 @@ from matplotlib_scalebar.scalebar import ScaleBar
 
 # SEED
 
-seed = 17
-numpy.random.seed(seed)
+# seed = 17
+# numpy.random.seed(seed)
 
 
 # QUANTITIES
@@ -270,11 +270,11 @@ if __name__ == "__main__":
 
     # RONCHIGRAM CALCULATION
 
-    mag_list = (100 * 10**-9,     # C1,0 magnitude/m (defocus)
-                100 * 10**-9,     # C1,2 magnitude/m (2-fold astigmatism)
+    mag_list = (140 * 10**-9,     # C1,0 magnitude/m (defocus)
+                140 * 10**-9,     # C1,2 magnitude/m (2-fold astigmatism)
 
-                10000 * 10**-9,   # C2,1 magnitude/m (axial coma)
-                10000 * 10**-9,   # C2,3 magnitude/m (3-fold astigmatism)
+                12000 * 10**-9,   # C2,1 magnitude/m (axial coma)
+                8000 * 10**-9,   # C2,3 magnitude/m (3-fold astigmatism)
                 
                 0.7 * 10**-3)   # C3,0 magnitude/m (3rd-order spherical aberration)
 
@@ -287,7 +287,7 @@ if __name__ == "__main__":
                 0)          # C3,0 angle/rad
 
     imdim = 1024
-    simdim = 50 * 10**-3
+    simdim = 30 * 10**-3
 
     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1)
 
