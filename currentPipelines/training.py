@@ -185,17 +185,17 @@ from DataLoader2 import RonchigramDataset
 
 simulationsPath = configSection["simulationsPath"]
 
-c10, c12, c21, c23 = (eval(configSection[x]) for x in ["c10", "c12", "c21", "c23"])
-phi10, phi12, phi21, phi23 = (eval(configSection[x]) for x in ["phi10", "phi12", "phi21", "phi23"])
+c10, c12, c21, c23, c30 = (eval(configSection[x]) for x in ["c10", "c12", "c21", "c23", "c30"])
+phi10, phi12, phi21, phi23, phi30 = (eval(configSection[x]) for x in ["phi10", "phi12", "phi21", "phi23", "phi30"])
 
-c10scaling, c12scaling, c21scaling, c23scaling = (eval(configSection[x]) for x in ["c10scaling", "c12scaling", "c21scaling", "c23scaling"])
-phi10scaling, phi12scaling, phi21scaling, phi23scaling = (eval(configSection[x]) for x in ["phi10scaling", "phi12scaling", "phi21scaling", "phi23scaling"])
+c10scaling, c12scaling, c21scaling, c23scaling, c30scaling = (eval(configSection[x]) for x in ["c10scaling", "c12scaling", "c21scaling", "c23scaling", "c30scaling"])
+phi10scaling, phi12scaling, phi21scaling, phi23scaling, phi30scaling = (eval(configSection[x]) for x in ["phi10scaling", "phi12scaling", "phi21scaling", "phi23scaling", "phi30scaling"])
 
 ronchdset = RonchigramDataset(hdf5filename=simulationsPath, complexLabels=False,
-                                c10=c10, c12=c12, c21=c21, c23=c23, 
-                                phi10=phi10, phi12=phi12, phi21=phi21, phi23=phi23,
-                                c10scaling=c10scaling, c12scaling=c12scaling, c21scaling=c21scaling, c23scaling=c23scaling,
-                                phi10scaling=phi10scaling, phi12scaling=phi12scaling, phi21scaling=phi21scaling, phi23scaling=phi23scaling)
+                                c10=c10, c12=c12, c21=c21, c23=c23, c30=c30,
+                                phi10=phi10, phi12=phi12, phi21=phi21, phi23=phi23, phi30=phi30,
+                                c10scaling=c10scaling, c12scaling=c12scaling, c21scaling=c21scaling, c23scaling=c23scaling, c30scaling=c30scaling,
+                                phi10scaling=phi10scaling, phi12scaling=phi12scaling, phi21scaling=phi21scaling, phi23scaling=phi23scaling, phi30scaling=phi30scaling)
 
 print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(GPU)}")
 
@@ -369,23 +369,7 @@ criterion = eval(configSection["criterion"])
 lr = eval(configSection["lr"])
 
 # TODO: make sure this, from the Kaggle webpage, is really applicable to your own data (I think it can be, though)
-# optimiser = optim.SGD([
-#     {
-#         "params": chain(model.stem.parameters(), model.blocks.parameters()),
-#         "lr": lr * 0.1,
-#     },
-#     {
-#         "params": model.head[:6].parameters(),
-#         "lr": lr * 0.2
-#     },
-#     {
-#         "params": model.head[6].parameters(),
-#         "lr": lr
-#     }],
-#     momentum=0.9, weight_decay=1e-3, nesterov=True)
-
-
-optimiser = optim.Adam([
+optimiser = optim.SGD([
     {
         "params": chain(model.stem.parameters(), model.blocks.parameters()),
         "lr": lr * 0.1,
@@ -398,14 +382,30 @@ optimiser = optim.Adam([
         "params": model.head[6].parameters(),
         "lr": lr
     }],
-    weight_decay=1e-3)
+    momentum=0.9, weight_decay=1e-3, nesterov=True)
+
+
+# optimiser = optim.Adam([
+#     {
+#         "params": chain(model.stem.parameters(), model.blocks.parameters()),
+#         "lr": lr * 0.1,
+#     },
+#     {
+#         "params": model.head[:6].parameters(),
+#         "lr": lr * 0.2
+#     },
+#     {
+#         "params": model.head[6].parameters(),
+#         "lr": lr
+#     }],
+#     weight_decay=1e-3)
 
 
 # TODO: I have put this here to conveniently save the string to a logging file, must find a way to do this without 
 # instantiating the string first
-# gamma = eval(configSection["gamma"])
-# lr_scheduler_string = f"ExponentialLR(optimiser, gamma={gamma})"
-# lr_scheduler = eval(lr_scheduler_string)
+gamma = eval(configSection["gamma"])
+lr_scheduler_string = f"ExponentialLR(optimiser, gamma={gamma})"
+lr_scheduler = eval(lr_scheduler_string)
 
 
 # update_fn DEFINITION
@@ -564,20 +564,20 @@ tb_logger.attach(trainer, log_handler=OutputHandler('training', output_transform
 # tb_logger.attach(trainer, log_handler=OutputHandler('training', output_transform = lambda out: out["validationLoss"]), event_name=Events.ITERATION_COMPLETED)
 
 # Learning rate scheduling
-# trainer.add_event_handler(Events.EPOCH_COMPLETED, lambda engine: lr_scheduler.step())
+trainer.add_event_handler(Events.EPOCH_COMPLETED, lambda engine: lr_scheduler.step())
 
 
 # Log optimiser parameters
-# tb_logger.attach(trainer, log_handler=OptimizerParamsHandler(optimiser, "lr"), event_name=Events.EPOCH_STARTED)
+tb_logger.attach(trainer, log_handler=OptimizerParamsHandler(optimiser, "lr"), event_name=Events.EPOCH_STARTED)
 
 
 # Interaction-wise progress bar
-ProgressBar(bar_format="").attach(trainer, metric_names=['runningAvgBatchloss', output_transform=output_transform])
+ProgressBar(bar_format="").attach(trainer, metric_names=['runningAvgBatchloss'])
 
 
 # Epoch-wise progress bar with display of training losses
 # TODO: figure out if it matters that below, metric_names' value doesn't contain a comma as it does above
-ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['runningAvgBatchloss', output_transform=out], event_name=Events.EPOCH_STARTED,
+ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['runningAvgBatchloss'], event_name=Events.EPOCH_STARTED,
 closing_event_name=Events.EPOCH_COMPLETED)
 
 
@@ -723,7 +723,7 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     f.write("\n\n")
     f.write(str(optimiser))
     f.write("\n\nCriterion: " + str(criterion))
-    # f.write("\n\nLearning rate scheduler: " + lr_scheduler_string)
+    f.write("\n\nLearning rate scheduler: " + lr_scheduler_string)
     f.write(f"\n\nEarly stopping patience: {es_patience}")
     try:
         f.write("\n\nTraining metrics: " + str(list(metrics.keys())))
