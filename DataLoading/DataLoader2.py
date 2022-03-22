@@ -30,14 +30,14 @@ import sys
 class RonchigramDataset(Dataset):
     """Ronchigram dataset loaded from a single HDF5 file (see contents of "if TestLoading" above for file contents). Labels are 
     initially aberration magnitudes and angles but a magnitude/angle pair get changed into a single complex number, the 
-    magnitude/m being its modulus and the angle/rad being its argument. Currently, aberrations are C10, C12, C21 and 
-    C23 in Krivanek notation."""
+    magnitude/m being its modulus and the angle/rad being its argument. Currently, aberrations are C10, C12, C21, C23 and 
+    C30 in Krivanek notation."""
 
     def __init__(self, hdf5filename: str, transform=None, complexLabels=False, 
-                c10 = False, c12 = False, c21 = False, c23 = False, 
-                phi10 = False, phi12 = False, phi21 = False, phi23 = False,
-                c10scaling = 1, c12scaling = 1, c21scaling = 1, c23scaling = 1,
-                phi10scaling = 1, phi12scaling = 1, phi21scaling = 1, phi23scaling = 1):
+                c10=False, c12=False, c21=False, c23=False, c30=False,
+                phi10=False, phi12=False, phi21=False, phi23=False, phi30=False,
+                c10scaling=1, c12scaling=1, c21scaling=1, c23scaling=1, c30scaling=1,
+                phi10scaling=1, phi12scaling=1, phi21scaling=1, phi23scaling=1, phi30scaling=1):
         """Args:
                 hdf5filename: path to the HDF5 file containing the data as mentioned in the comment under this class' definition
                 
@@ -55,14 +55,14 @@ class RonchigramDataset(Dataset):
         self.transform = transform
         self.complexLabels = complexLabels
 
-        cnm = (c10, c12, c21, c23)
-        phinm = (phi10, phi12, phi21, phi23)
+        cnm = (c10, c12, c21, c23, c30)
+        phinm = (phi10, phi12, phi21, phi23, phi30)
 
         self.cnmIndices = [i for i, x in enumerate(cnm) if x]
         self.phinmIndices = [i for i, x in enumerate(phinm) if x]
 
-        self.cnmscaling = np.array([c10scaling, c12scaling, c21scaling, c23scaling])
-        self.phinmscaling = np.array([phi10scaling, phi12scaling, phi21scaling, phi23scaling])
+        self.cnmscaling = np.array([c10scaling, c12scaling, c21scaling, c23scaling, c30scaling])
+        self.phinmscaling = np.array([phi10scaling, phi12scaling, phi21scaling, phi23scaling, phi30scaling])
 
         with h5py.File(self.hdf5filename, "r") as flen:
             # Ranks refers to each parallel process used to save simulations to HDF5 file
@@ -355,8 +355,8 @@ if __name__ == "__main__":
     # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5",
     # removec10=False, removec12=False, removec21=False, removec23=False, removephi10=True, removephi12=False, removephi21=False, removephi23=False)
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/20_03_22/mixedAbers.h5", 
-    c10 = True, c12 = True, c21 = True, c23 = True, phi10 = False, phi12 = True, phi21 = True, phi23 = True)
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/22_03_22/mixedAbers.h5", 
+    c10=True, c12=True, c21=True, c23=True, c30=True, phi10=False, phi12=True, phi21=True, phi23=True, phi30=False)
 
     print(ronchdset[0][1])
     print(ronchdset[-1][1])
