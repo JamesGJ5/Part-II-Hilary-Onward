@@ -58,14 +58,14 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/20_03_22/linearPhi23.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/22_03_22/mixedAbers.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
             try:
                 # dtype is float64 rather than float32 to reduce the memory taken up in storage.
-                random_mags_dset = f.create_dataset("random_mags dataset", (number_processes, number_simulations, 4), dtype="float32")
-                random_angs_dset = f.create_dataset("random_angs dataset", (number_processes, number_simulations, 4), dtype="float32")
+                random_mags_dset = f.create_dataset("random_mags dataset", (number_processes, number_simulations, 5), dtype="float32")
+                random_angs_dset = f.create_dataset("random_angs dataset", (number_processes, number_simulations, 5), dtype="float32")
                 random_I_dset = f.create_dataset("random_I dataset", (number_processes, number_simulations, 1), dtype="float32")
                 random_t_dset = f.create_dataset("random_t dataset", (number_processes, number_simulations, 1), dtype="float32")
                 ronch_dset = f.create_dataset("ronch dataset", (number_processes, number_simulations, 1024, 1024), dtype="float32")
@@ -97,10 +97,16 @@ if __name__ == "__main__":
                 # NOTE: The below variable is only useful for certain statements below
                 # simulation_number += 1
 
-                C10 = randu(max_C10, 2 * max_C10)
-                C12 = randu(max_C12, 2 * max_C12)
-                C21 = randu(max_C21, 2 * max_C21)
-                C23 = randu(max_C23, 2 * max_C23)
+                # C10 = randu(max_C10, 2 * max_C10)
+                # C12 = randu(max_C12, 2 * max_C12)
+                # C21 = randu(max_C21, 2 * max_C21)
+                # C23 = randu(max_C23, 2 * max_C23)
+
+                C10 = randu(0, max_C10)
+                C12 = randu(0, max_C12)
+                C21 = randu(0, max_C21)
+                C23 = randu(0, max_C23)
+                C30 = 0
 
                 # C10 = linearC10[simulation]
                 # C12 = 50 * 10**-9
@@ -144,7 +150,8 @@ if __name__ == "__main__":
                 phi10 = 0   # Defocus has an m-value of 0
                 phi12 = randu(0, np.pi / 2)
                 phi21 = randu(0, np.pi / 1)
-                phi23 = linearPhi23[simulation]
+                phi23 = randu(0, np.pi / 3)
+                phi30 = 0
 
                 I = randu(min_I, max_I)
                 t = randu(min_t, max_t)
@@ -153,10 +160,10 @@ if __name__ == "__main__":
                 # careful when it comes to making changes to the below. Also, make sure that the spaces created in the 
                 # HDF5 file are filled completely, otherwise the length method of the dataset won't work properly, and 
                 # nor will the getitem method.
-                random_mags = np.array([C10, C12, C21, C23])
+                random_mags = np.array([C10, C12, C21, C23, C30])
                 random_mags_dset[rank, simulation] = random_mags[:]
 
-                random_angs = np.array([phi10, phi12, phi21, phi23])
+                random_angs = np.array([phi10, phi12, phi21, phi23, phi30])
                 random_angs_dset[rank, simulation] = random_angs[:]
 
                 random_I = np.array([I])
@@ -165,7 +172,7 @@ if __name__ == "__main__":
                 random_t = np.array([t])
                 random_t_dset[rank, simulation] = random_t[:]
 
-                ronch = Primary_Simulation_1.calc_Ronchigram(imdim, simdim, C10, C12, C21, C23, phi10, phi12, phi21, phi23, I, b, t)
+                ronch = Primary_Simulation_1.calc_Ronchigram(imdim, simdim, C10, C12, C21, C23, C30, phi10, phi12, phi21, phi23, phi30, I, b, t)
                 ronch_dset[rank, simulation] = ronch[:]
 
                 # FIXME: the below is a good way of keeping track of what is happening but it was applicable to the 
@@ -194,7 +201,7 @@ if __name__ == "__main__":
     # sys.exit()
 
     # CPUs AND PROCESSES
-    total_simulations = 1000
+    total_simulations = 100
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
