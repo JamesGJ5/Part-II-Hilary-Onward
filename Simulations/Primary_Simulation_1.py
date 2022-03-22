@@ -11,8 +11,8 @@ from matplotlib_scalebar.scalebar import ScaleBar
 
 # SEED
 
-seed = 17
-numpy.random.seed(seed)
+# seed = 17
+# numpy.random.seed(seed)
 
 
 # QUANTITIES
