@@ -589,8 +589,8 @@ closing_event_name=Events.EPOCH_COMPLETED)
 #   If desired, can create 
 metrics = {
     'Loss': Loss(criterion),
-    'RootMeanSquaredError': RootMeanSquaredError(),
-    'MeanAbsoluteError': MeanAbsoluteError(),
+    # 'RootMeanSquaredError': RootMeanSquaredError(),
+    # 'MeanAbsoluteError': MeanAbsoluteError(),
 }
 
 
@@ -600,7 +600,7 @@ metrics = {
 # Creating two evaluators to compute metrics on evaluation/test images and log them to Tensorboard
 # Below, create_supervised_evaluator is used to facilitate the logging of the metrics, as in https://pytorch.org/ignite/quickstart.html
 trainEvaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
-testEvaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
+# testEvaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
 
 
 
@@ -617,13 +617,13 @@ cpe.attach(trainer)
 # Defining a function that permits evaluation on evalLoader (to be used now) and testLoader (not really to be used for now)
 def run_evaluation(engine):
     trainEvaluator.run(evalLoader)
-    testEvaluator.run(testLoader)
+    # testEvaluator.run(testLoader)
 
 
 # NOTE: Evaluation occurs at every 3rd epoch, I believe, starting with the first I think--this may be why there has always been a waiting 
 # period before training begins. It could be that changing to EPOCHS_3_COMPLETED might be better but not so sure, it may be that the 
 # second line is doing that.
-trainer.add_event_handler(cpe.Events.EPOCHS_3_COMPLETED, run_evaluation)
+trainer.add_event_handler(cpe.Events.EPOCHS_3_STARTED, run_evaluation)
 
 # Hover over Events and you see that Events.COMPLETED means that run_evaluation here is being triggered when the engine's (trainer's) run is 
 # completed, so after the final epoch. This is worth keeping, of course.
@@ -635,8 +635,8 @@ tb_logger.attach(trainEvaluator, log_handler=OutputHandler(tag="training", metri
 global_step_transform=global_step_from_engine(trainer)), event_name=Events.EPOCH_COMPLETED)
 
 # Logging metrics for evaluation on TestLoader
-tb_logger.attach(testEvaluator, log_handler=OutputHandler(tag="test", metric_names=list(metrics.keys()), 
-global_step_transform=global_step_from_engine(trainer)), event_name=Events.EPOCH_COMPLETED)
+# tb_logger.attach(testEvaluator, log_handler=OutputHandler(tag="test", metric_names=list(metrics.keys()), 
+# global_step_transform=global_step_from_engine(trainer)), event_name=Events.EPOCH_COMPLETED)
 
 import logging
 
@@ -673,7 +673,7 @@ score_function=default_score_fn)
 
 # Each time n_epochs (see earlier in script for what n_epochs is) epochs end, I believe checkpointing is done if the 
 # score function is low enough; the dictionary below provides the model's state at that point.
-testEvaluator.add_event_handler(Events.COMPLETED, best_model_handler, {'model': model,})
+trainEvaluator.add_event_handler(Events.COMPLETED, best_model_handler, {'model': model,})
 
 
 
@@ -683,7 +683,7 @@ es_patience = 10
 es_handler = EarlyStopping(patience=es_patience, score_function=default_score_fn, trainer=trainer)
 # I haven't looked far into it, it doesn't seem to matter too much right now, but it may be that it is worth replacing 
 # test_evaluator below with train_evaluator, if that is a better indicator of whether early stopping is worth it
-testEvaluator.add_event_handler(Events.COMPLETED, es_handler)
+trainEvaluator.add_event_handler(Events.COMPLETED, es_handler)
 setup_logger(es_handler.logger)
 
 
@@ -697,7 +697,7 @@ def empty_cuda_cache(engine):
 
 trainer.add_event_handler(Events.EPOCH_COMPLETED, empty_cuda_cache)
 trainEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
-testEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
+# testEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 
 
 
@@ -742,7 +742,7 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
 print(f"trainEvaluator metrics: {trainEvaluator.state.metrics}")
 
 # test dataset metrics
-print(f"testEvaluator metrics: {testEvaluator.state.metrics}")
+# print(f"testEvaluator metrics: {testEvaluator.state.metrics}")
 
 
 # HIGHLIGHTING THE BEST-SCORE MODEL FROM TRAINING
@@ -801,7 +801,7 @@ if renamingBestModel:
 
 with open(f"{log_path}/README.txt", "w") as f:
     f.write(f"trainEvaluator metrics: {trainEvaluator.state.metrics}")
-    f.write(f"\n\ntestEvaluator metrics: {testEvaluator.state.metrics}")
+    # f.write(f"\n\ntestEvaluator metrics: {testEvaluator.state.metrics}")
 
 
 # PLOTTING AND SAVING LOSS CURVE
