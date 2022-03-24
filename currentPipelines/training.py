@@ -283,7 +283,9 @@ print(f"Memory/bytes allocated after ronchdset splitting: {torch.cuda.memory_all
 # Create data loaders via torch.utils.data.DataLoader
 # num_epochs is here to facilitate saving this information to file in code below, didn't want to move lots of code
 
-batchSize = eval(configSection["batchSize"])
+trainBatchSize = eval(configSection["trainBatchSize"])
+evalBatchSize = eval(configSection["evalBatchSize"])
+
 numWorkers = eval(configSection["numWorkers"])
 
 num_epochs = eval(configSection["num_epochs"])
@@ -302,12 +304,15 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     f.write("\n\n")
     f.write(str(testTransform))
     f.write("\n\n")
-    f.write(efficientNetModel + ", " + str(parameters) + f", resolution: {resolution}" + f", {ronchdsetLength} Ronchigrams"+ f", batch size: {batchSize}" + f", number of epochs: {num_epochs}\n\n")
+    f.write(efficientNetModel + ", " + str(parameters) + f", resolution: {resolution}" + \
+            f", {ronchdsetLength} Ronchigrams" + \
+            f", batch sizes: {trainBatchSize} for trainLoader & {evalBatchSize} for evalLoader" + \
+            f", number of epochs: {num_epochs}\n\n")
     f.write(str(model))
 
 
 
-trainLoader = DataLoader(trainSet, batch_size=batchSize, num_workers=numWorkers, shuffle=True, drop_last=True, 
+trainLoader = DataLoader(trainSet, batch_size=trainBatchSize, num_workers=numWorkers, shuffle=True, drop_last=True, 
                         pin_memory=True)
 
 # batch = next(iter(trainLoader))
@@ -319,7 +324,7 @@ trainLoader = DataLoader(trainSet, batch_size=batchSize, num_workers=numWorkers,
 
 
 
-evalLoader = DataLoader(evalSet, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
+evalLoader = DataLoader(evalSet, batch_size=evalBatchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
                         pin_memory=True)
 
 # batch = next(iter(evalLoader))
@@ -328,8 +333,8 @@ evalLoader = DataLoader(evalSet, batch_size=batchSize, num_workers=numWorkers, s
 # print(f"evalLoader batch type is {xtype}")
 
 
-testLoader = DataLoader(testSet, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
-                        pin_memory=True)
+# testLoader = DataLoader(testSet, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
+#                         pin_memory=True)
 
 # NOTE: the below is identical code to code found in inferencer.py; I ran both expecting that they would have the same output given that they same seed was used in 
 # each case, along with the same initial RonchigramDataset and train:eval:test proportions and the same transform details. If the output were the same, it would mean 
