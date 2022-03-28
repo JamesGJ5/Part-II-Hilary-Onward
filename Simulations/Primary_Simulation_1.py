@@ -24,7 +24,7 @@ c = sc.c
 pi = np.pi
 
 
-def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, C10_ang, C12_ang, C21_ang, C23_ang, C30_ang, I, b, t):
+def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, C10_ang, C12_ang, C21_ang, C23_ang, C30_ang, I, b, t, aperture_size):
     """Takes the aberration coefficient magnitudes mentioned above (in Krivanek notation) and returns a NumPy array of
     the resulting Ronchigram.
 
@@ -38,6 +38,8 @@ def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, 
     I: quoted electron current in Ronchigram generation/A, num
     b: fraction of I that reaches the detector, num
     t: Ronchigram aquisition time/s, num
+    aperture_size: "Objective aperture semi-angle (RADIUS)" 
+        (https://github.com/noahschnitzer/ronchigram-matlab/blob/master/misc/example.m) in rad
 
     returns
     Ronchigram, numpy.ndarray
@@ -220,7 +222,12 @@ def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, 
     chi_array = chi_grid(imdim, simdim, av, n_list, m_list, mag_list, ang_list)[0]
     al_rr = chi_grid(imdim, simdim, av, n_list, m_list, mag_list, ang_list)[1]
 
-    fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
+    # Computing objective aperture (Schnitzer, 2020c)
+
+    obj_ap = al_rr <= aperture_size
+
+    fft_psi_p = fft2(np.exp(-1j*chi_array) * obj_ap)    # (Schnitzer, 2020a)
+    # fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
 
     # Schnitzer's, from (Schnitzer, 2020c)
     inter_param_schnitzer = 2*pi/(calc_wavlen(av)*kev/e*1000)*(m_e*c**2+kev*1000)/(2*m_e*c**2+kev*1000)
@@ -232,7 +239,8 @@ def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, 
 
     # CALCULATING THE RONCHIGRAM
 
-    inverse = ifft2(psi_t)  # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
+    inverse = ifft2(psi_t) * obj_ap # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
+    # inverse = ifft2(psi_t) # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
 
     ronch = abs(inverse)**2 # (Schnitzer, Sung and Hovden, 2020)
 
@@ -270,13 +278,13 @@ if __name__ == "__main__":
 
     # RONCHIGRAM CALCULATION
 
-    mag_list = (140 * 10**-9,     # C1,0 magnitude/m (defocus)
-                140 * 10**-9,     # C1,2 magnitude/m (2-fold astigmatism)
+    mag_list = (20 * 10**-9,     # C1,0 magnitude/m (defocus)
+                20 * 10**-9,     # C1,2 magnitude/m (2-fold astigmatism)
 
-                12000 * 10**-9,   # C2,1 magnitude/m (axial coma)
-                8000 * 10**-9,   # C2,3 magnitude/m (3-fold astigmatism)
+                0 * 10**-9,   # C2,1 magnitude/m (axial coma)
+                0 * 10**-9,   # C2,3 magnitude/m (3-fold astigmatism)
                 
-                0.7 * 10**-3)   # C3,0 magnitude/m (3rd-order spherical aberration)
+                0 * 10**-3)   # C3,0 magnitude/m (3rd-order spherical aberration)
 
     ang_list = (0,          # C1,0 angle/rad
                 np.pi / 4,  # C1,2 angle/rad
@@ -287,9 +295,9 @@ if __name__ == "__main__":
                 0)          # C3,0 angle/rad
 
     imdim = 1024
-    simdim = 30 * 10**-3
+    simdim = 180 * 10**-3
 
-    ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1)
+    ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=180*10**-3)
 
     # DEPICTING THE RONCHIGRAM
 
