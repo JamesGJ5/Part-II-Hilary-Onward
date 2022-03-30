@@ -330,7 +330,8 @@ def show_data(ronch, abers):
 
 if __name__ == "__main__":
 
-    # Seeding
+    # SEEDING
+
     # 22 is arbitrary here
     seed = 22
     random.seed(seed)
@@ -345,6 +346,7 @@ if __name__ == "__main__":
 
     torch.manual_seed(torchSeed)
 
+
     # GPU STUFF
     usingGPU = False
 
@@ -355,20 +357,17 @@ if __name__ == "__main__":
         print(f"GPU: {GPU}")
 
 
-    # Dataset instantiation
-
-    # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5",
-    # removec10=False, removec12=False, removec21=False, removec23=False, removephi10=True, removephi12=False, removephi21=False, removephi23=False)
+    # DATASET INSTANTIATION
 
     ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/29_03_22/abersWithC30.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, phi10=False, phi12=True, phi21=True, phi23=True, phi30=False)
 
-    print(ronchdset[0][0].shape)
-    # print(ronchdset[0][1])
-    # print(len(ronchdset))
+    print(f"Shape of Ronchigram in item at index 0 of dataset: {ronchdset[0][0].shape}")
+    print(f"Label in item at index 0 of dataset: {ronchdset[0][1]}")
+    print(f"Number of items in dataset: {len(ronchdset)}")
 
 
-    # Quick check of the numpy array plotting
+    # QUICK CHECK OF THE NUMPY ARRAY PLOTTING
 
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
@@ -386,7 +385,8 @@ if __name__ == "__main__":
     show_data(ronchdset[3][0], ronchdset[3][1])
     plt.show()
 
-    # sys.exit()
+
+    # ESTIMATING MEAN AND STD
 
     # Implementing a way to find the mean and std of the data for Normalize(). 
     # Since this relies on ToTensor() being done, I am going to create a new composed transform variable containing just 
@@ -394,18 +394,23 @@ if __name__ == "__main__":
     # are looking for the mean and std to pass to Normalize(), which should only act after the image has been converted to a 
     # torch Tensor with values between 0 and 1 inclusive and then resized to the desired resolution.
 
-    # Image size must be 600 x 600 for EfficientNet-B7; be careful if you instead want to look at things for a different model 
+    # Image size must be 300 x 300 for EfficientNet-B3; be careful if you instead want to look at things for a different model 
     # of EfficientNet
-    resolution = 600
+    resolution = 300
 
     scriptTime = datetime.datetime.now()
 
     apertureSize = 1024 / 2 # Aperture radius in pixels
 
-    # calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, apertureSize=apertureSize)
-    # print(calculatedMean, calculatedStd)
+    estimateMeanStd = False
 
-    # Applying transforms
+    if estimateMeanStd:
+
+        calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, apertureSize=apertureSize)
+        print(calculatedMean, calculatedStd)
+
+
+    # APPLYING TRANSFORMS
 
     # trainTransform and testTransform both have toTensor() because both train and test data must be converted to torch 
     # Tensor for operations by torch; trainTransform and testTransform both have Resize(), with the same arguments, for 
@@ -416,8 +421,8 @@ if __name__ == "__main__":
     # train and test data, the consistency should be fine. Anyway, images plotted below aren't exactly what the neural network 
     # "sees".
 
-    # Image size must be 600 x 600 for EfficientNet-B7
-    resolution = 600
+    # Image size must be 300 x 300 for EfficientNet-B3
+    resolution = 300
 
     # TODO: try works if mean and std of data are being calculated earlier in the script; except assigns fixed values to them, 
     # preferably values found previously - going to develop that bit such that it changes depending on mean and std already 
@@ -426,8 +431,8 @@ if __name__ == "__main__":
         mean = calculatedMean
         std = calculatedStd
     except:
-        mean = 0.5017
-        std = 0.2521
+        mean = 0.5006
+        std = 0.2591
 
     trainTransform = Compose([
         ToTensor(),
@@ -448,64 +453,13 @@ if __name__ == "__main__":
     chosenIndices = [0, 1, 2, 3]
     ronchSubset = Subset(ronchdset, chosenIndices)
 
-
     # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
     # incorporated, and testing the dataloader
 
     dataloader = DataLoader(ronchSubset, batch_size=4, shuffle=False, num_workers=0)
 
 
-    # Applying transforms
-
-    # trainTransform and testTransform both have toTensor() because both train and test data must be converted to torch 
-    # Tensor for operations by torch; trainTransform and testTransform both have Resize(), with the same arguments, for 
-    # consistency; trainTransform and testTransform both have Normalize(), with the same mean and std, for consistency.
-
-    # Images plotted in tests below deviate from what the simulated Ronchigrams look like since matplotlib clips the negative 
-    # array elements resulting from Normalize(). However, as long as Normalize is done with the same mean and std for both 
-    # train and test data, the consistency should be fine. Anyway, images plotted below aren't exactly what the neural network 
-    # "sees".
-
-    # Image size must be 600 x 600 for EfficientNet-B7
-    resolution = 600
-
-    # TODO: try works if mean and std of data are being calculated earlier in the script; except assigns fixed values to them, 
-    # preferably values found previously - going to develop that bit such that it changes depending on mean and std already 
-    # found, and stored somewhere, since don't want to calculate mean and std for same data over and over again.
-    try:
-        mean = calculatedMean
-        std = calculatedStd
-    except:
-        mean = 0.5017
-        std = 0.2521
-
-    trainTransform = Compose([
-        ToTensor(),
-        CenterCrop(np.sqrt(2) * apertureSize),
-        Resize(resolution, F2.InterpolationMode.BICUBIC),
-        Normalize(mean=[mean], std=[std])
-    ])
-
-    testTransform = Compose([
-        ToTensor(),
-        CenterCrop(np.sqrt(2) * apertureSize),
-        Resize(resolution, F2.InterpolationMode.BICUBIC),
-        Normalize(mean=[mean], std=[std])
-    ])
-
-    tempTrasnform = Compose([
-        ToTensor()
-    ])
-
-    ronchdset.transform = trainTransform
-
-    chosenIndices = [0, 1, 2, 3]
-    ronchSubset = Subset(ronchdset, chosenIndices)
-
-    # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
-    # incorporated, and testing the dataloader
-
-    dataloader = DataLoader(ronchSubset, batch_size=4, shuffle=False, num_workers=0)
+    # TESTING THE DATALOADER
 
     testingDataLoader = True
 
@@ -520,6 +474,7 @@ if __name__ == "__main__":
                 showBatch(batchedSample)
                 # print(batchedSample["aberrations"])
                 plt.ioff()
+
                 plt.show()
 
                 break
@@ -537,4 +492,4 @@ if __name__ == "__main__":
 
     trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
 
-    print(ronchdset.getIt(10))
+    print(f"I/A and t/s respectively: {ronchdset.getIt(10)}")
