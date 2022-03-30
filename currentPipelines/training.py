@@ -80,7 +80,6 @@ print(f"torch cuda current device: {torch.cuda.current_device()}")
 
 numLabels = eval(configSection["numLabels"])
 
-# TODO: put the below in model1.py instead so you don't have to write it in every script that instantiates an EfficientNet() model
 if efficientNetModel == "EfficientNet-B7":
     parameters = {"num_labels": numLabels, "width_coefficient": 2.0, "depth_coefficient": 3.1, "dropout_rate": 0.5}
     resolution = 600
