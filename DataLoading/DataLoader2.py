@@ -9,8 +9,8 @@ import numpy as np
 import torch
 import datetime
 
-from torch.utils.data import Dataset, DataLoader, random_split
-from torchvision.transforms import Compose, Resize, ToTensor, Normalize
+from torch.utils.data import Dataset, DataLoader, random_split, Subset
+from torchvision.transforms import Compose, Resize, ToTensor, Normalize, CenterCrop
 from torchvision import utils
 from ignite.utils import convert_tensor
 
@@ -209,6 +209,8 @@ class RonchigramDataset(Dataset):
 def showBatch(batchedSample):
     """Show Ronchigram and print its aberrations for a batch of samples."""
 
+    print("Running showBatch")
+
     images_batch, labels_batch = batchedSample[0], batchedSample[1]
 
     # Decomment if desired to see
@@ -264,7 +266,7 @@ def getMeanAndStd(dataloader, reducedBatches=None, specificDevice=None):
 
     return mean, std
 
-def getMeanAndStd2(ronchdset, trainingResolution, diagnosticBatchSize=4, diagnosticShuffle=True, batchesTested=32, specificDevice=None):
+def getMeanAndStd2(ronchdset, trainingResolution, diagnosticBatchSize=4, diagnosticShuffle=True, batchesTested=32, specificDevice=None, apertureSize=512):
     """Takes a Ronchigram dataset and estimates its mean and std after transforms besides torchvision.transforms.Normalize() are applied. 
     TODO: if/when transforms used for training and testing are changed, modify diagnosticTransform below accordingly.
 
@@ -279,12 +281,15 @@ def getMeanAndStd2(ronchdset, trainingResolution, diagnosticBatchSize=4, diagnos
     batchesTested: the number of batches of size diagnosticBatchSize to be sampled for estimation of mean and std
 
     device: if False, runs the below on the default device; otherwise, runs the below on the device specified
+
+    apertureSize: radius of objective aperture in input data in pixels, num
     """
 
     # Transform that is applied to the data before mean and std are calculated; should be calculated for transforms that are done before 
     # the Normalize() is applied
     diagnosticTransform = Compose([
         ToTensor(),
+        CenterCrop(np.sqrt(2) * apertureSize),
         Resize(trainingResolution, F2.InterpolationMode.BICUBIC)
     ])
 
@@ -358,9 +363,9 @@ if __name__ == "__main__":
     ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/29_03_22/abersWithC30.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, phi10=False, phi12=True, phi21=True, phi23=True, phi30=False)
 
-    print(ronchdset[0][1])
-    print(ronchdset[-1][1])
-    print(len(ronchdset))
+    print(ronchdset[0][0].shape)
+    # print(ronchdset[0][1])
+    # print(len(ronchdset))
 
 
     # Quick check of the numpy array plotting
@@ -368,8 +373,20 @@ if __name__ == "__main__":
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
     plt.figure()
+
+    show_data(ronchdset[0][0], ronchdset[0][1])
+    plt.show()
+
     show_data(ronchdset[1][0], ronchdset[1][1])
     plt.show()
+
+    show_data(ronchdset[2][0], ronchdset[2][1])
+    plt.show()
+
+    show_data(ronchdset[3][0], ronchdset[3][1])
+    plt.show()
+
+    # sys.exit()
 
     # Implementing a way to find the mean and std of the data for Normalize(). 
     # Since this relies on ToTensor() being done, I am going to create a new composed transform variable containing just 
@@ -383,8 +400,10 @@ if __name__ == "__main__":
 
     scriptTime = datetime.datetime.now()
 
-    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution)
+    apertureSize = 1024 / 2 # Aperture radius in pixels
 
+    # calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, apertureSize=apertureSize)
+    # print(calculatedMean, calculatedStd)
 
     # Applying transforms
 
@@ -407,28 +426,33 @@ if __name__ == "__main__":
         mean = calculatedMean
         std = calculatedStd
     except:
-        mean = 0.5008
-        std = 0.2562
+        mean = 0.5017
+        std = 0.2521
 
     trainTransform = Compose([
         ToTensor(),
+        CenterCrop(np.sqrt(2) * apertureSize),
         Resize(resolution, F2.InterpolationMode.BICUBIC),
         Normalize(mean=[mean], std=[std])
     ])
 
     testTransform = Compose([
         ToTensor(),
+        CenterCrop(np.sqrt(2) * apertureSize),
         Resize(resolution, F2.InterpolationMode.BICUBIC),
         Normalize(mean=[mean], std=[std])
     ])
 
     ronchdset.transform = trainTransform
 
+    chosenIndices = [0, 1, 2, 3]
+    ronchSubset = Subset(ronchdset, chosenIndices)
+
 
     # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
     # incorporated, and testing the dataloader
 
-    dataloader = DataLoader(ronchdset, batch_size=4, shuffle=True, num_workers=0)
+    dataloader = DataLoader(ronchSubset, batch_size=4, shuffle=False, num_workers=0)
 
 
     # Applying transforms
@@ -452,17 +476,19 @@ if __name__ == "__main__":
         mean = calculatedMean
         std = calculatedStd
     except:
-        mean = 0.5008
-        std = 0.2562
+        mean = 0.5017
+        std = 0.2521
 
     trainTransform = Compose([
         ToTensor(),
+        CenterCrop(np.sqrt(2) * apertureSize),
         Resize(resolution, F2.InterpolationMode.BICUBIC),
         Normalize(mean=[mean], std=[std])
     ])
 
     testTransform = Compose([
         ToTensor(),
+        CenterCrop(np.sqrt(2) * apertureSize),
         Resize(resolution, F2.InterpolationMode.BICUBIC),
         Normalize(mean=[mean], std=[std])
     ])
@@ -473,11 +499,13 @@ if __name__ == "__main__":
 
     ronchdset.transform = trainTransform
 
+    chosenIndices = [0, 1, 2, 3]
+    ronchSubset = Subset(ronchdset, chosenIndices)
 
     # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
     # incorporated, and testing the dataloader
 
-    dataloader = DataLoader(ronchdset, batch_size=4, shuffle=True, num_workers=0)
+    dataloader = DataLoader(ronchSubset, batch_size=4, shuffle=False, num_workers=0)
 
     testingDataLoader = True
 
@@ -486,7 +514,7 @@ if __name__ == "__main__":
             print(iBatch, batchedSample[0].size(),
                     batchedSample[1].size())
 
-            if iBatch == 3:
+            if iBatch == 0:
                 plt.figure()
 
                 showBatch(batchedSample)
