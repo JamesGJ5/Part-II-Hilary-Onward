@@ -355,11 +355,11 @@ if __name__ == "__main__":
     # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/16_02_22/Single_Aberrations.h5",
     # removec10=False, removec12=False, removec21=False, removec23=False, removephi10=True, removephi12=False, removephi21=False, removephi23=False)
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/22_03_22/abersWithC30.h5", 
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/29_03_22/abersWithC30.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, phi10=False, phi12=True, phi21=True, phi23=True, phi30=False)
 
     print(ronchdset[0][1])
-    print(ronchdset[-1002][1])
+    print(ronchdset[-1][1])
     print(len(ronchdset))
 
     sys.exit()
