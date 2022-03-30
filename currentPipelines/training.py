@@ -61,31 +61,9 @@ configSection = config[sys.argv[1]]
 
 # SEED INFORMATION
 
-# Arbitrary seed number
-fixedSeed = 17
-
-# Might make a way for seed to be random later
-torchSeed = fixedSeed
+# TODO: consider allowing seed to be random later
+torchSeed = 17
 torch.manual_seed(torchSeed)
-
-
-
-# OPTIONS LIKE IN CNN_5.PY
-
-# Creating this variable because in model importation I will only import EfficientNet-B7 if this name in string form is 
-# what the below variable is assigned to
-efficientNetModel = "EfficientNet-B3"
-
-pretrainedWeights = eval(configSection["pretrainedWeights"])
-
-# The below is whether the last lr computed in preTrainedWeights' run will be returned (see 
-# https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ExponentialLR.html for more on this)
-# TODO: figure out how to actually implement getting last lr in state_dict like the above link says is doable
-if pretrainedWeights:
-    useLast_lr = eval(configSection["useLast_lr"])
-
-estimateMeanStd = eval(configSection["estimateMeanStd"])  # If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and std to the Normalize() 
-                        # transform
 
 
 # GPU STUFF
@@ -97,7 +75,8 @@ device = torch.device(f"cuda:{GPU}")
 torch.cuda.set_device(GPU)
 print(f"torch cuda current device: {torch.cuda.current_device()}")
 
-# MODEL INSTANTIATION
+
+# MODEL OPTIONS
 
 numLabels = eval(configSection["numLabels"])
 
@@ -134,6 +113,13 @@ elif efficientNetModel == "EfficientNet-B0":
     parameters = {"num_labels": numLabels, "width_coefficient": 1.0, "depth_coefficient": 1.0, "dropout_rate": 0.2}
     resolution = 224
 
+
+# CHOOSING MODEL
+
+# Creating this variable because in model importation I will only import EfficientNet-B3 if this name in string form is 
+# what the below variable is assigned to
+efficientNetModel = "EfficientNet-B3"
+
 model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficient=parameters["width_coefficient"], 
                             depth_coefficient=parameters["depth_coefficient"], 
                             dropout_rate=parameters["dropout_rate"]).to(device)
@@ -143,12 +129,18 @@ print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_all
 
 # LOADING WEIGHTS INTO MODEL
 
+pretrainedWeights = eval(configSection["pretrainedWeights"])
+
 if pretrainedWeights:
-    weightsPath = configSection["weightsPath"]
+
+    # The below is whether the last lr computed in preTrainedWeights' run will be returned (see 
+    # https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ExponentialLR.html for more on this)
+    # TODO: figure out how to actually implement getting last lr in state_dict like the above link says is doable
+    useLast_lr = eval(configSection["useLast_lr"])
 
     # TODO: if you get an error about cuda weights being wrong or something, use the map_location parameter below as you 
     # did in inferencer.py
-    model.load_state_dict(torch.load(weightsPath))
+    model.load_state_dict(torch.load(configSection["weightsPath"]))
 
 
 # TRANSFORMS, DATASETS AND DATASET SPLITTING, AND DATA LOADERS
@@ -181,6 +173,13 @@ scriptTime = datetime.datetime.now()
 
 apertureSize = ronchdset[0][0].shape[0] / 2 # Radius of objective aperture in pixels
 print(f"Aperture size is {apertureSize}")
+
+
+# ESTIMATING MEAN AND STANDARD DEVIATION OF DATA
+
+# If want to estimate the mean and std of the data (with transforms beside Normalize() applied) and pass said mean and 
+#   std to the Normalize() transform
+estimateMeanStd = eval(configSection["estimateMeanStd"])
 
 # Optional estimation of mean and std of data to pass to torchvision.transforms.Normalize()
 if estimateMeanStd:
