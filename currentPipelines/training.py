@@ -3,67 +3,44 @@ import torchvision
 import torch
 import torch.nn as nn
 import os
+
 import numpy as np
 import ignite # Installed via "conda install ignite -c pytorch"
 import model1
 import datetime
-
-
-# Tensorboard stuff
-from torch.utils.tensorboard import SummaryWriter
-
-
-# For data loading onward
 import sys
+
 import math
 import torchvision.transforms.functional as F2
-from torch.utils.data import Dataset, DataLoader, random_split
+from torch.utils.data import DataLoader, random_split
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize, CenterCrop
-from torchvision import utils
-
-
-# For optimiser onward
 from itertools import chain
+
 import torch.optim as optim
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import ExponentialLR
-from customLossFuncs import modifiedMAPE, myMAFE, myMAFE2, neglectNegligiblePhi
-
-
-# For update_fn definition onward
 from ignite.utils import convert_tensor
-
-
-# For Output_transform and tensorboard stuff definition onward
 from ignite.engine import Engine, Events, create_supervised_evaluator
-from ignite.metrics import RunningAverage, Loss, MeanAbsoluteError, MeanSquaredError, RootMeanSquaredError
+
+from ignite.metrics import RunningAverage, Loss
 from ignite.contrib.handlers import TensorboardLogger
 from ignite.contrib.handlers.tensorboard_logger import OutputHandler, OptimizerParamsHandler
 from ignite.contrib.handlers import ProgressBar
-
-
-# For logger onward
 from ignite.contrib.handlers import CustomPeriodicEvent
+
 from ignite.handlers import global_step_from_engine
 import logging
-
-
-# Model checkpointing onward
 from ignite.handlers import ModelCheckpoint, EarlyStopping, TerminateOnNan
-
-
-# For loss curve
 import matplotlib.pyplot as plt
 
-# TODO: import remaining modules here as required
 
-# TODO: cite the below link
-# https://www.kaggle.com/hmendonca/efficientnet-cifar-10-ignite was used for help in building an early version of this pipeline
+# TODO: cite https://www.kaggle.com/hmendonca/efficientnet-cifar-10-ignite (used for help in building an early version 
+# of this pipeline)
 
 
-# Version checking
+# VERSION CHECKING
 
-print(f"torch version: {torch.__version__}, ignite version: {ignite.__version__}")
+print(f"torch version: {torch.__version__}... ignite version: {ignite.__version__}...")
 
 
 
@@ -73,15 +50,13 @@ os.chdir("/home/james/VSCode/currentPipelines")
 print(f"Current working directory: {os.getcwd()}")
 
 
-# CONFIG STUFF
+# STUFF FOR IMPORTING CONFIGURATIONS
 
 config = ConfigParser()
 config.read("config1.ini")
 
-# TODO: 18th write code to get this from Linux terminal
-sectionName = sys.argv[1]
-
-configSection = config[sectionName]
+# Section of config1.ini to import parameters from (section name is 2nd argument passed to terminal)
+configSection = config[sys.argv[1]]
 
 
 # SEED INFORMATION
@@ -646,8 +621,6 @@ global_step_transform=global_step_from_engine(trainer)), event_name=Events.EPOCH
 # Logging metrics for evaluation on TestLoader
 # tb_logger.attach(testEvaluator, log_handler=OutputHandler(tag="test", metric_names=list(metrics.keys()), 
 # global_step_transform=global_step_from_engine(trainer)), event_name=Events.EPOCH_COMPLETED)
-
-import logging
 
 # Setup engine & logger
 def setup_logger(logger):
