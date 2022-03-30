@@ -362,28 +362,6 @@ if __name__ == "__main__":
     print(ronchdset[-1][1])
     print(len(ronchdset))
 
-    sys.exit()
-
-    # sys.exit()
-
-    # print(ronchdset[50000][1])
-
-    # ronchdset.cnmscaling = np.array([1 / (100 * 10**-9), 1 / (100 * 10**-9), 1 / (10000 * 10**-9), 1 / (10000 * 10**-9)])
-    # ronchdset.phinmscaling = np.array([1, 1 / (np.pi / 2), 1 / (np.pi), 1 / (np.pi/3)])
-
-    # print(ronchdset[6000][1])
-
-    # sys.exit()
-
-    # ronchdset.complexLabels = False
-
-    # print(ronchdset[0][1].size())
-    # sys.exit()
-
-    # ronchdset.upscaleMags = 10**8
-    # print(ronchdset[0][1])
-    # sys.exit()
-
 
     # Quick check of the numpy array plotting
 
@@ -446,10 +424,6 @@ if __name__ == "__main__":
 
     ronchdset.transform = trainTransform
 
-    # testItem = ronchdset[50000][0]
-    # print(testItem)
-    # print(type(testItem))
-
 
     # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
     # incorporated, and testing the dataloader
@@ -499,10 +473,6 @@ if __name__ == "__main__":
 
     ronchdset.transform = trainTransform
 
-    # testItem = ronchdset[50000][0]
-    # print(testItem)
-    # print(type(testItem))
-
 
     # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
     # incorporated, and testing the dataloader
@@ -525,6 +495,7 @@ if __name__ == "__main__":
                 plt.show()
 
                 break
+
 
     # Checking if random_split works by splitting ronchdset into train, eval and test
     # TODO: be careful because there are also dataloaders above, the memory they take up may be high, which is bad if they 
