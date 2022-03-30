@@ -21,7 +21,11 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 30 * 10**-3
+    simdim = 35 * 10**-3
+
+    # Essentially the convergence semi-angle/mrad; only called aperture_size because objective aperture size controls this 
+    # quantity and wanted to be consistent with (Schnitzer, 2020c) in Primary_Simulation_1.py
+    aperture_size = simdim
 
     # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
     max_C10 = 280 * 10**-9  # Maximum C10 (defocus) magnitude/m
@@ -58,7 +62,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/28_03_22/abersWithC30.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/30_03_22/abersWithC30.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -81,70 +85,27 @@ if __name__ == "__main__":
 
             # Initialising simulation_number variable that will be incremented below
             # NOTE: The below variable is only useful for certain statements below
-            # simulation_number = 0
+            simulation_number = 0
 
-            linearC10 = np.linspace(max_C10 + rank / number_processes * max_C10, max_C10 + (rank + 1) / number_processes * max_C10, number_simulations, endpoint=False)
-            linearC12 = np.linspace(max_C12 + rank / number_processes * max_C12, max_C12 + (rank + 1) / number_processes * max_C12, number_simulations, endpoint=False)
-            linearC21 = np.linspace(max_C21 + rank / number_processes * max_C21, max_C21 + (rank + 1) / number_processes * max_C21, number_simulations, endpoint=False)
-            linearC23 = np.linspace(max_C23 + rank / number_processes * max_C23, max_C23 + (rank + 1) / number_processes * max_C23, number_simulations, endpoint=False)
+            # linearC10 = np.linspace(max_C10 + rank / number_processes * max_C10, max_C10 + (rank + 1) / number_processes * max_C10, number_simulations, endpoint=False)
+            # linearC12 = np.linspace(max_C12 + rank / number_processes * max_C12, max_C12 + (rank + 1) / number_processes * max_C12, number_simulations, endpoint=False)
+            # linearC21 = np.linspace(max_C21 + rank / number_processes * max_C21, max_C21 + (rank + 1) / number_processes * max_C21, number_simulations, endpoint=False)
+            # linearC23 = np.linspace(max_C23 + rank / number_processes * max_C23, max_C23 + (rank + 1) / number_processes * max_C23, number_simulations, endpoint=False)
 
-            linearPhi12 = np.linspace(rank / number_processes * np.pi/2, (rank + 1) / number_processes * np.pi/2, number_simulations, endpoint=False)
-            linearPhi21 = np.linspace(rank / number_processes * np.pi, (rank + 1) / number_processes * np.pi, number_simulations, endpoint=False)
-            linearPhi23 = np.linspace(rank / number_processes * np.pi/3, (rank + 1) / number_processes * np.pi/3, number_simulations, endpoint=False)
+            # linearPhi12 = np.linspace(rank / number_processes * np.pi/2, (rank + 1) / number_processes * np.pi/2, number_simulations, endpoint=False)
+            # linearPhi21 = np.linspace(rank / number_processes * np.pi, (rank + 1) / number_processes * np.pi, number_simulations, endpoint=False)
+            # linearPhi23 = np.linspace(rank / number_processes * np.pi/3, (rank + 1) / number_processes * np.pi/3, number_simulations, endpoint=False)
 
             # See Google doc 4th Year > 16/02/22 for how the below ranges were chosen
             for simulation in range(number_simulations):
-                # NOTE: The below variable is only useful for certain statements below
-                # simulation_number += 1
-
-                # C10 = randu(max_C10, 2 * max_C10)
-                # C12 = randu(max_C12, 2 * max_C12)
-                # C21 = randu(max_C21, 2 * max_C21)
-                # C23 = randu(max_C23, 2 * max_C23)
+                # NOTE: The below variable is only useful when creating a dataset in which a parameter varies linearly
+                simulation_number += 1
 
                 C10 = randu(0, max_C10)
                 C12 = randu(0, max_C12)
                 C21 = randu(0, max_C21)
                 C23 = randu(0, max_C23)
                 C30 = 0.7 * 10**-3
-
-                # C10 = linearC10[simulation]
-                # C12 = 50 * 10**-9
-                # C21 = 5000 * 10**-9
-                # C23 = 5000 * 10**-9
-
-                # phi10 = 0
-                # phi12 = np.pi/4
-                # phi21 = np.pi/2
-                # phi23 = np.pi/6
-
-                # if simulation_number <= math.ceil(number_simulations / 4):
-                #     C10 = randu(0, max_C10)
-
-                #     C12 = randu(0, C10/100)
-                #     C21 = randu(0, C10/10)
-                #     C23 = randu(0, C10/10)
-
-                # elif math.ceil(number_simulations / 4) < simulation_number <= math.ceil(number_simulations / 2):
-                #     C12 = randu(0, max_C12)
-
-                #     C10 = randu(0, C12/100)
-                #     C21 = randu(0, C12/10)
-                #     C23 = randu(0, C12/10)
-
-                # elif math.ceil(number_simulations / 2) < simulation_number <= math.ceil(3 * number_simulations / 4):
-                #     C21 = randu(0, max_C21)
-                    
-                #     C10 = randu(0, C21/1000)
-                #     C12 = randu(0, C21/1000)
-                #     C23 = randu(0, C21/100)
-
-                # elif math.ceil(3 * number_simulations / 4) < simulation_number:
-                #     C23 = randu(0, max_C23)
-                    
-                #     C10 = randu(0, C23/1000)
-                #     C12 = randu(0, C23/1000)
-                #     C21 = randu(0, C23/100)
 
                 # Below, the ranges for 
                 phi10 = 0   # Defocus has an m-value of 0
@@ -172,31 +133,16 @@ if __name__ == "__main__":
                 random_t = np.array([t])
                 random_t_dset[rank, simulation] = random_t[:]
 
-                ronch = Primary_Simulation_1.calc_Ronchigram(imdim, simdim, C10, C12, C21, C23, C30, phi10, phi12, phi21, phi23, phi30, I, b, t)
+                ronch = Primary_Simulation_1.calc_Ronchigram(imdim, simdim, C10, C12, C21, C23, C30, phi10, phi12, 
+                                                            phi21, phi23, phi30, I, b, t, aperture_size=aperture_size)
                 ronch_dset[rank, simulation] = ronch[:]
 
-                # FIXME: the below is a good way of keeping track of what is happening but it was applicable to the 
-                # multiprocessing things, not the MPI stuff. May recreate it for MPI.
 
-                # To make sure things are running properly (only want to do for one process lest we get an overflowing terminal)
-                # if processnum == 0:
-                    # if simulation_number == 1:
-                    #     print("\n")
-                    #     print(random_mags_dset[simulation])
-                    #     print(random_angs_dset[simulation])
-                    #     print(random_I_dset[simulation])
-                    #     print(ronch_dset[simulation])
+                if simulation_number % math.ceil(number_simulations / 20) == 0:
 
-                    if simulation_number % math.ceil(number_simulations / 10) == 0:
-                        print(f"\n{simulation_number} simulations complete for process number {processnum} at" \
-                            f"{datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}")
+                    print(f"\n{simulation_number} simulations complete for rank at index {rank} at " + \
+                            f"{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}")
 
-    # This code was here to make a small practice file (/media/rob/hdd2/james/simulations/17_01_22/Single_Aberrations_Lite.h5)
-    # number_processes = 1
-    # rank = 0
-    # simulate_single_aberrations(10, imdim, simdim, max_C10, max_C12, max_C21, max_C23, min_I, max_I, min_t, max_t)
-
-    # sys.exit()
 
     # CPUs AND PROCESSES
     total_simulations = 100000
@@ -205,10 +151,6 @@ if __name__ == "__main__":
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
 
     rank = MPI.COMM_WORLD.rank
-    # The below was in use because previously I was writing HDF5 files containg space for simulations from all 32 channels 
-    # while not using all 32 of them - this led to unnecessary space being consumed, so I just used number_processes in 
-    # creating my datasets instead.
-    # channels = 32
 
 
     # START TIME METRICS
@@ -220,7 +162,8 @@ if __name__ == "__main__":
     # CALLING THE SIMULATION FUNCTION ABOVE
     simulate_single_aberrations(simulations_per_process, imdim, simdim, max_C10, max_C12, max_C21, max_C23, min_I, max_I, min_t, max_t)
 
-    # Finish time metrics
+
+    # FINISH TIME METRICS
     finish_date_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
     print("\nFinished at:", finish_date_time)
 
