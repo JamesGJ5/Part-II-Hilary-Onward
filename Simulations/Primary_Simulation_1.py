@@ -11,8 +11,8 @@ from matplotlib_scalebar.scalebar import ScaleBar
 
 # SEED
 
-# seed = 17
-# numpy.random.seed(seed)
+seed = 17
+numpy.random.seed(seed)
 
 
 # QUANTITIES
@@ -24,7 +24,10 @@ c = sc.c
 pi = np.pi
 
 
-def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, C10_ang, C12_ang, C21_ang, C23_ang, C30_ang, I, b, t, aperture_size):
+def calc_Ronchigram(imdim, simdim,
+                    C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, C32_mag, C34_mag, C41_mag, C43_mag, C45_mag, C50_mag, C52_mag, C54_mag, C56_mag,
+                    C10_ang, C12_ang, C21_ang, C23_ang, C30_ang, C32_ang, C34_ang, C41_ang, C43_ang, C45_ang, C50_ang, C52_ang, C54_ang, C56_ang,
+                    I, b, t, aperture_size):
     """Takes the aberration coefficient magnitudes mentioned above (in Krivanek notation) and returns a NumPy array of
     the resulting Ronchigram.
 
@@ -46,17 +49,30 @@ def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, 
     """
 
     # n is order of geometrical aberration, m is rotational symmetry
-    n_list = (1, 1, 2, 2, 3)
-    m_list = (0, 2, 1, 3, 0)
+    n_list = (1, 1, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5)
+    m_list = (0, 2, 1, 3, 0, 2, 4, 1, 3, 5, 0, 2, 4, 6)
 
     # These are the magnitudes of each aberration Cn,m (Cn,m are aberration names in Krivanek notation (Krivanek, Dellby
     # and Lupini, 1999)). The terms below are named in Table 1 of (Kirkland, 2011), which is compiled from (Krivanek,
     # Dellby and Lupini, 1999) and (Krivanek et al., 2008).
     mag_list = (C10_mag,    # C1,0 magnitude/m (defocus)
                 C12_mag,    # C1,2 magnitude/m (2-fold astigmatism)
+
                 C21_mag,    # C2,1 magnitude/m (axial coma)
-                C23_mag,
-                C30_mag)    # C2,3 magnitude/m (3-fold astigmatism)
+                C23_mag,    # C2,3 magnitude/m (3-fold astigmatism)
+
+                C30_mag,    
+                C32_mag,
+                C34_mag,
+                
+                C41_mag,
+                C43_mag,
+                C45_mag,
+                
+                C50_mag,
+                C52_mag,
+                C54_mag,
+                C56_mag)
     # NOTE: in https://github.com/noahschnitzer/ronchigram-matlab/blob/master/simulation/aberration_generator.m there is 
     # mention of a variable called "ang" being the unit for defocus' magnitude; this stands for Angstrom, not angle.
 
@@ -67,9 +83,22 @@ def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, 
     # Orientation angles phi_n,m for each aberration; follows same convention as np.arctan2
     ang_list = (C10_ang,    # C1,0 angle/rad
                 C12_ang,    # C1,2 angle/rad
+
                 C21_ang,    # C2,1 angle/rad
-                C23_ang,
-                C30_ang)    # C2,3 angle/rad
+                C23_ang,    # C2,3 angle/rad
+
+                C30_ang,
+                C32_ang,
+                C34_ang,
+                
+                C41_ang,
+                C43_ang,
+                C45_ang,
+                
+                C50_ang,
+                C52_ang,
+                C54_ang,
+                C56_ang)
 
     def chi_term(al, phi, av, n, m, mag, ang):
         """Takes an aberration and determines its contribution to chi (aberration function) for a given convergence angle 
@@ -230,6 +259,8 @@ def calc_Ronchigram(imdim, simdim, C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, 
     # fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
     
 
+    print(calc_wavlen(av))
+
     # Schnitzer's, from (Schnitzer, 2020c)
     inter_param_schnitzer = 2*pi/(calc_wavlen(av)*kev/e*1000)*(m_e*c**2+kev*1000)/(2*m_e*c**2+kev*1000)
     exp_part = np.exp(-1j * np.pi/4 * noise_fun * inter_param_schnitzer / (1.7042*10**-12))   # Schnitzer's
@@ -282,26 +313,48 @@ if __name__ == "__main__":
 
     # RONCHIGRAM CALCULATION
 
-    mag_list = (140 * 10**-9,     # C1,0 magnitude/m (defocus)
-                140 * 10**-9,     # C1,2 magnitude/m (2-fold astigmatism)
+    mag_list = (25 * 10**-10,   # C1,0 magnitude/m (defocus)
+                25 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism)
 
-                12000 * 10**-9,   # C2,1 magnitude/m (axial coma)
-                8000 * 10**-9,   # C2,3 magnitude/m (3-fold astigmatism)
+                78.5 * 10**-10,   # C2,1 magnitude/m (2nd-order axial coma)
+                47.75 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism)
                 
-                0.7 * 10**-3)   # C3,0 magnitude/m (3rd-order spherical aberration)
+                5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration)
+                5.2 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
+                2.61 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
 
-    ang_list = (0,          # C1,0 angle/rad
-                np.pi / 4,  # C1,2 angle/rad
+                0.05 * 10**-3,   # C4,1 magnitude/m (4th-order axial coma)
+                0.05 * 10**-3,   # C4,3 magnitude/m (3-lobe aberration)
+                0.05 * 10**-3,   # C4,5 magnitude/m (5-fold astigmatism)
 
-                np.pi / 2,  # C2,1 angle/rad
-                np.pi / 6,  # C2,3 angle/rad
+                5 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
+                5 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
+                5 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
+                5 * 10**-3)    # C5,6 magnitude/m (6-fold astigmatism)
 
-                0)          # C3,0 angle/rad
+    ang_list = (0,              # C1,0 angle/rad
+                2 * np.pi / 4,      # C1,2 angle/rad
+
+                2 * np.pi / 2,      # C2,1 angle/rad
+                2 * np.pi / 6,      # C2,3 angle/rad
+
+                0,              # C3,0 angle/rad
+                2 * np.pi / 4,      # C3,2 angle/rad
+                2 * np.pi / 8,      # C3,4 angle/rad
+
+                2 * np.pi / 2,      # C4,1 angle/rad
+                2 * np.pi / 6,      # C4,3 angle/rad
+                2 * np.pi / 10,     # C4,5 angle/rad
+
+                0,              # C5,0 angle/rad
+                2 * np.pi / 4,      # C5,2 angle/rad
+                2 * np.pi / 8,      # C5,4 angle/rad
+                2 * np.pi / 12)     # C5,6 angle/rad
 
     imdim = 1024
-    simdim = 35 * 10**-3
+    simdim = 70 * 10**-3
 
-    ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=35*10**-3)
+    ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=70*10**-3)
 
     # DEPICTING THE RONCHIGRAM
 
