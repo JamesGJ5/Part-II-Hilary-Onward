@@ -21,17 +21,31 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 35 * 10**-3
+    simdim = 110 * 10**-3
 
     # Essentially the convergence semi-angle/mrad; only called aperture_size because objective aperture size controls this 
     # quantity and wanted to be consistent with (Schnitzer, 2020c) in Primary_Simulation_1.py
     aperture_size = simdim
 
     # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
-    max_C10 = 280 * 10**-9  # Maximum C10 (defocus) magnitude/m
-    max_C12 = 280 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
-    max_C21 = 24000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
-    max_C23 = 16000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
+    max_C10 = 200 * 10**-9  # Maximum C10 (defocus) magnitude/m
+    max_C12 = 150 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
+
+    max_C21 = 260 * 10**-8  # Maximum C21 (axial coma) magnitude/m
+    max_C23 = 100 * 10**-8  # Maximum C23 (3-fold astigmatism) magnitude/m
+
+    max_C30 = 10.4 * 10**-6
+    max_C32 = 10.4 * 10**-6
+    max_C34 = 5.22 * 10**-6
+
+    max_C41 = 0.1 * 10**-3
+    max_C43 = 0.1 * 10**-3
+    max_C45 = 0.1 * 10**-3
+
+    max_C50 = 10 * 10**-3
+    max_C52 = 10 * 10**-3
+    max_C54 = 10 * 10**-3
+    max_C56 = 10 * 10**-3
 
     # min_Cnm will be 0 since negative values are redundant, I THINK (see lab book's 29/11/2021 entry)
     # phi_n,m will be between 0 and pi/m radians since, I believe, other angles are redundant (see lab book's 29/11/2021 entry)
@@ -62,14 +76,14 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/30_03_22/abersWithC30.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/31_03_22/partiallyCorrectedSTEM.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
             try:
                 # dtype is float64 rather than float32 to reduce the memory taken up in storage.
-                random_mags_dset = f.create_dataset("random_mags dataset", (number_processes, number_simulations, 5), dtype="float32")
-                random_angs_dset = f.create_dataset("random_angs dataset", (number_processes, number_simulations, 5), dtype="float32")
+                random_mags_dset = f.create_dataset("random_mags dataset", (number_processes, number_simulations, 14), dtype="float32")
+                random_angs_dset = f.create_dataset("random_angs dataset", (number_processes, number_simulations, 14), dtype="float32")
                 random_I_dset = f.create_dataset("random_I dataset", (number_processes, number_simulations, 1), dtype="float32")
                 random_t_dset = f.create_dataset("random_t dataset", (number_processes, number_simulations, 1), dtype="float32")
                 ronch_dset = f.create_dataset("ronch dataset", (number_processes, number_simulations, 1024, 1024), dtype="float32")
@@ -103,16 +117,42 @@ if __name__ == "__main__":
 
                 C10 = randu(0, max_C10)
                 C12 = randu(0, max_C12)
+
                 C21 = randu(0, max_C21)
                 C23 = randu(0, max_C23)
-                C30 = 0.7 * 10**-3
 
-                # Below, the ranges for 
-                phi10 = 0   # Defocus has an m-value of 0
-                phi12 = randu(0, np.pi / 2)
-                phi21 = randu(0, np.pi / 1)
-                phi23 = randu(0, np.pi / 3)
+                C30 = randu(0, max_C30)
+                C32 = randu(0, max_C32)
+                C34 = randu(0, max_C34)
+
+                C41 = randu(0, max_C41)
+                C43 = randu(0, max_C43)
+                C45 = randu(0, max_C45)
+
+                C50 = randu(0, max_C50)
+                C52 = randu(0, max_C52)
+                C54 = randu(0, max_C54)
+                C56 = randu(0, max_C56)
+
+
+                phi10 = 0
+                phi12 = randu(0, 2 * np.pi / 2)
+
+                phi21 = randu(0, 2 * np.pi / 1)
+                phi23 = randu(0, 2 * np.pi / 3)
+
                 phi30 = 0
+                phi32 = randu(0, 2 * np.pi / 2)
+                phi34 = randu(0, 2 * np.pi / 4)
+
+                phi41 = randu(0, 2 * np.pi / 1)
+                phi43 = randu(0, 2 * np.pi / 3)
+                phi45 = randu(0, 2 * np.pi / 5)
+
+                phi50 = 0
+                phi52 = randu(0, 2 * np.pi / 2)
+                phi54 = randu(0, 2 * np.pi / 4)
+                phi56 = randu(0, 2 * np.pi / 6)
 
                 I = randu(min_I, max_I)
                 t = randu(min_t, max_t)
@@ -121,10 +161,10 @@ if __name__ == "__main__":
                 # careful when it comes to making changes to the below. Also, make sure that the spaces created in the 
                 # HDF5 file are filled completely, otherwise the length method of the dataset won't work properly, and 
                 # nor will the getitem method.
-                random_mags = np.array([C10, C12, C21, C23, C30])
+                random_mags = np.array([C10, C12, C21, C23, C30, C32, C34, C41, C43, C45, C50, C52, C54, C56])
                 random_mags_dset[rank, simulation] = random_mags[:]
 
-                random_angs = np.array([phi10, phi12, phi21, phi23, phi30])
+                random_angs = np.array([phi10, phi12, phi21, phi23, phi30, phi32, phi34, phi41, phi43, phi45, phi50, phi52, phi54, phi56])
                 random_angs_dset[rank, simulation] = random_angs[:]
 
                 random_I = np.array([I])
@@ -133,8 +173,12 @@ if __name__ == "__main__":
                 random_t = np.array([t])
                 random_t_dset[rank, simulation] = random_t[:]
 
-                ronch = Primary_Simulation_1.calc_Ronchigram(imdim, simdim, C10, C12, C21, C23, C30, phi10, phi12, 
-                                                            phi21, phi23, phi30, I, b, t, aperture_size=aperture_size)
+                ronch = Primary_Simulation_1.calc_Ronchigram(imdim, simdim,
+                                                            C10, C12, C21, C23, C30, C32, C34, C41, C43, C45, C50, C52, C54, C56,
+                                                            phi10, phi12, phi21, phi23, phi30, phi32, phi34, phi41, phi43, phi45, 
+                                                            phi50, phi52, phi54, phi56,
+                                                            I, b, t,
+                                                            aperture_size=aperture_size)
                 ronch_dset[rank, simulation] = ronch[:]
 
 
@@ -145,7 +189,7 @@ if __name__ == "__main__":
 
 
     # CPUs AND PROCESSES
-    total_simulations = 100000
+    total_simulations = 85000
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
