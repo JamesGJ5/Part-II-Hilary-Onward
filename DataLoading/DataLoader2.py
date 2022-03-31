@@ -8,6 +8,7 @@ import torchvision.transforms.functional as F2
 import numpy as np
 import torch
 import datetime
+import random
 
 from torch.utils.data import Dataset, DataLoader, random_split, Subset
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize, CenterCrop
@@ -34,10 +35,21 @@ class RonchigramDataset(Dataset):
     C30 in Krivanek notation."""
 
     def __init__(self, hdf5filename: str, transform=None, complexLabels=False, 
-                c10=False, c12=False, c21=False, c23=False, c30=False,
-                phi10=False, phi12=False, phi21=False, phi23=False, phi30=False,
-                c10scaling=1, c12scaling=1, c21scaling=1, c23scaling=1, c30scaling=1,
-                phi10scaling=1, phi12scaling=1, phi21scaling=1, phi23scaling=1, phi30scaling=1):
+
+                c10=False, c12=False, c21=False, c23=False, c30=False, c32=False, c34=False, c41=False, c43=False, 
+                c45=False, c50=False, c52=False, c54=False, c56=False,
+
+                phi10=False, phi12=False, phi21=False, phi23=False, phi30=False, phi32=False, phi34=False, phi41=False,
+                phi43=False, phi45=False, phi50=False, phi52=False, phi54=False, phi56=False,
+
+                c10scaling=1, c12scaling=1, c21scaling=1, c23scaling=1, c30scaling=1, c32scaling=1, c34scaling=1, 
+                c41scaling=1, c43scaling=1, c45scaling=1, c50scaling=1, c52scaling=1, c54scaling=1, c56scaling=1,
+
+                phi10scaling=1, phi12scaling=1, phi21scaling=1, phi23scaling=1, phi30scaling=1, phi32scaling=1, 
+                phi34scaling=1, phi41scaling=1, phi43scaling=1, phi45scaling=1, phi50scaling=1, phi52scaling=1,
+                phi54scaling=1, phi56scaling=1
+
+                ):
         """Args:
                 hdf5filename: path to the HDF5 file containing the data as mentioned in the comment under this class' definition
                 
@@ -55,14 +67,18 @@ class RonchigramDataset(Dataset):
         self.transform = transform
         self.complexLabels = complexLabels
 
-        cnm = (c10, c12, c21, c23, c30)
-        phinm = (phi10, phi12, phi21, phi23, phi30)
+        cnm = (c10, c12, c21, c23, c30, c32, c34, c41, c43, c45, c50, c52, c54, c56)
+        phinm = (phi10, phi12, phi21, phi23, phi30, phi32, phi34, phi41, phi43, phi45, phi50, phi52, phi54, phi56)
 
         self.cnmIndices = [i for i, x in enumerate(cnm) if x]
         self.phinmIndices = [i for i, x in enumerate(phinm) if x]
 
-        self.cnmscaling = np.array([c10scaling, c12scaling, c21scaling, c23scaling, c30scaling])
-        self.phinmscaling = np.array([phi10scaling, phi12scaling, phi21scaling, phi23scaling, phi30scaling])
+        self.cnmscaling = np.array([c10scaling, c12scaling, c21scaling, c23scaling, c30scaling, c32scaling, c34scaling,
+                                    c41scaling, c43scaling, c45scaling, c50scaling, c52scaling, c54scaling, c56scaling])
+
+        self.phinmscaling = np.array([phi10scaling, phi12scaling, phi21scaling, phi23scaling, phi30scaling, phi32scaling,
+                                        phi34scaling, phi41scaling, phi43scaling, phi45scaling, phi50scaling, 
+                                        phi52scaling, phi54scaling, phi56scaling])
 
         with h5py.File(self.hdf5filename, "r") as flen:
             # Ranks refers to each parallel process used to save simulations to HDF5 file
@@ -334,7 +350,7 @@ if __name__ == "__main__":
 
     # 22 is arbitrary here
     seed = 22
-    random.seed(seed)
+    # random.seed(seed)
 
     # Random seed or a fixed seed (defined above)
     torchReproducible = True
@@ -344,7 +360,7 @@ if __name__ == "__main__":
     else:
         torchSeed = torch.seed()
 
-    torch.manual_seed(torchSeed)
+    # torch.manual_seed(torchSeed)
 
 
     # GPU STUFF
@@ -359,8 +375,11 @@ if __name__ == "__main__":
 
     # DATASET INSTANTIATION
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/29_03_22/abersWithC30.h5", 
-    c10=True, c12=True, c21=True, c23=True, c30=True, phi10=False, phi12=True, phi21=True, phi23=True, phi30=False)
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/31_03_22/partiallyCorrectedSTEM.h5", 
+    c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
+    c52=True, c54=True, c56=True,
+    phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
+    phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
 
     print(f"Shape of Ronchigram in item at index 0 of dataset: {ronchdset[0][0].shape}")
     print(f"Label in item at index 0 of dataset: {ronchdset[0][1]}")
@@ -369,20 +388,22 @@ if __name__ == "__main__":
 
     # QUICK CHECK OF THE NUMPY ARRAY PLOTTING
 
+    chosenIndices = [random.randint(0, len(ronchdset) - 1) for i in range(4)]
+
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
     plt.figure()
 
-    show_data(ronchdset[0][0], ronchdset[0][1])
+    show_data(ronchdset[chosenIndices[0]][0], ronchdset[chosenIndices[0]][1])
     plt.show()
 
-    show_data(ronchdset[1][0], ronchdset[1][1])
+    show_data(ronchdset[chosenIndices[1]][0], ronchdset[chosenIndices[1]][1])
     plt.show()
 
-    show_data(ronchdset[2][0], ronchdset[2][1])
+    show_data(ronchdset[chosenIndices[2]][0], ronchdset[chosenIndices[2]][1])
     plt.show()
 
-    show_data(ronchdset[3][0], ronchdset[3][1])
+    show_data(ronchdset[chosenIndices[3]][0], ronchdset[chosenIndices[3]][1])
     plt.show()
 
 
@@ -450,7 +471,6 @@ if __name__ == "__main__":
 
     ronchdset.transform = trainTransform
 
-    chosenIndices = [0, 1, 2, 3]
     ronchSubset = Subset(ronchdset, chosenIndices)
 
     # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
