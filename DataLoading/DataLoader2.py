@@ -375,7 +375,7 @@ if __name__ == "__main__":
 
     # DATASET INSTANTIATION
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/31_03_22/partiallyCorrectedSTEM_2.h5", 
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/01_04_22/partiallyCorrectedSTEM.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
     c52=True, c54=True, c56=True,
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
