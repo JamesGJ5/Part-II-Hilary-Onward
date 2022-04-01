@@ -375,20 +375,27 @@ if __name__ == "__main__":
 
     # DATASET INSTANTIATION
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/31_03_22/partiallyCorrectedSTEM.h5", 
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/31_03_22/partiallyCorrectedSTEM_2.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
     c52=True, c54=True, c56=True,
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
     phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
 
-    print(f"Shape of Ronchigram in item at index 0 of dataset: {ronchdset[0][0].shape}")
-    print(f"Label in item at index 0 of dataset: {ronchdset[0][1]}")
-    print(f"Number of items in dataset: {len(ronchdset)}")
+    chosenIndices = [random.randint(0, len(ronchdset) - 1) for i in range(4)]
+    print(f"Chosen indices: {chosenIndices}")
 
+    for idx in chosenIndices:
+        print(f"\n{idx}")
+        print(ronchdset[idx][1])
+
+    # print(f"Shape of Ronchigram in item at index {idx} of dataset: {ronchdset[idx][0].shape}")
+    # print(f"Ronchigram array in item at index {idx} of dataset: {ronchdset[idx][0]}")
+    # print(f"Label in item at index {idx} of dataset: {ronchdset[idx][1]}")
+    # print(f"Number of items in dataset: {len(ronchdset)}")
+
+    # sys.exit()
 
     # QUICK CHECK OF THE NUMPY ARRAY PLOTTING
-
-    chosenIndices = [random.randint(0, len(ronchdset) - 1) for i in range(4)]
 
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
