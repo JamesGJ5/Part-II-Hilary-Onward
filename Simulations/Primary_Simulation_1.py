@@ -313,11 +313,11 @@ if __name__ == "__main__":
 
     # RONCHIGRAM CALCULATION
 
-    mag_list = (100 * 10**-9,   # C1,0 magnitude/m (defocus)
-                75 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism)
+    mag_list = (25 * 10**-10,   # C1,0 magnitude/m (defocus)
+                25 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism)
 
-                130 * 10**-8,   # C2,1 magnitude/m (2nd-order axial coma)
-                50 * 10**-8,  # C2,3 magnitude/m (3-fold astigmatism)
+                78.5 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma)
+                47.75 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism)
                 
                 5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration)
                 5.2 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
@@ -352,9 +352,9 @@ if __name__ == "__main__":
                 2 * np.pi / 12)     # C5,6 angle/rad
 
     imdim = 1024
-    simdim = 90 * 10**-3
+    simdim = 110 * 10**-3
 
-    ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=90*10**-3)
+    ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=110*10**-3)
 
     # DEPICTING THE RONCHIGRAM
 
