@@ -78,6 +78,10 @@ print(f"torch cuda current device: {torch.cuda.current_device()}")
 
 # MODEL OPTIONS
 
+# Creating this variable because in model importation I will only import EfficientNet-B3 if this name in string form is 
+# what the below variable is assigned to
+efficientNetModel = "EfficientNet-B2"
+
 numLabels = eval(configSection["numLabels"])
 
 if efficientNetModel == "EfficientNet-B7":
@@ -115,10 +119,6 @@ elif efficientNetModel == "EfficientNet-B0":
 
 # CHOOSING MODEL
 
-# Creating this variable because in model importation I will only import EfficientNet-B3 if this name in string form is 
-# what the below variable is assigned to
-efficientNetModel = "EfficientNet-B3"
-
 model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficient=parameters["width_coefficient"], 
                             depth_coefficient=parameters["depth_coefficient"], 
                             dropout_rate=parameters["dropout_rate"]).to(device)
@@ -151,17 +151,44 @@ from DataLoader2 import RonchigramDataset
 
 simulationsPath = configSection["simulationsPath"]
 
-c10, c12, c21, c23, c30 = (eval(configSection[x]) for x in ["c10", "c12", "c21", "c23", "c30"])
-phi10, phi12, phi21, phi23, phi30 = (eval(configSection[x]) for x in ["phi10", "phi12", "phi21", "phi23", "phi30"])
+c10, c12, c21, c23, c30, c32, c34, c41, c43, c45, c50, c52, c54, c56 = (eval(configSection[x]) for x in ["c10", "c12", \
+                                    "c21", "c23", "c30", "c32", "c34", "c41", "c43", "c45", "c50", "c52", "c54", "c56"])
 
-c10scaling, c12scaling, c21scaling, c23scaling, c30scaling = (eval(configSection[x]) for x in ["c10scaling", "c12scaling", "c21scaling", "c23scaling", "c30scaling"])
-phi10scaling, phi12scaling, phi21scaling, phi23scaling, phi30scaling = (eval(configSection[x]) for x in ["phi10scaling", "phi12scaling", "phi21scaling", "phi23scaling", "phi30scaling"])
+phi10, phi12, phi21, phi23, phi30, phi32, phi34, phi41, phi43, phi45, phi50, phi52, phi54, phi56 = (\
+    eval(configSection[x]) for x in ["phi10", "phi12", "phi21", "phi23", "phi30", "phi32", "phi34", "phi41", "phi43", \
+                                                                            "phi45", "phi50", "phi52", "phi54", "phi56"])
+
+c10scaling, c12scaling, c21scaling, c23scaling, c30scaling, c32scaling, c34scaling, c41scaling, c43scaling, c45scaling, \
+    c50scaling, c52scaling, c54scaling, c56scaling = (eval(configSection[x]) for x in ["c10scaling", "c12scaling", \
+    "c21scaling", "c23scaling", "c30scaling", "c32scaling", "c34scaling", "c41scaling", "c43scaling", "c45scaling", \
+                                                                "c50scaling", "c52scaling", "c54scaling", "c56scaling"])
+
+phi10scaling, phi12scaling, phi21scaling, phi23scaling, phi30scaling, phi32scaling, phi34scaling, phi41scaling, \
+    phi43scaling, phi45scaling, phi50scaling, phi52scaling, phi54scaling, phi56scaling = (eval(configSection[x]) for x \
+    in ["phi10scaling", "phi12scaling", "phi21scaling", "phi23scaling", "phi30scaling", "phi32scaling", \
+    "phi34scaling", "phi41scaling", "phi43scaling", "phi45scaling", "phi50scaling", "phi52scaling", "phi54scaling", \
+    "phi56scaling"])
 
 ronchdset = RonchigramDataset(hdf5filename=simulationsPath, complexLabels=False,
-                                c10=c10, c12=c12, c21=c21, c23=c23, c30=c30,
-                                phi10=phi10, phi12=phi12, phi21=phi21, phi23=phi23, phi30=phi30,
-                                c10scaling=c10scaling, c12scaling=c12scaling, c21scaling=c21scaling, c23scaling=c23scaling, c30scaling=c30scaling,
-                                phi10scaling=phi10scaling, phi12scaling=phi12scaling, phi21scaling=phi21scaling, phi23scaling=phi23scaling, phi30scaling=phi30scaling)
+
+                                c10=c10, c12=c12, c21=c21, c23=c23, c30=c30, c32=c32, c34=c34, c41=c41, c43=c43, c45=c45,
+                                c50=c50, c52=c52, c54=c54, c56=c56,
+
+                                phi10=phi10, phi12=phi12, phi21=phi21, phi23=phi23, phi30=phi30, phi32=phi32, 
+                                phi34=phi34, phi41=phi41, phi43=phi43, phi45=phi45, phi50=phi50, phi52=phi52,
+                                phi54=phi54, phi56=phi56,
+
+                                c10scaling=c10scaling, c12scaling=c12scaling, c21scaling=c21scaling, 
+                                c23scaling=c23scaling, c30scaling=c30scaling, c32scaling=c32scaling, 
+                                c34scaling=c34scaling, c41scaling=c41scaling, c43scaling=c43scaling, 
+                                c45scaling=c45scaling, c50scaling=c50scaling, c52scaling=c52scaling,
+                                c54scaling=c54scaling, c56scaling=c56scaling,
+                                
+                                phi10scaling=phi10scaling, phi12scaling=phi12scaling, phi21scaling=phi21scaling, 
+                                phi23scaling=phi23scaling, phi30scaling=phi30scaling, phi32scaling=phi32scaling, 
+                                phi34scaling=phi34scaling, phi41scaling=phi41scaling, phi43scaling=phi43scaling, 
+                                phi45scaling=phi45scaling, phi50scaling=phi50scaling, phi52scaling=phi52scaling,
+                                phi54scaling=phi54scaling, phi56scaling=phi56scaling)
 
 print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(GPU)}")
 
@@ -187,7 +214,7 @@ if estimateMeanStd:
     # NOTE: in a test, I found that completing the below without specificDevice == device was quicker than using the GPU, 
     # so I am doing the below without GPU support.
     print(f"Resolution of each Ronchigram for which mean and standard deviation are calculated is {resolution}, which should equal the resolution used in training.")
-    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, batchesTested=320, apertureSize=apertureSize)
+    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, diagnosticBatchSize=64, batchesTested=1300, apertureSize=apertureSize)
     print(calculatedMean, calculatedStd)
 
 
@@ -237,9 +264,9 @@ ronchdsetLength = len(ronchdset)
 
 print(f"Total number of Ronchigrams used: {ronchdsetLength}")
 
-trainFraction = 0.7
-evalFraction = 0.15
-testFraction = 1 - trainFraction - evalFraction
+trainFraction = 14 / 17
+evalFraction = 1 - trainFraction
+testFraction = 0
 
 trainLength = math.ceil(ronchdsetLength * trainFraction)
 evalLength = math.ceil(ronchdsetLength * evalFraction)
@@ -591,7 +618,7 @@ trainEvaluator = create_supervised_evaluator(model, metrics=metrics, device=devi
 from ignite.contrib.handlers import CustomPeriodicEvent
 
 # Below, creating a custom periodic event that occurs every 3 epochs
-cpe = CustomPeriodicEvent(n_epochs=3)
+cpe = CustomPeriodicEvent(n_epochs=2)
 
 # Below, making sure that this custom periodic event is attached to the trainer Engine
 cpe.attach(trainer)
@@ -605,7 +632,7 @@ def run_evaluation(engine):
 # NOTE: Evaluation occurs at every 3rd epoch, I believe, starting with the first I think--this may be why there has always been a waiting 
 # period before training begins. It could be that changing to EPOCHS_3_COMPLETED might be better but not so sure, it may be that the 
 # second line is doing that.
-trainer.add_event_handler(cpe.Events.EPOCHS_3_STARTED, run_evaluation)
+trainer.add_event_handler(cpe.Events.EPOCHS_2_STARTED, run_evaluation)
 
 # Hover over Events and you see that Events.COMPLETED means that run_evaluation here is being triggered when the engine's (trainer's) run is 
 # completed, so after the final epoch. This is worth keeping, of course.
