@@ -214,7 +214,7 @@ if estimateMeanStd:
     # NOTE: in a test, I found that completing the below without specificDevice == device was quicker than using the GPU, 
     # so I am doing the below without GPU support.
     print(f"Resolution of each Ronchigram for which mean and standard deviation are calculated is {resolution}, which should equal the resolution used in training.")
-    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, diagnosticBatchSize=64, batchesTested=1300, apertureSize=apertureSize)
+    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, diagnosticBatchSize=64, batchesTested=130, apertureSize=apertureSize)
     print(calculatedMean, calculatedStd)
 
 
