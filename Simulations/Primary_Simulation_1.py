@@ -255,8 +255,8 @@ def calc_Ronchigram(imdim, simdim,
 
     obj_ap = al_rr <= aperture_size
 
-    fft_psi_p = fft2(np.exp(-1j*chi_array) * obj_ap)    # (Schnitzer, 2020a)
-    # fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
+    # fft_psi_p = fft2(np.exp(-1j*chi_array) * obj_ap)    # (Schnitzer, 2020a)
+    fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
     
 
     # print(calc_wavlen(av))
@@ -271,8 +271,8 @@ def calc_Ronchigram(imdim, simdim,
 
     # CALCULATING THE RONCHIGRAM
 
-    # inverse = ifft2(psi_t) # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
-    inverse = ifft2(psi_t) * obj_ap # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
+    inverse = ifft2(psi_t) # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
+    # inverse = ifft2(psi_t) * obj_ap # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
 
     # plt.imshow(np.angle(inverse))
     # plt.show()
