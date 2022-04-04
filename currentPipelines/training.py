@@ -197,8 +197,8 @@ print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory
 # logged for information about the saving of mean and std calculated for the Normalize() transform.
 scriptTime = datetime.datetime.now()
 
-apertureSize = ronchdset[0][0].shape[0] / 2 # Radius of objective aperture in pixels
-print(f"Aperture size is {apertureSize}")
+# apertureSize = ronchdset[0][0].shape[0] / 2 # Radius of objective aperture in pixels
+# print(f"Aperture size is {apertureSize}")
 
 
 # ESTIMATING MEAN AND STANDARD DEVIATION OF DATA
@@ -214,7 +214,7 @@ if estimateMeanStd:
     # NOTE: in a test, I found that completing the below without specificDevice == device was quicker than using the GPU, 
     # so I am doing the below without GPU support.
     print(f"Resolution of each Ronchigram for which mean and standard deviation are calculated is {resolution}, which should equal the resolution used in training.")
-    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, diagnosticBatchSize=64, batchesTested=130, apertureSize=apertureSize)
+    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, diagnosticBatchSize=64, batchesTested=130) # , apertureSize=apertureSize)
     print(calculatedMean, calculatedStd)
 
 
@@ -234,7 +234,7 @@ except:
 
 trainTransform = Compose([
     ToTensor(),
-    CenterCrop(np.sqrt(2) * apertureSize),
+    # CenterCrop(np.sqrt(2) * apertureSize),
     Resize(resolution, F2.InterpolationMode.BICUBIC),
     Normalize(mean=[mean], std=[std])
 ])
@@ -243,7 +243,7 @@ trainTransform = Compose([
 # rather than trainTransform
 testTransform = Compose([
     ToTensor(),
-    CenterCrop(np.sqrt(2) * apertureSize),
+    # CenterCrop(np.sqrt(2) * apertureSize),
     Resize(resolution, F2.InterpolationMode.BICUBIC),
     Normalize(mean=[mean], std=[std])
 ])
