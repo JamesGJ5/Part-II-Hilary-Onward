@@ -635,10 +635,10 @@ metrics = {
     'c10Loss': Loss(criterion, output_transform=c10lossTransform),
     'c12Loss': Loss(criterion, output_transform=c12lossTransform),
     'c21Loss': Loss(criterion, output_transform=c21lossTransform),
-    # 'c23Loss': Loss(criterion, output_transform=c23lossTransform),
+    'c23Loss': Loss(criterion, output_transform=c23lossTransform),
     'phi12Loss': Loss(criterion, output_transform=phi12lossTransform),
-    # 'phi21Loss': Loss(criterion, output_transform=phi21lossTransform),
-    # 'phi23Loss': Loss(criterion, output_transform=phi23lossTransform)
+    'phi21Loss': Loss(criterion, output_transform=phi21lossTransform),
+    'phi23Loss': Loss(criterion, output_transform=phi23lossTransform)
     # 'RootMeanSquaredError': RootMeanSquaredError(),
     # 'MeanAbsoluteError': MeanAbsoluteError(),
 }
