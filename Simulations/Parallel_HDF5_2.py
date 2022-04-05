@@ -21,18 +21,18 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 50 * 10**-3
+    simdim = 60 * 10**-3
 
     # Essentially the convergence semi-angle/mrad; only called aperture_size because objective aperture size controls this 
     # quantity and wanted to be consistent with (Schnitzer, 2020c) in Primary_Simulation_1.py
     aperture_size = simdim
 
     # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
-    max_C10 = 200 * 10**-9  # Maximum C10 (defocus) magnitude/m
-    max_C12 = 150 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
+    max_C10 = 100 * 10**-9  # Maximum C10 (defocus) magnitude/m
+    max_C12 = 100 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
 
-    max_C21 = 260 * 10**-8  # Maximum C21 (axial coma) magnitude/m
-    max_C23 = 100 * 10**-8  # Maximum C23 (3-fold astigmatism) magnitude/m
+    max_C21 = 300 * 10**-9  # Maximum C21 (axial coma) magnitude/m
+    max_C23 = 100 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
     max_C30 = 10.4 * 10**-6
     max_C32 = 10.4 * 10**-6
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/03_04_22/partiallyCorrectedSTEM_2.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/04_04_22/partiallyCorrectedSTEM_2.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -189,7 +189,7 @@ if __name__ == "__main__":
 
 
     # CPUs AND PROCESSES
-    total_simulations = 85000
+    total_simulations = 100
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
