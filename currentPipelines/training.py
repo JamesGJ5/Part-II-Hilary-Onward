@@ -197,8 +197,8 @@ print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory
 # logged for information about the saving of mean and std calculated for the Normalize() transform.
 scriptTime = datetime.datetime.now()
 
-# apertureSize = ronchdset[0][0].shape[0] / 2 # Radius of objective aperture in pixels
-# print(f"Aperture size is {apertureSize}")
+apertureSize = ronchdset[0][0].shape[0] / 2 # Radius of objective aperture in pixels
+print(f"Aperture size is {apertureSize}")
 
 
 # ESTIMATING MEAN AND STANDARD DEVIATION OF DATA
@@ -214,7 +214,7 @@ if estimateMeanStd:
     # NOTE: in a test, I found that completing the below without specificDevice == device was quicker than using the GPU, 
     # so I am doing the below without GPU support.
     print(f"Resolution of each Ronchigram for which mean and standard deviation are calculated is {resolution}, which should equal the resolution used in training.")
-    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, diagnosticBatchSize=64, batchesTested=130) # , apertureSize=apertureSize)
+    calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, diagnosticBatchSize=64, batchesTested=130, apertureSize=apertureSize)
     print(calculatedMean, calculatedStd)
 
 
@@ -234,7 +234,7 @@ except:
 
 trainTransform = Compose([
     ToTensor(),
-    # CenterCrop(np.sqrt(2) * apertureSize),
+    CenterCrop(np.sqrt(2) * apertureSize),
     Resize(resolution, F2.InterpolationMode.BICUBIC),
     Normalize(mean=[mean], std=[std])
 ])
@@ -243,7 +243,7 @@ trainTransform = Compose([
 # rather than trainTransform
 testTransform = Compose([
     ToTensor(),
-    # CenterCrop(np.sqrt(2) * apertureSize),
+    CenterCrop(np.sqrt(2) * apertureSize),
     Resize(resolution, F2.InterpolationMode.BICUBIC),
     Normalize(mean=[mean], std=[std])
 ])
@@ -592,12 +592,53 @@ closing_event_name=Events.EPOCH_COMPLETED)
 
 # METRICS TO LOG TO TENSORBOARD
 
+def perElementTransform(idx, output):
+    """Selects the element at index idx of each the predicted and target label and, when passed to a 
+    torch.ignite.metrics object, computes the metric with respect to that element."""
+
+    y_pred, y = output[0][idx], output[1][idx]
+
+    return y_pred, y
+
+def c10lossTransform(output):
+    return perElementTransform(0, output)
+
+def c12lossTransform(output):
+    return perElementTransform(1, output)
+
+def c21lossTransform(output):
+    return perElementTransform(2, output)
+
+def c23lossTransform(output):
+    return perElementTransform(3, output)
+
+def phi12lossTransform(output):
+    return perElementTransform(4, output)
+
+def phi21lossTransform(output):
+    return perElementTransform(5, output)
+
+def phi23lossTransform(output):
+    return perElementTransform(6, output)
+
 # TODO: 17th by creating custom metrics via method in https://pytorch.org/ignite/metrics.html,
 #   add a percentage error (loss) per element metric; add a MAE per element metric;
 #   add a RMSE per element metric
-#   If desired, can create 
+
+# metricKeys = [s + 'Loss' for s in ('Overall', 'c10', 'c12', 'c21', 'c23', 'phi12', 'phi21', 'phi23')]
+# outputTransforms = ['None'] + [f'perElementTransform({i})' for i in range(7)]
+# metricVals = ['Loss(criterion, output_transform=' + output_transform for output_transform in outputTransforms]
+# metrics = {metricKey: eval(metricVal) for (metricName, metric) in zip(metricKeys, metricVals)}
+
 metrics = {
-    'Loss': Loss(criterion),
+    'OverallLoss': Loss(criterion),
+    'c10Loss': Loss(criterion, output_transform=c10lossTransform),
+    'c12Loss': Loss(criterion, output_transform=c12lossTransform),
+    'c21Loss': Loss(criterion, output_transform=c21lossTransform),
+    # 'c23Loss': Loss(criterion, output_transform=c23lossTransform),
+    'phi12Loss': Loss(criterion, output_transform=phi12lossTransform),
+    # 'phi21Loss': Loss(criterion, output_transform=phi21lossTransform),
+    # 'phi23Loss': Loss(criterion, output_transform=phi23lossTransform)
     # 'RootMeanSquaredError': RootMeanSquaredError(),
     # 'MeanAbsoluteError': MeanAbsoluteError(),
 }
@@ -664,7 +705,7 @@ trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 # Implementing a way to show this script that the best model is the one with the lowest MeanSquaredError value
 def default_score_fn(engine):
 
-    score = 1 / engine.state.metrics['Loss']
+    score = 1 / engine.state.metrics['OverallLoss']
 
     return score
 
