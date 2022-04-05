@@ -11,8 +11,8 @@ from matplotlib_scalebar.scalebar import ScaleBar
 
 # SEED
 
-# seed = 17
-# numpy.random.seed(seed)
+seed = 17
+numpy.random.seed(seed)
 
 
 # QUANTITIES
@@ -255,8 +255,8 @@ def calc_Ronchigram(imdim, simdim,
 
     obj_ap = al_rr <= aperture_size
 
-    # fft_psi_p = fft2(np.exp(-1j*chi_array) * obj_ap)    # (Schnitzer, 2020a)
-    fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
+    fft_psi_p = fft2(np.exp(-1j*chi_array) * obj_ap)    # (Schnitzer, 2020a)
+    # fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
     
 
     # print(calc_wavlen(av))
@@ -271,8 +271,8 @@ def calc_Ronchigram(imdim, simdim,
 
     # CALCULATING THE RONCHIGRAM
 
-    inverse = ifft2(psi_t) # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
-    # inverse = ifft2(psi_t) * obj_ap # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
+    # inverse = ifft2(psi_t) # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
+    inverse = ifft2(psi_t) * obj_ap # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
 
     # plt.imshow(np.angle(inverse))
     # plt.show()
@@ -313,13 +313,13 @@ if __name__ == "__main__":
 
     # RONCHIGRAM CALCULATION
 
-    mag_list = (25 * 10**-10,   # C1,0 magnitude/m (defocus)
-                25 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism)
+    mag_list = (50 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
+                50 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
 
-                78.5 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma)
-                47.75 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism)
+                150 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
+                50 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
                 
-                5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration)
+                5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
                 5.2 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
                 2.61 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
 
@@ -333,10 +333,10 @@ if __name__ == "__main__":
                 5 * 10**-3)    # C5,6 magnitude/m (6-fold astigmatism)
 
     ang_list = (0,              # C1,0 angle/rad
-                2 * np.pi / 4,      # C1,2 angle/rad
+                2 * np.pi / 2 * 1/2,      # C1,2 angle/rad
 
-                2 * np.pi / 2,      # C2,1 angle/rad
-                2 * np.pi / 6,      # C2,3 angle/rad
+                2 * np.pi / 1 * 1/2,      # C2,1 angle/rad
+                2 * np.pi / 3 * 1/2,      # C2,3 angle/rad
 
                 0,              # C3,0 angle/rad
                 2 * np.pi / 4,      # C3,2 angle/rad
@@ -352,9 +352,9 @@ if __name__ == "__main__":
                 2 * np.pi / 12)     # C5,6 angle/rad
 
     imdim = 1024
-    simdim = 110 * 10**-3
+    simdim = 60 * 10**-3
 
-    ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=110*10**-3)
+    ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=simdim)
 
     # DEPICTING THE RONCHIGRAM
 
