@@ -333,7 +333,7 @@ if __name__ == "__main__":
                 5 * 10**-3)    # C5,6 magnitude/m (6-fold astigmatism)
 
     ang_list = (0,              # C1,0 angle/rad
-                2 * np.pi / 2 * 1/2,      # C1,2 angle/rad
+                2 * np.pi / 2 * 1/4,      # C1,2 angle/rad
 
                 2 * np.pi / 1 * 1/2,      # C2,1 angle/rad
                 2 * np.pi / 3 * 1/2,      # C2,3 angle/rad
