@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 60 * 10**-3
+    simdim = 35 * 10**-3
 
     # Essentially the convergence semi-angle/mrad; only called aperture_size because objective aperture size controls this 
     # quantity and wanted to be consistent with (Schnitzer, 2020c) in Primary_Simulation_1.py
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/05_04_22/phi12Linear.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/_/partiallyCorrectedSTEM.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -119,8 +119,8 @@ if __name__ == "__main__":
                 C12 = randu(0, max_C12)
                 # C12 = linearC12[simulation]
 
-                C21 = randu(0, max_C21)
-                C23 = randu(0, max_C23)
+                C21 = max_C21 / 2
+                C23 = max_C23 / 2
 
                 C30 = max_C30 / 2
                 C32 = max_C32 / 2
@@ -137,11 +137,11 @@ if __name__ == "__main__":
 
 
                 phi10 = 0
-                # phi12 = randu(0, 2 * np.pi / 2)
-                phi12 = linearPhi12[simulation]
+                phi12 = randu(0, 2 * np.pi / 2)
+                # phi12 = linearPhi12[simulation]
 
-                phi21 = randu(0, 2 * np.pi / 1)
-                phi23 = randu(0, 2 * np.pi / 3)
+                phi21 = 2 * np.pi / 2
+                phi23 = 2 * np.pi / 6
 
                 phi30 = 0
                 phi32 = 2 * np.pi / 4
@@ -191,7 +191,7 @@ if __name__ == "__main__":
 
 
     # CPUs AND PROCESSES
-    total_simulations = 100
+    total_simulations = 85000
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
