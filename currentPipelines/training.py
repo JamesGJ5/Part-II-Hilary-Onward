@@ -791,7 +791,7 @@ def default_score_fn(engine):
 
 # TODO: rather than checkpointing the model at 3 points, maybe checkpoint at lots of points, depending on how much space there 
 # is and how long this takes. Also, make sure the model present at the end of training is saved too.
-best_model_handler = ModelCheckpoint(dirname=log_path, filename_prefix="best", n_saved=3, score_name="reciprocalLoss",
+best_model_handler = ModelCheckpoint(dirname=log_path, filename_prefix="best", n_saved=num_epochs, score_name="reciprocalLoss",
 score_function=default_score_fn)
 
 # Each time n_epochs (see earlier in script for what n_epochs is) epochs end, I believe checkpointing is done if the 
