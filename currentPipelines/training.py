@@ -592,13 +592,25 @@ closing_event_name=Events.EPOCH_COMPLETED)
 
 # METRICS TO LOG TO TENSORBOARD
 
-# TODO: make the labels dictionaries, such that you can find specific elements by name of aberration constant as key, 
-# since index is not specific to aberration constants: e.g., if label is [c10, c12, c21], c12's index is 1; however, 
-# if I am only training the network to recognise c12 and c21, the label will be [c12, c21] and thus c12's index is 0. 
-# Therefore, the below functions will not serve their names.
-# OR
-# TODO: for each function below, get index for a given aberration constant from the cnm and phinm tuples higher up in 
-# this script. This is probably the best solution since it will be the easiest one to implement.
+consts = (
+"c10", "c12", "c21", "c23", "c30", "c32", "c34",
+"c41", "c43", "c45", "c50", "c52", "c54", "c56", 
+
+"phi10", "phi12", "phi21", "phi23", "phi30", "phi32", "phi34",
+"phi41", "phi43", "phi45", "phi50", "phi52", "phi54", "phi56"
+)
+
+# Just a tuple saying True at indices whose aberration constants are included in the label and False at others
+constsTrueFalse = (c10, c12, c21, c23, c30, c32, c34, c41, c43, c45, c50, c52, c54, c56,
+                phi10, phi12, phi21, phi23, phi30, phi32, phi34, phi41, phi43, phi45, phi50, phi52, phi54, phi56)
+
+constsInLabel = [const for i, const in enumerate(consts) if constsTrueFalse[i]]
+print(f"constsInLabel: {constsInLabel}")
+
+# TODO: don't find out how to get the exec() function above working--instead use a better one of the methods at 
+# https://blog.finxter.com/how-to-dynamically-create-a-function-in-python/ in order to generate the below functions 
+# succinctly at runtime.
+
 def perElementTransform(idx, output):
     """Selects the element at index idx of each the predicted and target label and, when passed to a 
     torch.ignite.metrics object, computes the metric with respect to that element."""
@@ -608,40 +620,95 @@ def perElementTransform(idx, output):
     return y_pred, y
 
 def c10lossTransform(output):
-    return perElementTransform(0, output)
+    const = "c10"
+
+    if const not in constsInLabel:
+        idx = None
+        print(f"const not in label")
+
+    else:
+        idx = constsInLabel.index(const)
+
+    return perElementTransform(idx, output)
 
 def c12lossTransform(output):
-    return perElementTransform(1, output)
+    const = "c12"
 
-# def c21lossTransform(output):
-#     return perElementTransform(2, output)
+    if const not in constsInLabel:
+        idx = None
+        print(f"const not in label")
 
-# def c23lossTransform(output):
-#     return perElementTransform(3, output)
+    else:
+        idx = constsInLabel.index(const)
 
-# NOTE: the "2" below only applies while the labels are of the form [c10, c12, phi12]; I must follow the closest of 
-# the above TODO points to make it so that I didn't have to change from 4 to 2 below.
+    return perElementTransform(idx, output)
+
+def c21lossTransform(output):
+    const = "c21"
+
+    if const not in constsInLabel:
+        idx = None
+        print(f"const not in label")
+
+    else:
+        idx = constsInLabel.index(const)
+
+    return perElementTransform(idx, output)
+
+def c23lossTransform(output):
+    const = "c23"
+
+    if const not in constsInLabel:
+        idx = None
+        print(f"const not in label")
+
+    else:
+        idx = constsInLabel.index(const)
+
+    return perElementTransform(idx, output)
+
 def phi12lossTransform(output):
-    return perElementTransform(2, output)
+    const = "phi12"
 
-# def phi21lossTransform(output):
-#     return perElementTransform(5, output)
+    if const not in constsInLabel:
+        idx = None
+        print(f"const not in label")
 
-# def phi23lossTransform(output):
-#     return perElementTransform(6, output)
+    else:
+        idx = constsInLabel.index(const)
 
-# TODO: 17th by creating custom metrics via method in https://pytorch.org/ignite/metrics.html,
-#   add a percentage error (loss) per element metric; add a MAE per element metric;
-#   add a RMSE per element metric
+    return perElementTransform(idx, output)
 
-# metricKeys = [s + 'Loss' for s in ('Overall', 'c10', 'c12', 'c21', 'c23', 'phi12', 'phi21', 'phi23')]
-# outputTransforms = ['None'] + [f'perElementTransform({i})' for i in range(7)]
-# metricVals = ['Loss(criterion, output_transform=' + output_transform for output_transform in outputTransforms]
-# metrics = {metricKey: eval(metricVal) for (metricName, metric) in zip(metricKeys, metricVals)}
+def phi21lossTransform(output):
+    const = "phi21"
+
+    if const not in constsInLabel:
+        idx = None
+        print(f"const not in label")
+
+    else:
+        idx = constsInLabel.index(const)
+
+    return perElementTransform(idx, output)
+
+def phi23lossTransform(output):
+    const = "phi23"
+
+    if const not in constsInLabel:
+        idx = None
+        print(f"const not in label")
+
+    else:
+        idx = constsInLabel.index(const)
+
+    return perElementTransform(idx, output)
+
+# TODO: 17th by creating custom metrics via method in https://pytorch.org/ignite/metrics.html, add a percentage error 
+# (loss) per element metric.
 
 metrics = {
     'OverallLoss': Loss(criterion),
-    'c10Loss': Loss(criterion, output_transform=c10lossTransform),
+    # 'c10Loss': Loss(criterion, output_transform=c10lossTransform),
     'c12Loss': Loss(criterion, output_transform=c12lossTransform),
     # 'c21Loss': Loss(criterion, output_transform=c21lossTransform),
     # 'c23Loss': Loss(criterion, output_transform=c23lossTransform),
@@ -651,7 +718,6 @@ metrics = {
     # 'RootMeanSquaredError': RootMeanSquaredError(),
     # 'MeanAbsoluteError': MeanAbsoluteError(),
 }
-
 
 
 # EVALUATOR INSTANTIATION
