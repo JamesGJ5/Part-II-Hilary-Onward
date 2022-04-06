@@ -76,7 +76,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/_/partiallyCorrectedSTEM.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/06_04_22/varingC12Phi12_randSeed.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -115,7 +115,7 @@ if __name__ == "__main__":
                 # Just for line 187 (i.e. status updates)
                 simulation_number += 1
 
-                C10 = randu(0, max_C10)
+                C10 = max_C10 / 2
                 C12 = randu(0, max_C12)
                 # C12 = linearC12[simulation]
 
