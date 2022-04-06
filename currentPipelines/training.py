@@ -796,7 +796,10 @@ score_function=default_score_fn)
 
 # Each time n_epochs (see earlier in script for what n_epochs is) epochs end, I believe checkpointing is done if the 
 # score function is low enough; the dictionary below provides the model's state at that point.
-trainEvaluator.add_event_handler(Events.COMPLETED, best_model_handler, {'model': model,})
+trainEvaluator.add_event_handler(Events.COMPLETED, best_model_handler, {'model': model, 
+                                                                        'optimiser': optimiser,
+                                                                        'lr_scheduler': lr_scheduler})
+                                                                        # 'epoch': trainEvaluator.state.epoch})
 
 
 
