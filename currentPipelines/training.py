@@ -592,6 +592,13 @@ closing_event_name=Events.EPOCH_COMPLETED)
 
 # METRICS TO LOG TO TENSORBOARD
 
+# TODO: make the labels dictionaries, such that you can find specific elements by name of aberration constant as key, 
+# since index is not specific to aberration constants: e.g., if label is [c10, c12, c21], c12's index is 1; however, 
+# if I am only training the network to recognise c12 and c21, the label will be [c12, c21] and thus c12's index is 0. 
+# Therefore, the below functions will not serve their names.
+# OR
+# TODO: for each function below, get index for a given aberration constant from the cnm and phinm tuples higher up in 
+# this script. This is probably the best solution since it will be the easiest one to implement.
 def perElementTransform(idx, output):
     """Selects the element at index idx of each the predicted and target label and, when passed to a 
     torch.ignite.metrics object, computes the metric with respect to that element."""
@@ -606,20 +613,22 @@ def c10lossTransform(output):
 def c12lossTransform(output):
     return perElementTransform(1, output)
 
-def c21lossTransform(output):
+# def c21lossTransform(output):
+#     return perElementTransform(2, output)
+
+# def c23lossTransform(output):
+#     return perElementTransform(3, output)
+
+# NOTE: the "2" below only applies while the labels are of the form [c10, c12, phi12]; I must follow the closest of 
+# the above TODO points to make it so that I didn't have to change from 4 to 2 below.
+def phi12lossTransform(output):
     return perElementTransform(2, output)
 
-def c23lossTransform(output):
-    return perElementTransform(3, output)
+# def phi21lossTransform(output):
+#     return perElementTransform(5, output)
 
-def phi12lossTransform(output):
-    return perElementTransform(4, output)
-
-def phi21lossTransform(output):
-    return perElementTransform(5, output)
-
-def phi23lossTransform(output):
-    return perElementTransform(6, output)
+# def phi23lossTransform(output):
+#     return perElementTransform(6, output)
 
 # TODO: 17th by creating custom metrics via method in https://pytorch.org/ignite/metrics.html,
 #   add a percentage error (loss) per element metric; add a MAE per element metric;
@@ -634,11 +643,11 @@ metrics = {
     'OverallLoss': Loss(criterion),
     'c10Loss': Loss(criterion, output_transform=c10lossTransform),
     'c12Loss': Loss(criterion, output_transform=c12lossTransform),
-    'c21Loss': Loss(criterion, output_transform=c21lossTransform),
-    'c23Loss': Loss(criterion, output_transform=c23lossTransform),
+    # 'c21Loss': Loss(criterion, output_transform=c21lossTransform),
+    # 'c23Loss': Loss(criterion, output_transform=c23lossTransform),
     'phi12Loss': Loss(criterion, output_transform=phi12lossTransform),
-    'phi21Loss': Loss(criterion, output_transform=phi21lossTransform),
-    'phi23Loss': Loss(criterion, output_transform=phi23lossTransform)
+    # 'phi21Loss': Loss(criterion, output_transform=phi21lossTransform),
+    # 'phi23Loss': Loss(criterion, output_transform=phi23lossTransform)
     # 'RootMeanSquaredError': RootMeanSquaredError(),
     # 'MeanAbsoluteError': MeanAbsoluteError(),
 }
