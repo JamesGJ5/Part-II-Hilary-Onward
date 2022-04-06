@@ -802,7 +802,7 @@ trainEvaluator.add_event_handler(Events.COMPLETED, best_model_handler, {'model':
 
 # EARLY STOPPING
 
-es_patience = 10
+es_patience = 4
 es_handler = EarlyStopping(patience=es_patience, score_function=default_score_fn, trainer=trainer)
 # I haven't looked far into it, it doesn't seem to matter too much right now, but it may be that it is worth replacing 
 # test_evaluator below with train_evaluator, if that is a better indicator of whether early stopping is worth it
