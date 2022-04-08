@@ -197,7 +197,11 @@ print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory
 # logged for information about the saving of mean and std calculated for the Normalize() transform.
 scriptTime = datetime.datetime.now()
 
-apertureSize = ronchdset[0][0].shape[0] / 2 # Radius of objective aperture in pixels
+# Radius of objective aperture in pixels, then multiplied by ratio of desired simdim to actual simdim so can get 
+# very central part of Ronchigram without choosing a physically-unrealistic simdim
+ratio = eval(configSection["desiredSimdim"]) / eval(configSection["actualSimdim"])
+
+apertureSize = ronchdset[0][0].shape[0] / 2 * ratio
 print(f"Aperture size is {apertureSize}")
 
 
