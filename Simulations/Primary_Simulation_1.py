@@ -7,11 +7,12 @@ import scipy.constants as sc
 from PIL import Image
 import matplotlib.pyplot as plt
 from matplotlib_scalebar.scalebar import ScaleBar
+import random
 
 
 # SEED
 
-# seed = 17
+# seed = 18
 # numpy.random.seed(seed)
 
 
@@ -313,46 +314,77 @@ if __name__ == "__main__":
 
     # RONCHIGRAM CALCULATION
 
-    mag_list = (50 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
-                50 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+    randu = numpy.random.uniform
 
-                150 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
-                50 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
-                
-                5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
-                5.2 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
-                2.61 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
+    mag_list = (
+                # 50 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
+                randu(0, 2 * 50 * 10**-9),
+                # 50 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                randu(0, 2 * 50 * 10**-9),
+                # 150 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
+                randu(0, 2 * 150 * 10**-9),
+                # 50 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                randu(0, 2 * 50 * 10**-9),
+   
+                # 5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
+                randu(0, 2 * 5.2 * 10**-6),
+                # 5.2 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
+                randu(0, 2 * 5.2 * 10**-6),
+                # 2.61 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
+                randu (0, 2 * 2.61 * 10**-6),
 
-                0.05 * 10**-3,   # C4,1 magnitude/m (4th-order axial coma)
-                0.05 * 10**-3,   # C4,3 magnitude/m (3-lobe aberration)
-                0.05 * 10**-3,   # C4,5 magnitude/m (5-fold astigmatism)
+                # 0.05 * 10**-3,   # C4,1 magnitude/m (4th-order axial coma)
+                randu(0, 2 * 0.05 * 10**-3),
+                # 0.05 * 10**-3,   # C4,3 magnitude/m (3-lobe aberration)
+                randu(0, 2 * 0.05 * 10**-3),
+                # 0.05 * 10**-3,   # C4,5 magnitude/m (5-fold astigmatism)
+                randu(0, 2 * 0.05 * 10**-3),
 
-                5 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
-                5 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
-                5 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
-                5 * 10**-3)    # C5,6 magnitude/m (6-fold astigmatism)
+                # 5 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
+                randu(0, 2 * 5 * 10**-3),
+                # 5 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
+                randu(0, 2 * 5 * 10**-3),
+                # 5 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
+                randu(0, 2 * 5 * 10**-3),
+                # 5 * 10**-3)    # C5,6 magnitude/m (6-fold astigmatism)
+                randu(0, 2 * 5 * 10**-3))
 
     ang_list = (0,              # C1,0 angle/rad
-                2 * np.pi / 2 * 3/4,      # C1,2 angle/rad
+                # 2 * np.pi / 2 * 2/4,      # C1,2 angle/rad
+                randu(0, 2 * np.pi / 2),
 
-                2 * np.pi / 1 * 1/2,      # C2,1 angle/rad
-                2 * np.pi / 3 * 1/2,      # C2,3 angle/rad
+                # 2 * np.pi / 1 * 1/2,      # C2,1 angle/rad
+                randu(0, 2 * np.pi / 1),
+                # 2 * np.pi / 3 * 1/2,      # C2,3 angle/rad
+                randu(0, 2 * np.pi / 3),
+
 
                 0,              # C3,0 angle/rad
-                2 * np.pi / 4,      # C3,2 angle/rad
-                2 * np.pi / 8,      # C3,4 angle/rad
+                # 2 * np.pi / 2 * 1/2,      # C3,2 angle/rad
+                randu(0, 2 * np.pi / 2),
+                # 2 * np.pi / 4 * 1/2,      # C3,4 angle/rad
+                randu(0, 2 * np.pi / 4),
 
-                2 * np.pi / 2,      # C4,1 angle/rad
-                2 * np.pi / 6,      # C4,3 angle/rad
-                2 * np.pi / 10,     # C4,5 angle/rad
+                # 2 * np.pi / 1 * 1/2,      # C4,1 angle/rad
+                randu(0, 2 * np.pi / 1),
+                # 2 * np.pi / 3 * 1/2,      # C4,3 angle/rad
+                randu(0, 2 * np.pi / 3),
+                # 2 * np.pi / 5 * 1/2,     # C4,5 angle/rad
+                randu(0, 2 * np.pi / 5),
 
                 0,              # C5,0 angle/rad
-                2 * np.pi / 4,      # C5,2 angle/rad
-                2 * np.pi / 8,      # C5,4 angle/rad
-                2 * np.pi / 12)     # C5,6 angle/rad
+                # 2 * np.pi / 2 * 1/2,      # C5,2 angle/rad
+                randu(0, 2 * np.pi / 2),
+                # 2 * np.pi / 4 * 1/2,      # C5,4 angle/rad
+                randu(0, 2 * np.pi / 4),
+                # 2 * np.pi / 6 * 1/2)     # C5,6 angle/rad
+                randu(0, 2 * np.pi / 6))
+
+    print(ang_list[1] / (2 * np.pi / 2))
+    print(mag_list[1] / (2 * 50 * 10**-9))
 
     imdim = 1024
-    simdim = 35 * 10**-3
+    simdim = 30 * 10**-3
 
     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=simdim)
 
