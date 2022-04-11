@@ -40,7 +40,7 @@ import matplotlib.pyplot as plt
 
 # VERSION CHECKING
 
-print(f"torch version: {torch.__version__}... ignite version: {ignite.__version__}...")
+# print(f"torch version: {torch.__version__}... ignite version: {ignite.__version__}...")
 
 
 
@@ -123,23 +123,18 @@ model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficie
                             depth_coefficient=parameters["depth_coefficient"], 
                             dropout_rate=parameters["dropout_rate"]).to(device)
 
-print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_allocated(GPU)}")
+# print(f"Memory/bytes allocated after model instantiation: {torch.cuda.memory_allocated(GPU)}")
 
 
-# LOADING WEIGHTS INTO MODEL
+# LOADING PRETRAINED MODEL WEIGHTS
 
-pretrainedWeights = eval(configSection["pretrainedWeights"])
+pretrainedModel = eval(configSection["pretrainedModel"])
 
-if pretrainedWeights:
-
-    # The below is whether the last lr computed in preTrainedWeights' run will be returned (see 
-    # https://pytorch.org/docs/stable/generated/torch.optim.lr_scheduler.ExponentialLR.html for more on this)
-    # TODO: figure out how to actually implement getting last lr in state_dict like the above link says is doable
-    useLast_lr = eval(configSection["useLast_lr"])
+if pretrainedModel:
 
     # TODO: if you get an error about cuda weights being wrong or something, use the map_location parameter below as you 
     # did in inferencer.py
-    model.load_state_dict(torch.load(configSection["weightsPath"]))
+    model.load_state_dict(torch.load(configSection["pretrainedModelPath"])["model"])
 
 
 # TRANSFORMS, DATASETS AND DATASET SPLITTING, AND DATA LOADERS
@@ -190,7 +185,7 @@ ronchdset = RonchigramDataset(hdf5filename=simulationsPath, complexLabels=False,
                                 phi45scaling=phi45scaling, phi50scaling=phi50scaling, phi52scaling=phi52scaling,
                                 phi54scaling=phi54scaling, phi56scaling=phi56scaling)
 
-print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(GPU)}")
+# print(f"Memory/bytes allocated after ronchdset instantiation: {torch.cuda.memory_allocated(GPU)}")
 
 # I am storing the time in this variable scriptTime because I want the same time to be logged for both saving training 
 # information and for the name of the file(s) training results in, i.e. model weights etc. Also, want this time to be 
@@ -224,10 +219,6 @@ if estimateMeanStd:
 
 # Apply transforms
 
-# TODO: import function in DataLoader2.py that calculates mean and std for normalisation. The values below right now 
-# are values from previous mean and std measurement, so should be roughly accurate, although this measurement was only 
-# done over 32 Ronchigrams.
-
 try:
     mean = calculatedMean
     std = calculatedStd
@@ -259,8 +250,6 @@ ronchdset.transform = trainTransform
 
 inputDtype = ronchdset[0][0].type()
 
-# print(ronchdset[0])
-
 
 # Lengths for trainSet, evalSet and testSet
 
@@ -285,7 +274,7 @@ print(f"trainFraction:evalFraction:testFraction {trainFraction}:{evalFraction}:{
 # rather than trainTransform
 trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
 
-print(f"Memory/bytes allocated after ronchdset splitting: {torch.cuda.memory_allocated(GPU)}")
+# print(f"Memory/bytes allocated after ronchdset splitting: {torch.cuda.memory_allocated(GPU)}")
 
 
 # Create data loaders via torch.utils.data.DataLoader
@@ -303,7 +292,7 @@ num_epochs = eval(configSection["num_epochs"])
 
 with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
     f.write(f"\n\n\n{scriptTime}")
-    if not pretrainedWeights:
+    if not pretrainedModel:
         f.write("\n\nSee config1 at the date and time this training run was done (see https://github.com/JamesGJ5/Part-II-Hilary-Onward) for weights used.")
 
     f.write(f"\n\nGPU: {GPU}, Torch seed: {torchSeed}, input datatype: {inputDtype}, numWorkers: {numWorkers}, train:eval:test {trainFraction}:{evalFraction}:{testFraction}")
@@ -323,61 +312,20 @@ with open("/home/james/VSCode/currentPipelines/modelLogging", "a") as f:
 trainLoader = DataLoader(trainSet, batch_size=trainBatchSize, num_workers=numWorkers, shuffle=True, drop_last=True, 
                         pin_memory=True)
 
-# batch = next(iter(trainLoader))
-# x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
-# xtype = x.type()
-# print(f"trainLoader batch type is {xtype}")
-
-# print(batch)
-
-
-
 evalLoader = DataLoader(evalSet, batch_size=evalBatchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
                         pin_memory=True)
-
-# batch = next(iter(evalLoader))
-# x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
-# xtype = x.type()
-# print(f"evalLoader batch type is {xtype}")
-
 
 # testLoader = DataLoader(testSet, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
 #                         pin_memory=True)
 
-# NOTE: the below is identical code to code found in inferencer.py; I ran both expecting that they would have the same output given that they same seed was used in 
-# each case, along with the same initial RonchigramDataset and train:eval:test proportions and the same transform details. If the output were the same, it would mean 
-# that the test loader instantiated in inferencer.py would be different from that in training.py, meaning the test loader used in inferencer.py wouldn't instead 
-# overlap with the train loader used to train the model being inferenced.
-
-# batch = next(iter(testLoader))
-# exampleRonch = batch[0][1]
-# print(exampleRonch)
-
-
-# batch = next(iter(testLoader))
-# x = convert_tensor(batch["ronchigram"], device=device, non_blocking=True)
-# xtype = x.type()
-# print(f"testLoader batch type is {xtype}")
-
-
-print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_allocated(GPU)}")
-
+# print(f"Memory/bytes allocated after creating data loaders: {torch.cuda.memory_allocated(GPU)}")
 
 
 # OPTIMISER
 
-# j = 0
-# y_predNaNsSum = 0
-# targetNaNsSum = 0
-
 torchCriterion = nn.MSELoss(reduction="none")
 
-# criterionReduction = configSection["criterionReduction"]
 criterion = eval(configSection["criterion"])
-
-# if criterionReduction == "none":
-
-#     redFun = eval(configSection["redFun"])
 
 lr = eval(configSection["lr"])
 
@@ -413,12 +361,17 @@ optimiser = optim.SGD([
 #     }],
 #     weight_decay=1e-3)
 
-
 # TODO: I have put this here to conveniently save the string to a logging file, must find a way to do this without 
 # instantiating the string first
 gamma = eval(configSection["gamma"])
 lr_scheduler_string = f"ExponentialLR(optimiser, gamma={gamma})"
+
 lr_scheduler = eval(lr_scheduler_string)
+
+if pretrainedModel:
+
+    optimiser.load_state_dict(torch.load(configSection["pretrainedModelPath"])["optimiser"])
+    lr_scheduler.load_state_dict(torch.load(configSection["pretrainedModelPath"])["lr_scheduler"])
 
 
 # update_fn DEFINITION
@@ -435,54 +388,17 @@ batchesDone = 0
 
 # Updates the weights while iterating over the training data
 def update_fn(engine, batch):
-    # Only do checking below when i == 1
-    # global i
-    # i += 1
 
     model.train()
 
     x = convert_tensor(batch[0], device=device, non_blocking=True)
-    # if i == 1:
-    #     print(f"Size of x is: {x.size()}")
-    #     print(x.type())
-
-    # print(x)
-
-    # print(f"After putting x onto the GPU: {torch.cuda.memory_allocated(0)}")
     
     y_pred = model(x)
-    # if i == 1: 
-    #     print(f"Size of y_pred is: {y_pred.size()}")
-        # print(y_pred.type())
-
-    # del x
 
     y = convert_tensor(batch[1], device=device, non_blocking=True)
-    # if i == 1: 
-    #     print(f"Size of y is: {y.size()}")
-        # print(y.type())
-
-    # sys.exit()
-
-    # print(y)
-    # print(y_pred)
 
     # Compute loss
     loss = criterion(y_pred, y)
-
-    # if criterionReduction == "none":
-        
-    #     loss = redFun(criterion, y_pred, y)
-
-    # print(loss)
-    # print(loss.size())
-
-    # print(loss)
-    # print(loss.size())
-
-    # sys.exit()
-
-    # print(loss)
 
     optimiser.zero_grad()
 
@@ -491,16 +407,6 @@ def update_fn(engine, batch):
     optimiser.step()
 
     batchloss = loss.item()
-    # print(batchloss)
-    # print(batchloss.shape)
-
-    # print(y)
-    # print(y_pred)
-    # print(batchloss)
-
-    # sys.exit()
-
-    # print(batchloss)
 
     global batchesDone
     batchesDone += 1
@@ -508,26 +414,15 @@ def update_fn(engine, batch):
     global batchlossVals
     batchlossVals.append(batchloss)
 
-    # if math.isnan(batchloss):
-    #     print("batchloss:", batchloss)
-    #     print("y:\n", y)
-    #     print("y_pred:\n", y_pred)
-
-    # if math.isinf(batchloss):
-    #     print("batchloss:", batchloss)
-    #     print("y:\n", y)
-    #     print("y_pred:\n", y_pred)
-
     return {
-        "batchloss": batchloss,
-        # "validationLoss": 1
+        "batchloss": batchloss
     }
 
 
 
 # CHECKING update_fn
 
-checkUpdate_fn = True
+checkUpdate_fn = False
 
 if checkUpdate_fn:
     batch = next(iter(trainLoader))
@@ -536,15 +431,12 @@ if checkUpdate_fn:
     # then add y to device and then calculate loss
     res = update_fn(engine=None, batch=batch)
     # TODO: decomment the below when you want to test update_fn
-    # print(res)
-
-    # sys.exit()
+    print(res)
 
     batch = None
     
 torch.cuda.empty_cache()
 
-# sys.exit()
 
 # Output_transform definition
 
@@ -614,7 +506,6 @@ print(f"constsInLabel: {constsInLabel}")
 # TODO: don't find out how to get the exec() function above working--instead use a better one of the methods at 
 # https://blog.finxter.com/how-to-dynamically-create-a-function-in-python/ in order to generate the below functions 
 # succinctly at runtime.
-
 def perElementTransform(idx, output):
     """Selects the element at index idx of each the predicted and target label and, when passed to a 
     torch.ignite.metrics object, computes the metric with respect to that element."""
@@ -709,7 +600,6 @@ def phi23lossTransform(output):
 
 # TODO: 17th by creating custom metrics via method in https://pytorch.org/ignite/metrics.html, add a percentage error 
 # (loss) per element metric.
-
 metrics = {
     'OverallLoss': Loss(criterion),
     # 'c10Loss': Loss(criterion, output_transform=c10lossTransform),
@@ -732,31 +622,16 @@ trainEvaluator = create_supervised_evaluator(model, metrics=metrics, device=devi
 # testEvaluator = create_supervised_evaluator(model, metrics=metrics, device=device, non_blocking=True)
 
 
-
 # SETTING UP LOGGER
 
 from ignite.contrib.handlers import CustomPeriodicEvent
-
-# # Below, creating a custom periodic event that occurs every 3 epochs
-# cpe = CustomPeriodicEvent(n_epochs=1)
-
-# # Below, making sure that this custom periodic event is attached to the trainer Engine
-# cpe.attach(trainer)
 
 # Defining a function that permits evaluation on evalLoader (to be used now) and testLoader (not really to be used for now)
 def run_evaluation(engine):
     trainEvaluator.run(evalLoader)
     # testEvaluator.run(testLoader)
 
-
-# NOTE: Evaluation occurs at every 3rd epoch, I believe, starting with the first I think--this may be why there has always been a waiting 
-# period before training begins. It could be that changing to EPOCHS_3_COMPLETED might be better but not so sure, it may be that the 
-# second line is doing that.
 trainer.add_event_handler(Events.EPOCH_COMPLETED, run_evaluation)
-
-# # Hover over Events and you see that Events.COMPLETED means that run_evaluation here is being triggered when the engine's (trainer's) run is 
-# # completed, so after the final epoch. This is worth keeping, of course.
-# trainer.add_event_handler(Events.COMPLETED, run_evaluation)
 
 
 # Logging metrics for evaluation on evalLoader
@@ -778,7 +653,6 @@ def setup_logger(logger):
 trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 
 
-
 # CHECKPOINTING
 
 # Implementing a way to show this script that the best model is the one with the lowest MeanSquaredError value
@@ -788,34 +662,23 @@ def default_score_fn(engine):
 
     return score
 
-
-# TODO: If this script ends up creating a different number of models than 3, may need to change n_saved below from 3 to 
-# something else. The below will result in a file with a number in it that corresponds to 1/MSE (so higher number means 
-# better model). There may be an error with float("inf"), will wait and see if ModelCheckpoint works with it.
-
-# TODO: rather than checkpointing the model at 3 points, maybe checkpoint at lots of points, depending on how much space there 
-# is and how long this takes. Also, make sure the model present at the end of training is saved too.
 best_model_handler = ModelCheckpoint(dirname=log_path, filename_prefix="best", n_saved=num_epochs, score_name="reciprocalLoss",
 score_function=default_score_fn)
 
-# Each time n_epochs (see earlier in script for what n_epochs is) epochs end, I believe checkpointing is done if the 
-# score function is low enough; the dictionary below provides the model's state at that point.
+# Checkpointing is done after every validation, since a validation is done after every epoch and n_saved == number of 
+# epochs
 trainEvaluator.add_event_handler(Events.COMPLETED, best_model_handler, {'model': model, 
                                                                         'optimiser': optimiser,
                                                                         'lr_scheduler': lr_scheduler})
                                                                         # 'epoch': trainEvaluator.state.epoch})
 
 
-
 # EARLY STOPPING
 
-es_patience = 4
+es_patience = 10
 es_handler = EarlyStopping(patience=es_patience, score_function=default_score_fn, trainer=trainer)
-# I haven't looked far into it, it doesn't seem to matter too much right now, but it may be that it is worth replacing 
-# test_evaluator below with train_evaluator, if that is a better indicator of whether early stopping is worth it
 trainEvaluator.add_event_handler(Events.COMPLETED, es_handler)
 setup_logger(es_handler.logger)
-
 
 
 # FUNCTION TO CLEAR CUDA CACHE BETWEEN TRAINING AND TESTING
@@ -830,16 +693,14 @@ trainEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 # testEvaluator.add_event_handler(Events.COMPLETED, empty_cuda_cache)
 
 
-
 # ACTUAL TRAINING
 
 # This is where training begins
 # Note: when training, in the display for a given epoch, while the epoch is running, x/y shows the number of batches 
 # iterated over, y being the total number of batches and x being the number of batches iterated over so far in the epoch.
 # So, x/y shows progress of iterations in an epoch.
-# TODO: see if, when the epoch ends, y changes to a number that doesn't correctly show the number of batches overal..
+# NOTE: when epoch ends, x/y changes to num_epochs/num_epochs, for some reason
 trainer.run(trainLoader, max_epochs=num_epochs)
-
 
 
 # SAVING MORE TRAINING INFORMATION
@@ -882,10 +743,6 @@ renamingBestModel = True
 if renamingBestModel:
     os.system(f"ls {log_path}")
 
-    # NOTE: out why print(next(os.walk(log_path)))[1] returns just an empty list - this 
-    # is because the ".pt" files really are just files, not directories (although their 
-    # icons make them look like directories). I think they are zip files.
-
     # Takes all files in the directory log_path and its sub-directories
     checkpoints = next(os.walk(log_path))[2]
     print("\n" + str(checkpoints))
@@ -896,7 +753,6 @@ if renamingBestModel:
 
     # TODO: automate calculation of the indices of the file names to take the 
     # scores from below
-
     scores = [eval(c[26:-3]) for c in checkpoints]
     print("\nScores:", scores)
 
