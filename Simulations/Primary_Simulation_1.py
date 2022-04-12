@@ -12,7 +12,7 @@ import random
 
 # SEED
 
-# seed = 18
+# seed = 17
 # numpy.random.seed(seed)
 
 
