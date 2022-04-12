@@ -501,7 +501,7 @@ constsTrueFalse = (c10, c12, c21, c23, c30, c32, c34, c41, c43, c45, c50, c52, c
                 phi10, phi12, phi21, phi23, phi30, phi32, phi34, phi41, phi43, phi45, phi50, phi52, phi54, phi56)
 
 constsInLabel = [const for i, const in enumerate(consts) if constsTrueFalse[i]]
-print(f"constsInLabel: {constsInLabel}")
+# print(f"constsInLabel: {constsInLabel}")
 
 # TODO: don't find out how to get the exec() function above working--instead use a better one of the methods at 
 # https://blog.finxter.com/how-to-dynamically-create-a-function-in-python/ in order to generate the below functions 
@@ -598,19 +598,15 @@ def phi23lossTransform(output):
 
     return perElementTransform(idx, output)
 
+constSpecificMetrics = [f"Loss(criterion, output_transform={const}lossTransform)" for const in constsInLabel]
+print(f"Dictionary of included per-constant metrics: {constSpecificMetrics}")
+constMetricDict = {const: eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetrics)}
+
 # TODO: 17th by creating custom metrics via method in https://pytorch.org/ignite/metrics.html, add a percentage error 
 # (loss) per element metric.
 metrics = {
     'OverallLoss': Loss(criterion),
-    # 'c10Loss': Loss(criterion, output_transform=c10lossTransform),
-    'c12Loss': Loss(criterion, output_transform=c12lossTransform),
-    # 'c21Loss': Loss(criterion, output_transform=c21lossTransform),
-    # 'c23Loss': Loss(criterion, output_transform=c23lossTransform),
-    'phi12Loss': Loss(criterion, output_transform=phi12lossTransform),
-    # 'phi21Loss': Loss(criterion, output_transform=phi21lossTransform),
-    # 'phi23Loss': Loss(criterion, output_transform=phi23lossTransform)
-    # 'RootMeanSquaredError': RootMeanSquaredError(),
-    # 'MeanAbsoluteError': MeanAbsoluteError(),
+    **constMetricDict
 }
 
 
