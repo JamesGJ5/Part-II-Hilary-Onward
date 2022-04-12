@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 35 * 10**-3
+    simdim = 70 * 10**-3
 
     # Essentially the convergence semi-angle/mrad; only called aperture_size because objective aperture size controls this 
     # quantity and wanted to be consistent with (Schnitzer, 2020c) in Primary_Simulation_1.py
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/08_04_22/c12RandPhi12Linear_RandOthers.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/12_04_22/partiallyCorrectedSTEM.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -102,11 +102,11 @@ if __name__ == "__main__":
             simulation_number = 0
 
             # linearC10 = np.linspace(rank / number_processes * max_C10, (rank + 1) / number_processes * max_C10, number_simulations, endpoint=False)
-            linearC12 = np.linspace(rank / number_processes * max_C12, (rank + 1) / number_processes * max_C12, number_simulations, endpoint=False)
+            # linearC12 = np.linspace(rank / number_processes * max_C12, (rank + 1) / number_processes * max_C12, number_simulations, endpoint=False)
             # linearC21 = np.linspace(rank / number_processes * max_C21, (rank + 1) / number_processes * max_C21, number_simulations, endpoint=False)
             # linearC23 = np.linspace(rank / number_processes * max_C23, (rank + 1) / number_processes * max_C23, number_simulations, endpoint=False)
 
-            linearPhi12 = np.linspace(rank / number_processes * 2*np.pi/2, (rank + 1) / number_processes * 2*np.pi/2, number_simulations, endpoint=False)
+            # linearPhi12 = np.linspace(rank / number_processes * 2*np.pi/2, (rank + 1) / number_processes * 2*np.pi/2, number_simulations, endpoint=False)
             # linearPhi21 = np.linspace(rank / number_processes * 2*np.pi, (rank + 1) / number_processes * 2*np.pi, number_simulations, endpoint=False)
             # linearPhi23 = np.linspace(rank / number_processes * 2*np.pi/3, (rank + 1) / number_processes * 2*np.pi/3, number_simulations, endpoint=False)
 
@@ -150,8 +150,8 @@ if __name__ == "__main__":
 
 
                 phi10 = 0
-                # phi12 = randu(0, 2 * np.pi / 2)
-                phi12 = linearPhi12[simulation]
+                phi12 = randu(0, 2 * np.pi / 2)
+                # phi12 = linearPhi12[simulation]
 
                 phi21 = randu(0, 2 * np.pi / 1)
                 # phi21 = 2 * np.pi / 2
@@ -207,14 +207,14 @@ if __name__ == "__main__":
                 ronch_dset[rank, simulation] = ronch[:]
 
 
-                if simulation_number % math.ceil(number_simulations / 20) == 0:
+                if simulation_number % math.ceil(number_simulations / 40) == 0:
 
                     print(f"\n{simulation_number} simulations complete for rank at index {rank} at " + \
                             f"{datetime.now().strftime('%m/%d/%Y, %H:%M:%S')}")
 
 
     # CPUs AND PROCESSES
-    total_simulations = 1000
+    total_simulations = 500000
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
