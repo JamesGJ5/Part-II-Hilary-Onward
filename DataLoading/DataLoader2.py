@@ -311,7 +311,7 @@ def getMeanAndStd2(ronchdset, trainingResolution, diagnosticBatchSize=4, diagnos
 
     ronchdset.transform = diagnosticTransform
 
-    diagnosticDataloader = DataLoader(ronchdset, batch_size=diagnosticBatchSize, shuffle=diagnosticShuffle, num_workers=0)
+    diagnosticDataloader = DataLoader(ronchdset, batch_size=diagnosticBatchSize, shuffle=diagnosticShuffle, num_workers=8)
 
     mean, std = getMeanAndStd(diagnosticDataloader, batchesTested, specificDevice=specificDevice)
 
@@ -367,7 +367,7 @@ if __name__ == "__main__":
     usingGPU = False
 
     if usingGPU:
-        GPU = 0
+        GPU = 1
         device = torch.device(f"cuda:{GPU}" if torch.cuda.is_available() else "cpu")
         GPU = torch.cuda.current_device()
         print(f"GPU: {GPU}")
@@ -430,13 +430,16 @@ if __name__ == "__main__":
 
     apertureSize = 1024 / 2 # Aperture radius in pixels
 
-    estimateMeanStd = False
+    estimateMeanStd = True
 
     if estimateMeanStd:
 
-        calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, apertureSize=apertureSize)
+        calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, 
+        apertureSize=apertureSize, diagnosticBatchSize=32)
+
         print(calculatedMean, calculatedStd)
 
+    sys.exit()
 
     # APPLYING TRANSFORMS
 
