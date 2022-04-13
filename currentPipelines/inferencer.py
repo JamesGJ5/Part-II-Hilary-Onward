@@ -7,7 +7,7 @@ import model1
 from ignite.metrics import MeanAbsoluteError, MeanSquaredError
 import math
 from torch.utils.data import DataLoader, random_split, Subset
-from torchvision.transforms import Compose, Resize, ToTensor, Normalize
+from torchvision.transforms import Compose, Resize, ToTensor, Normalize, CenterCrop
 import torchvision.transforms.functional as F2
 from ignite.utils import convert_tensor
 import cmath
@@ -55,7 +55,7 @@ from Primary_Simulation_1 import calc_Ronchigram
 
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
-GPU = 0
+GPU = 1
 usingGPU = True
 
 if not usingGPU:
@@ -71,15 +71,26 @@ if usingGPU:
 
 # OPTIONS
 
-efficientNetModel = "EfficientNet-B3"
+efficientNetModel = "EfficientNet-B2"
 
 
 # Choosing which labels are going to be returned alongside the Ronchigrams returned by the RonchigramDataset object that 
 # shall be instantiated.
-chosenVals = {"c10": True, "c12": True, "c21": True, "c23": True, "phi10": False, "phi12": True, "phi21": True, "phi23": True}
+chosenVals = {"c10": False, "c12": True, "c21": False, "c23": False, "c30": False,
+"c32": False, "c34": False, "c41": False, "c43": False, "c45": False, "c50": False, "c52": False, "c54": False, "c56": False,
+
+"phi10": False, "phi12": True, "phi21": False, "phi23": False, "phi30": False,
+"phi32": False, "phi34": False, "phi41": False, "phi43": False, "phi45": False, "phi50": False, "phi52": False, "phi54": False, "phi56": False
+}
+
 scalingVals = {
-    "c10scaling": 1 / (10 * 10**-9), "c12scaling": 1 / (10 * 10**-9), "c21scaling": 1 / (1000 * 10**-9), "c23scaling": 1 / (1000 * 10**-9), 
-    "phi10scaling": 1, "phi12scaling": 1 / (np.pi / 2), "phi21scaling": 1 / (np.pi / 1), "phi23scaling": 1 / (np.pi / 3)
+    "c10scaling": 1 / (100 * 10**-9), "c12scaling": 1 / (100 * 10**-9), "c21scaling": 1 / (300 * 10**-9), "c23scaling": 1 / (100 * 10**-9), 
+    "c30scaling": 1 / (10.4 * 10**-6), "c32scaling": 1 / (10.4 * 10**-6), "c34scaling": 1 / (5.22 * 10**-6), "c41scaling": 1 / (0.1 * 10**-3), "c43scaling": 1 / (0.1 * 10**-3), "c45scaling": 1 / (0.1 * 10**-3),
+    "c50scaling": 1 / (10 * 10**-3), "c52scaling": 1 / (10 * 10**-3), "c54scaling": 1 / (10 * 10**-3), "c56scaling": 1 / (10 * 10**-3),
+
+    "phi10scaling": 1, "phi12scaling": 1 / (2 * np.pi / 2), "phi21scaling": 1 / (2 * np.pi / 1), "phi23scaling": 1 / (2 * np.pi / 3), 
+    "phi30scaling": 1, "phi32scaling": 1 / (2 * np.pi / 2), "phi34scaling": 1 / (2 * np.pi / 4), "phi41scaling": 1 / (2 * np.pi / 1), "phi43scaling": 1 / (2 * np.pi / 3), "phi45scaling": 1 / (2 * np.pi / 5),
+    "phi50scaling": 1, "phi52scaling": 1 / (2 * np.pi / 2), "phi54scaling": 1 / (2 * np.pi / 4), "phi56scaling": 1 / (2 * np.pi / 6)
 } 
 
 
@@ -87,7 +98,7 @@ scalingVals = {
 
 # numLabels is essentially the number of elements the model outputs in its prediction for a given Ronchigram. It is of 
 # course best to match this number to the same number that was used in training the model.
-numLabels = 7
+numLabels = 2
 
 
 # CONFIG STUFF
@@ -105,9 +116,9 @@ config.read("config2.ini")
 # NOTE: mean and std are the mean and standard deviation estimated for the data used to train the model whose path 
 # is modelPath; can be found in modelLogging
 
-modelPath = config["modelSection"]["modelPath"]
-mean = eval(config["modelSection"]["mean"])
-std = eval(config["modelSection"]["std"])
+modelPath = config['modelSection']['modelPath']
+desiredSimdim = eval(config['modelSection']['desiredSimdim'])
+actualSimdim = eval(config['modelSection']['actualSimdim'])
 
 
 # TEST SET PATH
@@ -115,7 +126,7 @@ std = eval(config["modelSection"]["std"])
 # The path of the Ronchigrams which are to be inferred and whose "predicted" Ronchigrams are to be plotted alongside 
 # them.
 
-testSetPath = config["testSetPath"]["testSetPath"]
+# testSetPath = config["testSetPath"]["testSetPath"]
 
 
 # SCALING TENSORS
@@ -139,6 +150,10 @@ if efficientNetModel == "EfficientNet-B3":
     parameters = {"num_labels": numLabels, "width_coefficient": 1.2, "depth_coefficient": 1.4, "dropout_rate": 0.3}
     resolution = 300
 
+elif efficientNetModel == "EfficientNet-B2":
+    parameters = {"num_labels": numLabels, "width_coefficient": 1.1, "depth_coefficient": 1.2, "dropout_rate": 0.3}
+    resolution = 260
+
 model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficient=parameters["width_coefficient"], 
                             depth_coefficient=parameters["depth_coefficient"], 
                             dropout_rate=parameters["dropout_rate"]).to(device)
@@ -146,13 +161,13 @@ model = model1.EfficientNet(num_labels=parameters["num_labels"], width_coefficie
 
 # LOADING WEIGHTS
 
-model.load_state_dict(torch.load(modelPath, map_location = torch.device(f"cuda:{GPU}" if usingGPU else "cpu")))
+model.load_state_dict(torch.load(modelPath, map_location = torch.device(f"cuda:{GPU}" if usingGPU else "cpu"))["model"])
 
 
 # TEST DATA IMPORTATION
-# Load RonchigramDataset object with filename equal to the file holding new simulations to be inferred
+# # Load RonchigramDataset object with filename equal to the file holding new simulations to be inferred
 
-testSet = RonchigramDataset(testSetPath, complexLabels=False, **chosenVals, **scalingVals)
+# testSet = RonchigramDataset(testSetPath, complexLabels=False, **chosenVals, **scalingVals)
 
 
 # Set up the test transform; it should be the same as testTransform in training.py (1:48pm 15/02/22), with resolution 
@@ -163,190 +178,194 @@ testSet = RonchigramDataset(testSetPath, complexLabels=False, **chosenVals, **sc
 #   performance here, more just correct prediction of trends
 # Apply the transform to the RonchigramDataset object too
 
-testTransform = Compose([
-    ToTensor(),
-    Resize(resolution, F2.InterpolationMode.BICUBIC),
-    Normalize(mean=[mean], std=[std])
-])
+# TODO: generalise the below in case image size is not 1024 x 1024 px or in case simdim doesn't equal aperture size
+apertureSize = 1024 / 2
 
-testSet.transform = testTransform
+# testTransform = Compose([
+#     ToTensor(),
+#     CenterCrop(np.sqrt(2) * apertureSize),
+#     Resize(resolution, F2.InterpolationMode.BICUBIC),
+#     Normalize(mean=[mean], std=[std])
+# ])
+
+# testSet.transform = testTransform
 
 
 # Batch size and number of workers used to load the data
 
-batchSize = 4
-numWorkers = 2
+batchSize = 32
+numWorkers = 4
 
 
 # Collecting subset of testSet to make pretty pictures with
 
-chosenIndices = [0, 250, 500, 750]
-testSubset = Subset(testSet, chosenIndices)
+# chosenIndices = [0, 250, 500, 750]
+# testSubset = Subset(testSet, chosenIndices)
 
-testLoader = DataLoader(testSubset, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
-                        pin_memory=True)
-
-
-# Quick tests on batched data
-
-batch = next(iter(testLoader))
+# testLoader = DataLoader(testSubset, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
+#                         pin_memory=True)
 
 
-testingDataLoader = True
+# # Quick tests on batched data
 
-if testingDataLoader:
-    for iBatch, batchedSample in enumerate(testLoader):
+# batch = next(iter(testLoader))
 
-        print(f"\nBatch index: {iBatch}")
-        print(f"Ronchigram batch size: {batchedSample[0].size()}")
-        print(f"Labels batch size: {batchedSample[1].size()}\n")
 
-        if iBatch == 0:
-            plt.figure()
+# testingDataLoader = True
 
-            # In batchedSample, labels get printed, hence the below print statement
-            print("Batch of target labels:")
-            showBatch(batchedSample)
+# if testingDataLoader:
+#     for iBatch, batchedSample in enumerate(testLoader):
 
-            plt.ioff()
-            plt.show()
+#         print(f"\nBatch index: {iBatch}")
+#         print(f"Ronchigram batch size: {batchedSample[0].size()}")
+#         print(f"Labels batch size: {batchedSample[1].size()}\n")
 
-            break
+#         if iBatch == 0:
+#             plt.figure()
+
+#             # In batchedSample, labels get printed, hence the below print statement
+#             print("Batch of target labels:")
+#             showBatch(batchedSample)
+
+#             plt.ioff()
+#             plt.show()
+
+#             break
 
 
 # Carry out inference to get predicted labels
 
 model.eval()
 
-with torch.no_grad():
-    # NOTE: if this isn't feasible GPU memory-wise, may want to replace batch with batch[0] and instances of x[0] with x
-    x = convert_tensor(batch[0], device=device, non_blocking=True)
+# with torch.no_grad():
+#     # NOTE: if this isn't feasible GPU memory-wise, may want to replace batch with batch[0] and instances of x[0] with x
+#     x = convert_tensor(batch[0], device=device, non_blocking=True)
 
-    # yPred is the batch of labels predicted for x
-    yPred = model(x)
+#     # yPred is the batch of labels predicted for x
+#     yPred = model(x)
 
-    print("\nBatch of predicted labels:")
-    print(yPred)
+#     print("\nBatch of predicted labels:")
+#     print(yPred)
 
-    # The below is done because before input, cnm and phinm values are scaled by scaling factors; to see what predictions 
-    # mean physically, must rescale back as is done below.
-    yPred = yPred.cpu() / usedScalingFactors
+#     # The below is done because before input, cnm and phinm values are scaled by scaling factors; to see what predictions 
+#     # mean physically, must rescale back as is done below.
+#     yPred = yPred.cpu() / usedScalingFactors
 
 
-print("\nBatch of target labels but un-normalised:")
-print(batch[1] / usedScalingFactors)
+# print("\nBatch of target labels but un-normalised:")
+# print(batch[1] / usedScalingFactors)
 
-print("\nBatch of predicted labels but un-normalised:")
-print(yPred)
+# print("\nBatch of predicted labels but un-normalised:")
+# print(yPred)
     
 
-# Use predicted labels to calculate new Numpy Ronchigrams (with resolution 1024)
+# # Use predicted labels to calculate new Numpy Ronchigrams (with resolution 1024)
 
-imdim = 1024    # Output Ronchigram will have an array size of imdim x imdim elements
+# imdim = 1024    # Output Ronchigram will have an array size of imdim x imdim elements
 
-# TODO: make simdim importable alongside the simulations path that is imported
-simdim = 50 * 10**-3   # Convergence semi-angle/rad
+# # TODO: make simdim importable alongside the simulations path that is imported
+# simdim = 50 * 10**-3   # Convergence semi-angle/rad
 
-# NOTE: this will contain numpy arrays, not torch Tensors
-predictedRonchBatch = np.empty((batchSize, imdim, imdim, 1))
+# # NOTE: this will contain numpy arrays, not torch Tensors
+# predictedRonchBatch = np.empty((batchSize, imdim, imdim, 1))
 
-for labelVectorIndex in range(batchSize):
-    labelVector = yPred[labelVectorIndex]
+# for labelVectorIndex in range(batchSize):
+#     labelVector = yPred[labelVectorIndex]
 
-    # # If the network was trained using complex labels, the predicted labels must contain predicted real & imaginary 
-    # # parts of complex forms of aberrations
-    # if testSet.complexLabels:
+#     # # If the network was trained using complex labels, the predicted labels must contain predicted real & imaginary 
+#     # # parts of complex forms of aberrations
+#     # if testSet.complexLabels:
 
-    #     C10_mag, C10_ang = cmath.polar(labelVector[0] + labelVector[4] * 1j)
-    #     C12_mag, C12_ang = cmath.polar(labelVector[1] + labelVector[5] * 1j)
-    #     C21_mag, C21_ang = cmath.polar(labelVector[2] + labelVector[6] * 1j)
-    #     C23_mag, C23_ang = cmath.polar(labelVector[3] + labelVector[7] * 1j)
+#     #     C10_mag, C10_ang = cmath.polar(labelVector[0] + labelVector[4] * 1j)
+#     #     C12_mag, C12_ang = cmath.polar(labelVector[1] + labelVector[5] * 1j)
+#     #     C21_mag, C21_ang = cmath.polar(labelVector[2] + labelVector[6] * 1j)
+#     #     C23_mag, C23_ang = cmath.polar(labelVector[3] + labelVector[7] * 1j)
 
-    # TODO: replace the below with a concise generator or something
-    # NOTE: remember that just because an aberration magnitude is zero doesn't necessarily mean angle is zero? Idk
-    # TODO: implement a way to, when prediction doesn't contain a certain value but the inferred-from Ronchigram does, 
-    # get that value from the inferred-from Ronchigram to go into the predicted Ronchigram
-    i = 0
+#     # TODO: replace the below with a concise generator or something
+#     # NOTE: remember that just because an aberration magnitude is zero doesn't necessarily mean angle is zero? Idk
+#     # TODO: implement a way to, when prediction doesn't contain a certain value but the inferred-from Ronchigram does, 
+#     # get that value from the inferred-from Ronchigram to go into the predicted Ronchigram
+#     i = 0
 
-    C10_mag = labelVector[i].item() if chosenVals["c10"] else 0
-    i = i + 1 if C10_mag != 0 else i
+#     C10_mag = labelVector[i].item() if chosenVals["c10"] else 0
+#     i = i + 1 if C10_mag != 0 else i
 
-    C12_mag = labelVector[i].item() if chosenVals["c12"] else 0
-    i = i + 1 if C12_mag != 0 else i
+#     C12_mag = labelVector[i].item() if chosenVals["c12"] else 0
+#     i = i + 1 if C12_mag != 0 else i
 
-    C21_mag = labelVector[i].item() if chosenVals["c21"] else 0
-    i = i + 1 if C21_mag != 0 else i
+#     C21_mag = labelVector[i].item() if chosenVals["c21"] else 0
+#     i = i + 1 if C21_mag != 0 else i
 
-    C23_mag = labelVector[i].item() if chosenVals["c23"] else 0
-    i = i + 1 if C23_mag != 0 else i
+#     C23_mag = labelVector[i].item() if chosenVals["c23"] else 0
+#     i = i + 1 if C23_mag != 0 else i
 
-    C10_ang = labelVector[i].item() if chosenVals["phi10"] else 0
-    i = i + 1 if C10_ang != 0 else i
+#     C10_ang = labelVector[i].item() if chosenVals["phi10"] else 0
+#     i = i + 1 if C10_ang != 0 else i
 
-    C12_ang = labelVector[i].item() if chosenVals["phi12"] else 0
-    i = i + 1 if C12_ang != 0 else i
+#     C12_ang = labelVector[i].item() if chosenVals["phi12"] else 0
+#     i = i + 1 if C12_ang != 0 else i
 
-    C21_ang = labelVector[i].item() if chosenVals["phi21"] else 0
-    i = i + 1 if C21_ang != 0 else i
+#     C21_ang = labelVector[i].item() if chosenVals["phi21"] else 0
+#     i = i + 1 if C21_ang != 0 else i
 
-    C23_ang = labelVector[i].item() if chosenVals["phi23"] else 0
-    i = i + 1 if C23_ang != 0 else i
+#     C23_ang = labelVector[i].item() if chosenVals["phi23"] else 0
+#     i = i + 1 if C23_ang != 0 else i
 
-    # print(C10_mag, C12_mag, C21_mag, C23_mag, C10_ang, C12_ang, C21_ang, C23_ang)
+#     # print(C10_mag, C12_mag, C21_mag, C23_mag, C10_ang, C12_ang, C21_ang, C23_ang)
 
-    I, t = testSet.getIt(chosenIndices[labelVectorIndex])
-    # print(I, t)
+#     I, t = testSet.getIt(chosenIndices[labelVectorIndex])
+#     # print(I, t)
 
-    # NOTE: for now, haven't been saving b, it will probably just remain as 1 but I may change it so be careful
-    b = 1
+#     # NOTE: for now, haven't been saving b, it will probably just remain as 1 but I may change it so be careful
+#     b = 1
 
-    # TODO: calculate Ronchigram here from parameters above
-    predictedRonch = calc_Ronchigram(imdim=imdim, simdim=simdim,
-                                    C10_mag=C10_mag, C12_mag=C12_mag, C21_mag=C21_mag, C23_mag=C23_mag,
-                                    C10_ang=C10_ang, C12_ang=C12_ang, C21_ang=C21_ang, C23_ang=C23_ang,
-                                    I=I, b=b, t=t)
+#     # TODO: calculate Ronchigram here from parameters above
+#     predictedRonch = calc_Ronchigram(imdim=imdim, simdim=simdim,
+#                                     C10_mag=C10_mag, C12_mag=C12_mag, C21_mag=C21_mag, C23_mag=C23_mag,
+#                                     C10_ang=C10_ang, C12_ang=C12_ang, C21_ang=C21_ang, C23_ang=C23_ang,
+#                                     I=I, b=b, t=t)
 
-    predictedRonch = np.expand_dims(predictedRonch, 2)
+#     predictedRonch = np.expand_dims(predictedRonch, 2)
 
-    # print(predictedRonch[0].shape)
-    # print(predictedRonch)
+#     # print(predictedRonch[0].shape)
+#     # print(predictedRonch)
 
-    predictedRonchBatch[labelVectorIndex] = predictedRonch
+#     predictedRonchBatch[labelVectorIndex] = predictedRonch
 
-# print(predictedRonchBatch)
-# print(predictedRonchBatch[0].shape)
+# # print(predictedRonchBatch)
+# # print(predictedRonchBatch[0].shape)
 
 
-# Retrieving the data inferred by the network in Numpy form this time (i.e. without transforms)
+# # Retrieving the data inferred by the network in Numpy form this time (i.e. without transforms)
 
-testSet.transform = None
-testSubset = Subset(testSet, chosenIndices)
+# testSet.transform = None
+# testSubset = Subset(testSet, chosenIndices)
 
-# print(type(testSubset[0][0]))
-# print(testSubset[0][0].shape)
-# print(testSubset[0][0])
+# # print(type(testSubset[0][0]))
+# # print(testSubset[0][0].shape)
+# # print(testSubset[0][0])
 
-# Plot calculated Ronchigrams alongside latest ones from RonchigramDataset, using a function like show_data in 
-# DataLoader2.py for inspiration
+# # Plot calculated Ronchigrams alongside latest ones from RonchigramDataset, using a function like show_data in 
+# # DataLoader2.py for inspiration
 
-# TODO: attach labels to the below plot in some way, even if it is a README.txt or something like that; just gotta 
-# show labels to Chen in presentation so maybe they need not be in the plot itself.
-for i in range(len(testSubset)):
-    plt.subplot(2, len(testSubset), i + 1)
+# # TODO: attach labels to the below plot in some way, even if it is a README.txt or something like that; just gotta 
+# # show labels to Chen in presentation so maybe they need not be in the plot itself.
+# for i in range(len(testSubset)):
+#     plt.subplot(2, len(testSubset), i + 1)
 
-    plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    plt.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+#     plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+#     plt.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
 
-    plt.imshow(testSubset[i][0], cmap="gray")
+#     plt.imshow(testSubset[i][0], cmap="gray")
 
-    plt.subplot(2, len(testSubset), i + 5)
+#     plt.subplot(2, len(testSubset), i + 5)
 
-    plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    plt.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+#     plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+#     plt.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
 
-    plt.imshow(predictedRonchBatch[i], cmap="gray")
+#     plt.imshow(predictedRonchBatch[i], cmap="gray")
 
-plt.show()
+# plt.show()
 
 
 # Checking trends
@@ -366,16 +385,33 @@ plt.show()
 # 5) Plot actual c10 array vs predicted c10 array on the same graph, in different colours/maybe one with a line and one 
 # as scattered dots (the predictions being the dots)
 
-constants = ["c10", "c12", "c21", "c23", "phi12", "phi21", "phi23"]
-constUnits = ["m"] * 4 + ["rad"] * 3
+constants = ['c12', 'phi12']
+constUnits = ['m', 'rad']
 
 for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
 
-    trendSetPath = config["trendSetPath"][const]
+    trendSetPath = config['trendSet'][const]
+    mean = eval(config['trendSet'][f'{const}mean'])
+    std = eval(config['trendSet'][f'{const}std'])
 
-    trendSet = RonchigramDataset(trendSetPath, transform=testTransform, complexLabels=False, **chosenVals, **scalingVals)
+    trendSet = RonchigramDataset(trendSetPath, transform=None, complexLabels=False, **chosenVals, **scalingVals)
 
-    trendLoader = DataLoader(trendSet, batch_size=batchSize, shuffle=False, num_workers=numWorkers, pin_memory=True, 
+    # TODO: this is a slight misnomer, since this is not the size of the aperture, so I must find a more fitting name or 
+    # something; just copied this from training.py, where the change to the name must also be done.
+    apertureSize = trendSet[0][0].shape[0] / 2 * desiredSimdim / actualSimdim
+    print(f'Aperture Size in pixels: {apertureSize}')
+
+    testTransform = Compose([
+        ToTensor(),
+        CenterCrop(np.sqrt(2) * apertureSize),
+        Resize(resolution, F2.InterpolationMode.BICUBIC),
+        Normalize(mean=[mean], std=[std])
+    ])
+
+    trendSet.transform = testTransform
+    print(str(trendSet.transform))
+
+    trendLoader = DataLoader(trendSet, batch_size=batchSize, shuffle=False, num_workers=0, pin_memory=True, 
                             drop_last=False)
 
     # print(trendSet[0][1].size())
@@ -409,7 +445,7 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
             targetTensor = torch.cat((targetTensor, batchedTargets))
             predTensor = torch.cat((predTensor, predBatch))
 
-            if batchIdx % 10 == 0: print(f"{batchIdx} batches  of size {batchSize} done...")
+            if (batchIdx + 1) % 1 == 0: print(f"{batchIdx + 1} batches  of size {batchSize} done...")
 
         # usedScalingFactors = torch.reshape(usedScalingFactors, (len(usedScalingFactors), 1))
 
@@ -419,8 +455,22 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
 
         plt.plot(np.linspace(1, len(targetTensor), len(targetTensor)), targetTensor, 'b')
         plt.plot(np.linspace(1, len(predTensor), len(predTensor)), predTensor, 'ro')
-        plt.xlabel("Ronchigram Index")
+
+        # Only here to get extra plots where anomalies don't mean the rest of the graph is too squashed (should really 
+        # switch to an interactive graph where this isn't an issue)
+
+        yLimit = False
+
+        if yLimit:
+            plt.ylim((targetTensor[0], targetTensor[-1]))
+            filenameSuffix = "axesLimited"
+
+        else:
+            filenameSuffix = "noAxisLimits"
+
+        plt.xlabel("Ronchigram Number")
         plt.ylabel(f"{const} / {constUnit}")
+
         plt.title("Blue points target values, red points predictions")
-        plt.savefig(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/20_03_22/linear_{const}.png")
+        plt.savefig(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/13_04_22/{trendSetPath[-29 :-3]}_{filenameSuffix}.png")
         plt.show()
