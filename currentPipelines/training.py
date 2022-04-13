@@ -196,6 +196,8 @@ scriptTime = datetime.datetime.now()
 # very central part of Ronchigram without choosing a physically-unrealistic simdim
 ratio = eval(configSection["desiredSimdim"]) / eval(configSection["actualSimdim"])
 
+# TODO: this is a slight misnomer, since this is not the size of the aperture, so I must find a more fitting name or 
+# something
 apertureSize = ronchdset[0][0].shape[0] / 2 * ratio
 print(f"Aperture size is {apertureSize}")
 
@@ -450,7 +452,7 @@ def output_transform(out):
 # This is mostly so batchloss can be displayed during training
 # NOTE: below, the first mention of "output_transform" is one of RunningAverage's parameters, its argument is the 
 # function defined above
-RunningAverage(output_transform=output_transform).attach(trainer, "runningAvgBatchloss")
+RunningAverage(output_transform=output_transform).attach(trainer, 'Running Average')
 
 
 
@@ -461,10 +463,10 @@ log_path = f"/media/rob/hdd2/james/training/fineTuneEfficientNet/{exp_name}"
 
 tb_logger = TensorboardLogger(log_dir=log_path)
 
-tb_logger.attach(trainer, log_handler=OutputHandler('training', ['runningAvgBatchloss', ]), event_name=Events.ITERATION_COMPLETED)
+tb_logger.attach(trainer, log_handler=OutputHandler('Training', ['Running Average',]), event_name=Events.ITERATION_COMPLETED)
 print("Experiment name: ", exp_name)
 
-tb_logger.attach(trainer, log_handler=OutputHandler('training', output_transform=output_transform), event_name=Events.ITERATION_COMPLETED)
+tb_logger.attach(trainer, log_handler=OutputHandler('Training', output_transform=output_transform), event_name=Events.ITERATION_COMPLETED)
 
 # tb_logger.attach(trainer, log_handler=OutputHandler('training', output_transform = lambda out: out["validationLoss"]), event_name=Events.ITERATION_COMPLETED)
 
@@ -477,12 +479,12 @@ tb_logger.attach(trainer, log_handler=OptimizerParamsHandler(optimiser, "lr"), e
 
 
 # Interaction-wise progress bar
-ProgressBar(bar_format="").attach(trainer, metric_names=['runningAvgBatchloss'])
+ProgressBar(bar_format="").attach(trainer, metric_names=['Running Average'])
 
 
 # Epoch-wise progress bar with display of training losses
 # TODO: figure out if it matters that below, metric_names' value doesn't contain a comma as it does above
-ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['runningAvgBatchloss'], event_name=Events.EPOCH_STARTED,
+ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['Running Average'], event_name=Events.EPOCH_STARTED,
 closing_event_name=Events.EPOCH_COMPLETED)
 
 
@@ -510,7 +512,10 @@ def perElementTransform(idx, output):
     """Selects the element at index idx of each the predicted and target label and, when passed to a 
     torch.ignite.metrics object, computes the metric with respect to that element."""
 
-    y_pred, y = output[0][idx], output[1][idx]
+    # Remember, output is in the form y_pred, y, where each is a batch of predicted vectors and target vectors 
+    # respectively, each being of the size (evalBatchSize, numLabels), where numLabels is the number of aberration 
+    # constants whose recognition the network is being validated on
+    y_pred, y = output[0][:, idx], output[1][:, idx]
 
     return y_pred, y
 
@@ -600,6 +605,7 @@ def phi23lossTransform(output):
 
 constSpecificMetrics = [f"Loss(criterion, output_transform={const}lossTransform)" for const in constsInLabel]
 print(f"Dictionary of included per-constant metrics: {constSpecificMetrics}")
+
 constMetricDict = {const: eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetrics)}
 
 # TODO: 17th by creating custom metrics via method in https://pytorch.org/ignite/metrics.html, add a percentage error 
@@ -631,8 +637,15 @@ trainer.add_event_handler(Events.EPOCH_COMPLETED, run_evaluation)
 
 
 # Logging metrics for evaluation on evalLoader
-tb_logger.attach(trainEvaluator, log_handler=OutputHandler(tag="training", metric_names=list(metrics.keys()),
+tb_logger.attach(trainEvaluator, log_handler=OutputHandler(tag="Training", metric_names=list(metrics.keys()),
 global_step_transform=global_step_from_engine(trainer)), event_name=Events.EPOCH_COMPLETED)
+
+
+# For plotting multiple curves on the same graph
+# writer = SummaryWriter()
+# writer.add_scalars('Training/Superimposed Losses', {'Overall Validation Loss': })
+# tb_logger.writer.add_scalars('Training', {'Running Average': ,})
+
 
 # Logging metrics for evaluation on TestLoader
 # tb_logger.attach(testEvaluator, log_handler=OutputHandler(tag="test", metric_names=list(metrics.keys()), 
