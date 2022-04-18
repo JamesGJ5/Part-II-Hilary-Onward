@@ -606,12 +606,12 @@ def phi23lossTransform(output):
 constSpecificMetrics = [f"Loss(criterion, output_transform={const}lossTransform)" for const in constsInLabel]
 print(f"Dictionary of included per-constant metrics: {constSpecificMetrics}")
 
-constMetricDict = {const: eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetrics)}
+constMetricDict = {f'{const} Validation Loss': eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetrics)}
 
 # TODO: 17th by creating custom metrics via method in https://pytorch.org/ignite/metrics.html, add a percentage error 
 # (loss) per element metric.
 metrics = {
-    'OverallLoss': Loss(criterion),
+    'Overall Validation Loss': Loss(criterion),
     **constMetricDict
 }
 
