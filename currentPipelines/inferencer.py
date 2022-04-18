@@ -56,7 +56,7 @@ from Primary_Simulation_1 import calc_Ronchigram
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
 GPU = 1
-usingGPU = True
+usingGPU = False
 
 if not usingGPU:
     os.environ["CUDA_VISIBLE_DEVICES"]=""
@@ -459,10 +459,15 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
         # Only here to get extra plots where anomalies don't mean the rest of the graph is too squashed (should really 
         # switch to an interactive graph where this isn't an issue)
 
-        yLimit = False
+        yLimit = True
 
         if yLimit:
-            plt.ylim((targetTensor[0], targetTensor[-1]))
+            # /media/rob/hdd1/james-gj/inferenceResults/trendGraphs/13_04_22/7th April Network's Inference Results/linC12randPhi12fixedOthers_noAxisLimits.png
+            # The above link shows that the below limits are probably good to make sure that the blue line is prioritised 
+            # and not too much outside of it is shown
+            yLower = -0.2 * targetTensor[-1]
+            yUpper = 1.2 * targetTensor[-1]
+            plt.ylim((yLower, yUpper))
             filenameSuffix = "axesLimited"
 
         else:
@@ -472,5 +477,23 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
         plt.ylabel(f"{const} / {constUnit}")
 
         plt.title("Blue points target values, red points predictions")
-        plt.savefig(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/13_04_22/{trendSetPath[-29 :-3]}_{filenameSuffix}.png")
-        plt.show()
+
+        # Previously, this said "13th April Network's Inference Results"
+        whichNetwork = "13th April Network's Inference Results"
+
+        plt.savefig(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/17_04_22/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.png")
+        
+        # Put the below file statements here here as opposed to with the other "if yLimit:" block above because, if this new code doesn't work, I 
+        # still want the figure to be saved correctly.
+        if yLimit:
+            with open(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/17_04_22/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.txt", 'w') as f:
+                
+                numAnomalies = np.sum(predTensor < yLower) + np.sum(predTensor > yUpper)
+                f.write(f"{numAnomalies} anomalies out of 1000 measurements cannot be seen in this graph.")
+
+        with open(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/17_04_22/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.npy", 'wb') as f:
+            
+            np.save(f, targetTensor)
+            np.save(f, predTensor)
+        
+        # plt.show()
