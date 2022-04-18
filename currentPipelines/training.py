@@ -667,7 +667,7 @@ trainer.add_event_handler(Events.ITERATION_COMPLETED, TerminateOnNan())
 # Implementing a way to show this script that the best model is the one with the lowest MeanSquaredError value
 def default_score_fn(engine):
 
-    score = 1 / engine.state.metrics['OverallLoss']
+    score = 1 / engine.state.metrics['Overall Validation Loss']
 
     return score
 
