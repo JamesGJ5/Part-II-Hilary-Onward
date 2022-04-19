@@ -19,6 +19,7 @@ import torchvision.utils as vutils
 import datetime
 from ignite.utils import convert_tensor
 from configparser import ConfigParser
+from datetime import date
 
 
 # Seed information (may not use the same test set as in training but might as well set the torch seed to be 17 anyway, 
@@ -56,7 +57,7 @@ from Primary_Simulation_1 import calc_Ronchigram
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
 GPU = 1
-usingGPU = False
+usingGPU = True
 
 if not usingGPU:
     os.environ["CUDA_VISIBLE_DEVICES"]=""
@@ -428,72 +429,81 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
 
             batchedRonchs = convert_tensor(batchedRonchs, device=device, non_blocking=True)
 
-            # if batchIdx % 10 == 0:
-            #     print(batchedTargets.size())
-            #     print(batchedRonchs.size())
-
-            # TODO: change below so that instead of flattening, it reshapes into a different row for each cnm and phinm
-            # NOTE: the 0 below is for c10; change accordingly if wanting to check if model sees trends for other cnm and 
-            # for phinm
             batchedTargets = torch.flatten(batchedTargets[:, constIdx].cpu())
             predBatch = torch.flatten(model(batchedRonchs)[:, constIdx].cpu())
-
-            # if batchIdx % 10 == 0:
-            #     print(batchedTargets)
-            #     print(predBatch)
 
             targetTensor = torch.cat((targetTensor, batchedTargets))
             predTensor = torch.cat((predTensor, predBatch))
 
-            if (batchIdx + 1) % 1 == 0: print(f"{batchIdx + 1} batches  of size {batchSize} done...")
+            print(f"Batch number {batchIdx +1} (of size {batchSize}) is done...")
 
-        # usedScalingFactors = torch.reshape(usedScalingFactors, (len(usedScalingFactors), 1))
 
-        # TODO: generalise the below to other scaling values
-        targetTensor = (targetTensor / usedScalingFactors[constIdx]).numpy()
-        predTensor = (predTensor / usedScalingFactors[constIdx]).numpy()
+        # Target and predicted arrays featuring the aberration constant in question, un-normalised
+        targetArray = (targetTensor / usedScalingFactors[constIdx]).numpy()
+        predArray = (predTensor / usedScalingFactors[constIdx]).numpy()
 
-        plt.plot(np.linspace(1, len(targetTensor), len(targetTensor)), targetTensor, 'b')
-        plt.plot(np.linspace(1, len(predTensor), len(predTensor)), predTensor, 'ro')
 
-        # Only here to get extra plots where anomalies don't mean the rest of the graph is too squashed (should really 
-        # switch to an interactive graph where this isn't an issue)
+        # Just for file names and saving
+        trendGraphsDir = '/media/rob/hdd1/james-gj/inferenceResults/trendGraphs'
+        dateToday = date.today().strftime('%d_%m_%y')
+        whichNetwork = modelPath[52:].replace('/', '-')
 
-        yLimit = True
 
-        if yLimit:
+        # Creating directories to be saved to if they don't already exist
+        if not os.path.isdir(f'{trendGraphsDir}/{dateToday}/{whichNetwork}'):
+
+            if not os.path.isdir(f'{trendGraphsDir}/{dateToday}'):
+                os.mkdir(f'{trendGraphsDir}/{dateToday}')
+
+            os.mkdir(f'{trendGraphsDir}/{dateToday}/{whichNetwork}')
+
+
+        # Limiting y-axis so that presence of anomalies don't result in a squashed, un-expandable useful section of the 
+        # graph plotted in its current formulation
+        limit_yAxis = True
+
+        if limit_yAxis:
+            
             # /media/rob/hdd1/james-gj/inferenceResults/trendGraphs/13_04_22/7th April Network's Inference Results/linC12randPhi12fixedOthers_noAxisLimits.png
             # The above link shows that the below limits are probably good to make sure that the blue line is prioritised 
             # and not too much outside of it is shown
-            yLower = -0.2 * targetTensor[-1]
-            yUpper = 1.2 * targetTensor[-1]
+            yLower = -0.2 * targetArray[-1]
+            yUpper = 1.2 * targetArray[-1]
+
             plt.ylim((yLower, yUpper))
+
             filenameSuffix = "axesLimited"
 
+            # Only here to get extra plots where anomalies don't mean the rest of the graph is too squashed (should really 
+            # switch to an interactive graph where this isn't an issue)
+            # TODO: use better graphing than matplotlib.pyplot so that the below is not necessary
+            with open(f"{trendGraphsDir}/{dateToday}/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.txt", 'w') as f:
+                
+                numAnomalies = np.sum(predArray < yLower) + np.sum(predArray > yUpper)
+
+                f.write(f"{numAnomalies} anomalies out of 1000 measurements cannot be seen in this graph due to " +\
+                        "y-axis limiting.")
         else:
+            
             filenameSuffix = "noAxisLimits"
 
-        plt.xlabel("Ronchigram Number")
-        plt.ylabel(f"{const} / {constUnit}")
 
-        plt.title("Blue points target values, red points predictions")
-
-        # Previously, this said "13th April Network's Inference Results"
-        whichNetwork = "13th April Network's Inference Results"
-
-        plt.savefig(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/17_04_22/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.png")
-        
-        # Put the below file statements here here as opposed to with the other "if yLimit:" block above because, if this new code doesn't work, I 
-        # still want the figure to be saved correctly.
-        if yLimit:
-            with open(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/17_04_22/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.txt", 'w') as f:
-                
-                numAnomalies = np.sum(predTensor < yLower) + np.sum(predTensor > yUpper)
-                f.write(f"{numAnomalies} anomalies out of 1000 measurements cannot be seen in this graph.")
-
-        with open(f"/media/rob/hdd1/james-gj/inferenceResults/trendGraphs/17_04_22/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.npy", 'wb') as f:
+        # Saving arrays for later manipulation
+        with open(f"{trendGraphsDir}/{dateToday}/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.npy", 'wb') as f:
             
-            np.save(f, targetTensor)
-            np.save(f, predTensor)
-        
-        # plt.show()
+            np.save(f, targetArray)
+            np.save(f, predArray)
+
+
+        # Plotting trend graph
+        fig, ax = plt.subplots()
+
+        ax.plot(np.linspace(1, len(targetArray), len(targetArray)), targetArray, 'b')
+        ax.plot(np.linspace(1, len(predArray), len(predArray)), predArray, 'ro')
+
+        ax.set_xlabel("Ronchigram Number")
+        ax.set_ylabel(f"{const} / {constUnit}")
+
+        ax.set_title("Blue points target values, red points predictions")
+
+        fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.png")
