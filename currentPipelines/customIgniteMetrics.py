@@ -1,3 +1,6 @@
+# Code was copied and pasted (before being changed accordingly) from 
+# https://pytorch.org/ignite/_modules/ignite/contrib/metrics/regression/median_absolute_percentage_error.html#MedianAbsolutePercentageError
+
 from typing import Callable, Union
 
 import torch
