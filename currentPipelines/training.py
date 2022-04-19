@@ -23,6 +23,7 @@ from ignite.utils import convert_tensor
 from ignite.engine import Engine, Events, create_supervised_evaluator
 
 from ignite.metrics import RunningAverage, Loss
+from customIgniteMetrics import RMSPercentageError
 from ignite.contrib.handlers import TensorboardLogger
 from ignite.contrib.handlers.tensorboard_logger import OutputHandler, OptimizerParamsHandler
 from ignite.contrib.handlers import ProgressBar
@@ -452,7 +453,7 @@ def output_transform(out):
 # This is mostly so batchloss can be displayed during training
 # NOTE: below, the first mention of "output_transform" is one of RunningAverage's parameters, its argument is the 
 # function defined above
-RunningAverage(output_transform=output_transform).attach(trainer, 'Running Average')
+RunningAverage(output_transform=output_transform).attach(trainer, 'Training Loss Running Average')
 
 
 
@@ -463,7 +464,7 @@ log_path = f"/media/rob/hdd2/james/training/fineTuneEfficientNet/{exp_name}"
 
 tb_logger = TensorboardLogger(log_dir=log_path)
 
-tb_logger.attach(trainer, log_handler=OutputHandler('Training', ['Running Average',]), event_name=Events.ITERATION_COMPLETED)
+tb_logger.attach(trainer, log_handler=OutputHandler('Training', ['Training Loss Running Average',]), event_name=Events.ITERATION_COMPLETED)
 print("Experiment name: ", exp_name)
 
 tb_logger.attach(trainer, log_handler=OutputHandler('Training', output_transform=output_transform), event_name=Events.ITERATION_COMPLETED)
@@ -479,12 +480,12 @@ tb_logger.attach(trainer, log_handler=OptimizerParamsHandler(optimiser, "lr"), e
 
 
 # Interaction-wise progress bar
-ProgressBar(bar_format="").attach(trainer, metric_names=['Running Average'])
+ProgressBar(bar_format="").attach(trainer, metric_names=['Training Loss Running Average'])
 
 
 # Epoch-wise progress bar with display of training losses
 # TODO: figure out if it matters that below, metric_names' value doesn't contain a comma as it does above
-ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['Running Average'], event_name=Events.EPOCH_STARTED,
+ProgressBar(persist=True, bar_format="").attach(trainer, metric_names=['Training Loss Running Average'], event_name=Events.EPOCH_STARTED,
 closing_event_name=Events.EPOCH_COMPLETED)
 
 
@@ -603,16 +604,22 @@ def phi23lossTransform(output):
 
     return perElementTransform(idx, output)
 
-constSpecificMetrics = [f"Loss(criterion, output_transform={const}lossTransform)" for const in constsInLabel]
-print(f"Dictionary of included per-constant metrics: {constSpecificMetrics}")
+constSpecificMetricsLoss = [f"Loss(criterion, output_transform={const}lossTransform)" for const in constsInLabel]
+constSpecificMetricsRMSPE = [f"RMSPercentageError(output_transform={const}lossTransform)" for const in constsInLabel]
 
-constMetricDict = {f'{const} Validation Loss': eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetrics)}
+constMetricDictLoss = {f'{const} Validation Loss': eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetricsLoss)}
+constMetricDictRMSPE = {f'{const} Validation RMS Percentage Error': eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetricsRMSPE)}
+
+print(f"Dictionary of included per-constant metrics (Loss): {constMetricDictLoss}")
+print(f"Dictionary of included per-constant metrics (RMSPE): {constMetricDictRMSPE}")
 
 # TODO: 17th by creating custom metrics via method in https://pytorch.org/ignite/metrics.html, add a percentage error 
 # (loss) per element metric.
 metrics = {
     'Overall Validation Loss': Loss(criterion),
-    **constMetricDict
+    **constMetricDictLoss,
+    'Overall Validation RMS Percentage Error': RMSPercentageError(),
+    **constMetricDictRMSPE
 }
 
 
@@ -644,7 +651,7 @@ global_step_transform=global_step_from_engine(trainer)), event_name=Events.EPOCH
 # For plotting multiple curves on the same graph
 # writer = SummaryWriter()
 # writer.add_scalars('Training/Superimposed Losses', {'Overall Validation Loss': })
-# tb_logger.writer.add_scalars('Training', {'Running Average': ,})
+# tb_logger.writer.add_scalars('Training', {'Training Loss Running Average': ,})
 
 
 # Logging metrics for evaluation on TestLoader
