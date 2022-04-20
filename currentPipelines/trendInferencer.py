@@ -57,7 +57,7 @@ from Primary_Simulation_1 import calc_Ronchigram
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
 GPU = 1
-usingGPU = True
+usingGPU = False
 
 if not usingGPU:
     os.environ["CUDA_VISIBLE_DEVICES"]=""
@@ -195,7 +195,7 @@ apertureSize = 1024 / 2
 # Batch size and number of workers used to load the data
 
 batchSize = 32
-numWorkers = 4
+numWorkers = 8
 
 
 # Collecting subset of testSet to make pretty pictures with
