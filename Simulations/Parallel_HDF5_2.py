@@ -76,7 +76,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/_/simdim70mrad/randC12linPhi12_randOthers.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/19_04_22/simdim70mrad/partiallyCorrectedSTEM.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -150,8 +150,8 @@ if __name__ == "__main__":
 
 
                 phi10 = 0
-                # phi12 = randu(0, 2 * np.pi / 2)
-                phi12 = linearPhi12[simulation]
+                phi12 = randu(0, 2 * np.pi / 2)
+                # phi12 = linearPhi12[simulation]
 
                 phi21 = randu(0, 2 * np.pi / 1)
                 # phi21 = 2 * np.pi / 2
@@ -214,7 +214,7 @@ if __name__ == "__main__":
 
 
     # CPUs AND PROCESSES
-    total_simulations = 1000
+    total_simulations = 100
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
