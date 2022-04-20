@@ -375,7 +375,7 @@ if __name__ == "__main__":
 
     # DATASET INSTANTIATION
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/05_04_22/c12Linear.h5", 
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/19_04_22/simdim70mrad/partiallyCorrectedSTEM.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
     c52=True, c54=True, c56=True,
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
@@ -404,14 +404,14 @@ if __name__ == "__main__":
 
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
-    plt.figure()
+    # plt.figure()
 
-    for idx in chosenIndices:
-        print(f"\nIndex {idx}")
-        print(f"Label: {ronchdset[idx][1]}")
+    # for idx in chosenIndices:
+    #     print(f"\nIndex {idx}")
+    #     print(f"Label: {ronchdset[idx][1]}")
 
-        show_data(ronchdset[idx][0], ronchdset[idx][1])
-        plt.show()
+    #     show_data(ronchdset[idx][0], ronchdset[idx][1])
+    #     plt.show()
 
 
     # ESTIMATING MEAN AND STD
@@ -422,9 +422,9 @@ if __name__ == "__main__":
     # are looking for the mean and std to pass to Normalize(), which should only act after the image has been converted to a 
     # torch Tensor with values between 0 and 1 inclusive and then resized to the desired resolution.
 
-    # Image size must be 300 x 300 for EfficientNet-B3; be careful if you instead want to look at things for a different model 
+    # Image size must be 260 x 260 for EfficientNet-B2; be careful if you instead want to look at things for a different model 
     # of EfficientNet
-    resolution = 300
+    resolution = 260
 
     scriptTime = datetime.datetime.now()
 
