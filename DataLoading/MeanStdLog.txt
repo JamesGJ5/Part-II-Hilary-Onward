@@ -1690,3 +1690,10 @@ Calculated mean: 0.5013964176177979
 Calculated std: 0.255763441324234
 Mean and std calculated from 32 batches of size 32
 Shuffling was True; random module's seed and torch's seed were 22
+
+2022-04-19 11:01:29.044329
+/media/rob/hdd1/james-gj/Simulations/forInference/19_04_22/simdim70mrad/partiallyCorrectedSTEM.h5
+Calculated mean: 0.5009341835975647
+Calculated std: 0.25638020038604736
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
