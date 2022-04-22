@@ -1,6 +1,8 @@
 # Here I am going to copy the noise_fun code from Primary_Simulation_1.py and make a histogram out of noise_fun to 
 # see if it looks correct.
 
+zhiyuanRange = False
+
 import numpy as np
 from numpy.random import standard_normal
 from PIL import Image
@@ -18,8 +20,16 @@ assert imdim % noise_kernel_size == 0
 resize_factor = int(imdim/noise_kernel_size)
 
 noise_fn = np.zeros((noise_kernel_size, noise_kernel_size))
-for i in range(nnoise):
-    noise_fn += standard_normal(size=(noise_kernel_size, noise_kernel_size))
+
+if zhiyuanRange:
+
+    for i in range(nnoise):
+        noise_fn += np.random.uniform(-1, 0.6, size=(noise_kernel_size, noise_kernel_size))
+
+else:
+
+    for i in range(nnoise):
+        noise_fn += standard_normal(size=(noise_kernel_size, noise_kernel_size))
 
 noise_fn /= nnoise
 noise_fn += 1
