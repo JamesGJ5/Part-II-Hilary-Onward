@@ -314,7 +314,7 @@ model.eval()
 
 #     # print(C10_mag, C12_mag, C21_mag, C23_mag, C10_ang, C12_ang, C21_ang, C23_ang)
 
-#     I, t = testSet.getIt(chosenIndices[labelVectorIndex])
+#     I, t, _ = testSet.getIt(chosenIndices[labelVectorIndex])
 #     # print(I, t)
 
 #     # NOTE: for now, haven't been saving b, it will probably just remain as 1 but I may change it so be careful
