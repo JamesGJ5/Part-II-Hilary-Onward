@@ -8,6 +8,7 @@ import os
 from mpi4py import MPI
 import cmath
 import sys
+from numpy.random import default_rng
 
 from datetime import datetime
 
@@ -76,7 +77,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/19_04_22/simdim70mrad/partiallyCorrectedSTEM.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/22_04_22/simdim70mrad/partiallyCorrectedSTEM.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -86,6 +87,7 @@ if __name__ == "__main__":
                 random_angs_dset = f.create_dataset("random_angs dataset", (number_processes, number_simulations, 14), dtype="float32")
                 random_I_dset = f.create_dataset("random_I dataset", (number_processes, number_simulations, 1), dtype="float32")
                 random_t_dset = f.create_dataset("random_t dataset", (number_processes, number_simulations, 1), dtype="float32")
+                random_seed_dset = f.create_dataset("random_seed dataset", (number_processes, number_simulations, 1), dtype="int")
                 ronch_dset = f.create_dataset("ronch dataset", (number_processes, number_simulations, 1024, 1024), dtype="float32")
             
             except:
@@ -93,6 +95,7 @@ if __name__ == "__main__":
                 random_angs_dset = f["random_angs dataset"]
                 random_I_dset = f["random_I dataset"]
                 random_t_dset = f["random_t dataset"]
+                random_seed_dset = f["random_seed dataset"]
                 ronch_dset = f["ronch dataset"]
 
             randu = random.uniform
@@ -198,12 +201,17 @@ if __name__ == "__main__":
                 random_t = np.array([t])
                 random_t_dset[rank, simulation] = random_t[:]
 
+                # Want to limit the chance of multiple simulations having the same seed.
+                # TODO: make disimilar random seeds
+                random_seed = chosenSeeds[simulation]
+                random_seed_dset[rank, simulation] = random_seed
+
                 ronch = Primary_Simulation_1.calc_Ronchigram(imdim, simdim,
                                                             C10, C12, C21, C23, C30, C32, C34, C41, C43, C45, C50, C52, C54, C56,
                                                             phi10, phi12, phi21, phi23, phi30, phi32, phi34, phi41, phi43, phi45, 
                                                             phi50, phi52, phi54, phi56,
                                                             I, b, t,
-                                                            aperture_size=aperture_size)
+                                                            aperture_size=aperture_size, seed=random_seed)
                 ronch_dset[rank, simulation] = ronch[:]
 
 
@@ -220,6 +228,14 @@ if __name__ == "__main__":
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
 
     rank = MPI.COMM_WORLD.rank
+
+    # Factor of 10 is included below for good measure; really, for replace=False in default_rng().choice, possibleSeeds 
+    # must only contain as many elements as there are Ronchigrams in the process, but there shouldn't be an issue with 
+    # having more.
+    possibleSeeds = np.arange(rank * simulations_per_process * 10, (rank + 1) * simulations_per_process * 10)
+
+    # Don't want to repeat a seed for different Ronchigrams, hence replace=False.
+    chosenSeeds = default_rng().choice(possibleSeeds, len(possibleSeeds), replace=False)
 
 
     # START TIME METRICS

@@ -2,7 +2,7 @@ import numpy as np
 from numpy.fft import fft2
 from numpy.fft import ifft2, ifftshift
 import numpy.random
-from numpy.random import standard_normal
+from numpy.random import default_rng
 import scipy.constants as sc
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -29,7 +29,7 @@ pi = np.pi
 def calc_Ronchigram(imdim, simdim,
                     C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, C32_mag, C34_mag, C41_mag, C43_mag, C45_mag, C50_mag, C52_mag, C54_mag, C56_mag,
                     C10_ang, C12_ang, C21_ang, C23_ang, C30_ang, C32_ang, C34_ang, C41_ang, C43_ang, C45_ang, C50_ang, C52_ang, C54_ang, C56_ang,
-                    I, b, t, aperture_size, zhiyuanRange):
+                    I, b, t, aperture_size, zhiyuanRange=False, seed=None):
     """Takes the aberration coefficient magnitudes mentioned above (in Krivanek notation) and returns a NumPy array of
     the resulting Ronchigram.
 
@@ -47,6 +47,9 @@ def calc_Ronchigram(imdim, simdim,
         (https://github.com/noahschnitzer/ronchigram-matlab/blob/master/misc/example.m) in rad
     zhiyuanRange: whether or not I am including Zhiyuan's range for values of noise_fun, i.e. random-uniformly in the 
         range [0, 0.2pi), True of False
+    seed: seed passed to add random phases to the beam; this is passable because it would be good to randomly pick a 
+        seed in Parallel_HDF5_2.py, save it to HDF5 and pass it to the Ronchigram so that it could be saved along with 
+        the Ronchigram for reproducibility
 
     returns
     Ronchigram, numpy.ndarray
@@ -242,7 +245,7 @@ def calc_Ronchigram(imdim, simdim,
     else:
 
         for i in range(nnoise):
-            noise_fn += standard_normal(size=(noise_kernel_size, noise_kernel_size))
+            noise_fn += numpy.random.default_rng(seed).standard_normal(size=(noise_kernel_size, noise_kernel_size))
 
     # print(noise_fn)
 
@@ -437,7 +440,7 @@ if __name__ == "__main__":
         aperture_size = simdim
 
     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
-                            zhiyuanRange=False)
+                            zhiyuanRange=False, seed=10)
 
     # DEPICTING THE RONCHIGRAM
 
