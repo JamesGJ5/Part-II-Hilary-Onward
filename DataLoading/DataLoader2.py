@@ -102,6 +102,7 @@ class RonchigramDataset(Dataset):
 
         self.RandI = self.f["random_I dataset"]
         self.Randt = self.f["random_t dataset"]
+        self.randSeed = self.f["random_seed dataset"]
 
     def __getitem__(self, idx):
         """idx is the single-number index referring to the item being got. Since, for each of self.RandMags, 
@@ -194,8 +195,9 @@ class RonchigramDataset(Dataset):
 
         return sample
 
-    def getIt(self, idx):
-        """Returns I (the quoted Ronchigram capture current/A) and t (Ronchigram acquisition time/s)"""
+    def get_I_t_Seed(self, idx):
+        """Returns I (the quoted Ronchigram capture current/A), t (Ronchigram acquisition time/s), and seed passed to 
+        calc_Ronchigram to sample from standard_normal for adding random phases to the beam."""
 
         if not hasattr(self, 'f'):
             self.open_hdf5()
@@ -208,8 +210,9 @@ class RonchigramDataset(Dataset):
 
         I = self.RandI[rank, itemInRank]
         t = self.Randt[rank, itemInRank]
+        seed = self.randSeed[rank, itemInRank]
 
-        return (I, t)
+        return (I, t, seed)
 
     def __del__(self):
 
@@ -375,16 +378,18 @@ if __name__ == "__main__":
 
     # DATASET INSTANTIATION
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/19_04_22/simdim70mrad/partiallyCorrectedSTEM.h5", 
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/22_04_22/simdim70mrad/partiallyCorrectedSTEM.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
     c52=True, c54=True, c56=True,
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
     phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
 
-    print(len(ronchdset))
-    print(ronchdset[0][1])
-    print(ronchdset[-1][1])
+    # print(len(ronchdset))
+    # print(ronchdset[0][1])
+    # print(ronchdset[-1][1])
 
+    # print(ronchdset.get_I_t_Seed(0))
+    # print(ronchdset.get_I_t_Seed(1))
 
     # sys.exit()
 
@@ -404,15 +409,16 @@ if __name__ == "__main__":
 
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
-    # plt.figure()
+    plt.figure()
 
-    # for idx in chosenIndices:
-    #     print(f"\nIndex {idx}")
-    #     print(f"Label: {ronchdset[idx][1]}")
+    for idx in chosenIndices:
+        print(f"\nIndex {idx}")
+        print(f"Label: {ronchdset[idx][1]}")
 
-    #     show_data(ronchdset[idx][0], ronchdset[idx][1])
-    #     plt.show()
+        show_data(ronchdset[idx][0], ronchdset[idx][1])
+        plt.show()
 
+    sys.exit()
 
     # ESTIMATING MEAN AND STD
 
