@@ -8,6 +8,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 from matplotlib_scalebar.scalebar import ScaleBar
 import random
+import sys
 
 
 # SEED
@@ -28,7 +29,7 @@ pi = np.pi
 def calc_Ronchigram(imdim, simdim,
                     C10_mag, C12_mag, C21_mag, C23_mag, C30_mag, C32_mag, C34_mag, C41_mag, C43_mag, C45_mag, C50_mag, C52_mag, C54_mag, C56_mag,
                     C10_ang, C12_ang, C21_ang, C23_ang, C30_ang, C32_ang, C34_ang, C41_ang, C43_ang, C45_ang, C50_ang, C52_ang, C54_ang, C56_ang,
-                    I, b, t, aperture_size):
+                    I, b, t, aperture_size, zhiyuanRange):
     """Takes the aberration coefficient magnitudes mentioned above (in Krivanek notation) and returns a NumPy array of
     the resulting Ronchigram.
 
@@ -44,6 +45,8 @@ def calc_Ronchigram(imdim, simdim,
     t: Ronchigram aquisition time/s, num
     aperture_size: "Objective aperture semi-angle (RADIUS)" 
         (https://github.com/noahschnitzer/ronchigram-matlab/blob/master/misc/example.m) in rad
+    zhiyuanRange: whether or not I am including Zhiyuan's range for values of noise_fun, i.e. random-uniformly in the 
+        range [0, 0.2pi), True of False
 
     returns
     Ronchigram, numpy.ndarray
@@ -224,8 +227,22 @@ def calc_Ronchigram(imdim, simdim,
     resize_factor = int(imdim/noise_kernel_size)
 
     noise_fn = np.zeros((noise_kernel_size, noise_kernel_size))
-    for i in range(nnoise):
-        noise_fn += standard_normal(size=(noise_kernel_size, noise_kernel_size))
+
+    if zhiyuanRange:
+
+        for i in range(nnoise):
+            # Zhiyuan said he used values in the range 0 and 0.2pi for the phase; because nnoise==1, noise_fn /= nnoise 
+            # followed by noise_fn += 1 folllowed by noise_fn /= 2 shouldn't actually change the range below [-1, 0.6) 
+            # by very much--it should just become [0, 0.8); then, the resizing changes some values a bit but they are 
+            # still mostly in the range [0, 0.8); finally, in exp_part, inter_param / inter_param_0 is approximately 1, 
+            # meaning the exponent is approximately in the range [0, -0.2pi); previously, Zhiyuan said the negative sign
+            # was fine so I will keep it.
+            noise_fn += numpy.random.uniform(-1, 0.6, size=(noise_kernel_size, noise_kernel_size))
+
+    else:
+
+        for i in range(nnoise):
+            noise_fn += standard_normal(size=(noise_kernel_size, noise_kernel_size))
 
     # print(noise_fn)
 
@@ -258,6 +275,11 @@ def calc_Ronchigram(imdim, simdim,
 
     fft_psi_p = fft2(np.exp(-1j*chi_array) * obj_ap)    # (Schnitzer, 2020a)
     # fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
+
+
+    # fig, ax = plt.subplots()
+    # ax.axis("off")
+    # ax.imshow(abs(ifftshift(fft_psi_p))**2, interpolation="nearest")
     
 
     # print(calc_wavlen(av))
@@ -268,7 +290,6 @@ def calc_Ronchigram(imdim, simdim,
 
     # Transmission wavefunction under the eikonal approximation (Schnitzer, Sung and Hovden, 2019)
     psi_t = fft_psi_p * exp_part
-
 
     # CALCULATING THE RONCHIGRAM
 
@@ -316,11 +337,11 @@ if __name__ == "__main__":
 
     randu = numpy.random.uniform
 
-    mag_list = (
+    mag_list = [
                 50 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
                 # 50 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
-                randu(0, 2 * 50 * 10**-9),
+                50 * 10**-9,
                 150 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
                 # randu(0, 2 * 150 * 10**-9),
                 50 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
@@ -342,51 +363,81 @@ if __name__ == "__main__":
 
                 5 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                5 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
+                0 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                5 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
+                0 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
                 # randu(0, 2 * 5 * 10**-3),
-                5 * 10**-3)    # C5,6 magnitude/m (6-fold astigmatism)
+                5 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
                 # randu(0, 2 * 5 * 10**-3))
 
     ang_list = (0,              # C1,0 angle/rad
-                # 2 * np.pi / 2 * 2/4,      # C1,2 angle/rad
-                randu(0, 2 * np.pi / 2),
+                0,      # C1,2 angle/rad
+                # 0,
 
-                2 * np.pi / 1 * 1/2,      # C2,1 angle/rad
+                0,      # C2,1 angle/rad
                 # randu(0, 2 * np.pi / 1),
-                2 * np.pi / 3 * 1/2,      # C2,3 angle/rad
+                0,      # C2,3 angle/rad
                 # randu(0, 2 * np.pi / 3),
 
 
                 0,              # C3,0 angle/rad
-                2 * np.pi / 2 * 1/2,      # C3,2 angle/rad
+                0,      # C3,2 angle/rad
                 # randu(0, 2 * np.pi / 2),
-                2 * np.pi / 4 * 1/2,      # C3,4 angle/rad
+                0,      # C3,4 angle/rad
                 # randu(0, 2 * np.pi / 4),
 
-                2 * np.pi / 1 * 1/2,      # C4,1 angle/rad
+                0,      # C4,1 angle/rad
                 # randu(0, 2 * np.pi / 1),
-                2 * np.pi / 3 * 1/2,      # C4,3 angle/rad
+                0 * np.pi / 3 * 1/2,      # C4,3 angle/rad
                 # randu(0, 2 * np.pi / 3),
-                2 * np.pi / 5 * 1/2,     # C4,5 angle/rad
+                0 * np.pi / 5 * 1/2,     # C4,5 angle/rad
                 # randu(0, 2 * np.pi / 5),
 
                 0,              # C5,0 angle/rad
-                2 * np.pi / 2 * 1/2,      # C5,2 angle/rad
+                0 * np.pi / 2 * 1/2,      # C5,2 angle/rad
                 # randu(0, 2 * np.pi / 2),
-                2 * np.pi / 4 * 1/2,      # C5,4 angle/rad
+                0 * np.pi / 4 * 1/2,      # C5,4 angle/rad
                 # randu(0, 2 * np.pi / 4),
-                2 * np.pi / 6 * 1/2)     # C5,6 angle/rad
+                0 * np.pi / 6 * 1/2)     # C5,6 angle/rad
                 # randu(0, 2 * np.pi / 6))
 
     # print(ang_list[1] / (2 * np.pi / 2))
     # print(mag_list[1] / (2 * 50 * 10**-9))
 
     imdim = 1024
-    simdim = 70 * 10**-3
 
-    ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=simdim)
+    useZhiyuanParams = False
+
+    if useZhiyuanParams:
+
+        # Zhiyuan's parameters
+        dx = 0.1 * 10**-10  # (pixel size on sample plane/real space sampling) / A
+
+        # Lab book 17/03/22 (pixel size on detector plane/diffraction space sampling) / rad. Matches well to zhiyuan_dkgg
+        # my_dk = wavlen / imdim * dx
+        zhiyuan_dk = 0.19238281249999997 * 10**-3   # (pixel size on detector plane/diffraction space sampling) / rad
+
+        # Just making sure mine and Zhiyuan's dk are similar; the value Zhiyuan provided me above is probably a 
+        # rounded value, so there should be some nonzero discrepancy anyway. I checked and they percentDiff is very small,
+        # percentDiff = 100 * (my_dk - zhiyuan_dk) / zhiyuan_dk
+
+        # Lab book 17/03/22
+        simdim = imdim * zhiyuan_dk / 2
+
+        print(simdim)
+
+        aperture_size = 90 * 10**-3
+
+        zhiyuanRange = False
+
+    else:
+
+        simdim = 70 * 10**-3
+
+        aperture_size = simdim
+
+    ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
+                            zhiyuanRange=False)
 
     # DEPICTING THE RONCHIGRAM
 
@@ -408,13 +459,39 @@ if __name__ == "__main__":
 
     # ax.add_artist(scalebar)
 
-    dominantcnm = "c12"
     saveFig = False
 
     if saveFig:
         plt.savefig(f"/media/rob/hdd2/james/simulations/exampleRonchigrams/toFindNegligibleRanges/{dominantcnm}Dominant/c10_{mag_list[0]/10**-9}_c12_{mag_list[1]/10**-9}_c21_{mag_list[2]/10**-9}_c23_{mag_list[3]/10**-9}.png")
 
     plt.show()
+
+    # sys.exit()
+
+    # p01 = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-6, 0 * 10**-6]
+    # p02 = [10 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-6, 0 * 10**-6]
+    # p03 = [3 * 10**-9, 5 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-6, 0 * 10**-6]
+    # p04 = [3 * 10**-9, 0 * 10**-9, 5 * 10**-9, 0 * 10**-9, 0 * 10**-6, 0 * 10**-6]
+    # p05 = [3 * 10**-9, 0 * 10**-9, 0 * 10**-9, 5 * 10**-9, 0 * 10**-6, 0 * 10**-6]
+    # p06 = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 2 * 10**-6, 0 * 10**-6]
+
+    # for idx, p in enumerate([p01, p02, p03, p04, p05, p06]):
+
+    #     mag_list[0: len(p)] = p
+
+    #     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
+    #                         zhiyuanRange=False)
+
+    #     fig, ax = plt.subplots()
+    #     ax.axis("off")
+    #     ax.imshow(ronch, cmap="gray", interpolation="nearest")
+
+    #     saveFig = True
+
+    #     if saveFig:
+    #         plt.savefig(f"/media/rob/hdd1/james-gj/exampleRonchigrams/Zhiyuan/For Zhiyuan Meeting 21 Apr/p0{idx + 1}")
+
+    #     plt.show()
 
 
     # REFERENCES
