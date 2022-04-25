@@ -102,7 +102,11 @@ class RonchigramDataset(Dataset):
 
         self.RandI = self.f["random_I dataset"]
         self.Randt = self.f["random_t dataset"]
-        self.randSeed = self.f["random_seed dataset"]
+
+        try:
+            self.randSeed = self.f["random_seed dataset"]
+        except:
+            print("random_seed dataset doesn't exist for this simulation path so not making it an attribute.")
 
     def __getitem__(self, idx):
         """idx is the single-number index referring to the item being got. Since, for each of self.RandMags, 
@@ -210,9 +214,13 @@ class RonchigramDataset(Dataset):
 
         I = self.RandI[rank, itemInRank]
         t = self.Randt[rank, itemInRank]
-        seed = self.randSeed[rank, itemInRank]
 
-        return (I, t, seed)
+        try:
+            seed = self.randSeed[rank, itemInRank]
+            return I, t, seed
+
+        except:
+            return I, t
 
     def __del__(self):
 
