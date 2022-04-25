@@ -75,11 +75,13 @@ efficientNetModel = "EfficientNet-B2"
 
 # Choosing which labels are going to be returned alongside the Ronchigrams returned by the RonchigramDataset object that 
 # shall be instantiated.
-chosenVals = {"c10": False, "c12": True, "c21": False, "c23": False, "c30": False,
-"c32": False, "c34": False, "c41": False, "c43": False, "c45": False, "c50": False, "c52": False, "c54": False, "c56": False,
+chosenVals = {"c10": True, "c12": True, "c21": True, "c23": True, "c30": True,
+    "c32": True, "c34": True, "c41": True, "c43": True, "c45": True,
+    "c50": True, "c52": True, "c54": True, "c56": True,
 
-"phi10": False, "phi12": True, "phi21": False, "phi23": False, "phi30": False,
-"phi32": False, "phi34": False, "phi41": False, "phi43": False, "phi45": False, "phi50": False, "phi52": False, "phi54": False, "phi56": False
+    "phi10": True, "phi12": True, "phi21": True, "phi23": True, "phi30": True,
+    "phi32": True, "phi34": True, "phi41": True, "phi43": True, "phi45": True,
+    "phi50": True, "phi52": True, "phi54": True, "phi56": True
 }
 
 scalingVals = {
@@ -189,20 +191,43 @@ testSubset = Subset(testSet, chosenIndices)
 
 
 # DATA LOADING
-
 batchSize = 32
 numWorkers = 8
 
 testLoader = DataLoader(testSubset, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
                         pin_memory=True)
 
-# Quick tests to see if data is batched correctly
+# For quick tests to see if data is batched correctly
 batch = next(iter(testLoader))
 
-testingDataLoader = False
+ronchBatch = batch[0]
+labelsBatch = batch[1]
+
+# These indices only work when the labels are c10, c12, c21, c23, c30, c32, c34, c41, c43, c45, c50, c52, c54, c56, 
+# phi10, phi12, phi21, phi23, phi30, phi32, phi34, phi41, phi43, phi45, phi50, phi52, phi54, phi56
+if len(usedScalingFactors) == 28:
+    c12index = 1
+    phi12index = 15
+
+else:
+    c12index = input("Index of c12 in a label vector: ")
+    phi12index = input("Index of phi12 in a label vector: ")
+
+# For some post-inference work
+c12batch = torch.reshape(labelsBatch[:, c12index], (labelsBatch.size(dim=0), 1))
+phi12batch = torch.reshape(labelsBatch[:, phi12index], (labelsBatch.size(dim=0), 1))
+
+c12phi12batch = torch.cat((c12batch, phi12batch), 1)
+
+c12phi12scalingFactors = torch.tensor([usedScalingFactors[c12index]] + [usedScalingFactors[phi12index]])
+
+# New batch with the same form as the old batch except with the labels only containing values for c12 & phi12
+batch = [ronchBatch, c12phi12batch]
+
+testingDataLoader = True
 
 if testingDataLoader:
-    for iBatch, batchedSample in enumerate(testLoader):
+    for iBatch, batchedSample in enumerate([batch]):
 
         print(f"\nBatch index: {iBatch}")
         print(f"Ronchigram batch size: {batchedSample[0].size()}")
@@ -237,12 +262,14 @@ with torch.no_grad():
 
     # The below is done because before input, cnm and phinm values are scaled by scaling factors; to see what predictions 
     # mean physically, must rescale back as is done below.
-    yPred = yPred.cpu() / usedScalingFactors
+    yPred = yPred.cpu() / c12phi12scalingFactors
 
-print("\nBatch of target labels but un-normalised:")
-print(batch[1] / usedScalingFactors)
+# Target c12 & phi12
+print("\nBatch of target c12 & phi12 but un-normalised:")
+print(c12phi12batch / c12phi12scalingFactors)
 
-print("\nBatch of predicted labels but un-normalised:")
+# Predicted c12 & phi12
+print("\nBatch of predicted c12 & phi12 but un-normalised:")
 print(yPred)
 
 
