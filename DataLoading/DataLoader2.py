@@ -212,15 +212,16 @@ class RonchigramDataset(Dataset):
         rank = idx // itemsPerRank
         itemInRank = idx % itemsPerRank
 
-        I = self.RandI[rank, itemInRank]
-        t = self.Randt[rank, itemInRank]
+        I = self.RandI[rank, itemInRank].item()
+        t = self.Randt[rank, itemInRank].item()
 
         try:
-            seed = self.randSeed[rank, itemInRank]
+            seed = self.randSeed[rank, itemInRank].item()
             return I, t, seed
 
         except:
-            return I, t
+            print("NOTE: seed = None")
+            return I, t, None
 
     def __del__(self):
 
@@ -417,14 +418,14 @@ if __name__ == "__main__":
 
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
-    plt.figure()
+    # plt.figure()
 
-    for idx in chosenIndices:
-        print(f"\nIndex {idx}")
-        print(f"Label: {ronchdset[idx][1]}")
+    # for idx in chosenIndices:
+    #     print(f"\nIndex {idx}")
+    #     print(f"Label: {ronchdset[idx][1]}")
 
-        show_data(ronchdset[idx][0], ronchdset[idx][1])
-        plt.show()
+    #     show_data(ronchdset[idx][0], ronchdset[idx][1])
+    #     plt.show()
 
     sys.exit()
 
