@@ -18,6 +18,7 @@ import datetime
 from ignite.utils import convert_tensor
 from configparser import ConfigParser
 from datetime import date
+from numpy.random import default_rng
 
 
 # Seed information (may not use the same test set as in training but might as well set the torch seed to be 17 anyway, 
@@ -85,13 +86,13 @@ chosenVals = {"c10": True, "c12": True, "c21": True, "c23": True, "c30": True,
 }
 
 scalingVals = {
-    "c10scaling": 1 / (100 * 10**-9), "c12scaling": 1 / (100 * 10**-9), "c21scaling": 1 / (300 * 10**-9), "c23scaling": 1 / (100 * 10**-9), 
-    "c30scaling": 1 / (10.4 * 10**-6), "c32scaling": 1 / (10.4 * 10**-6), "c34scaling": 1 / (5.22 * 10**-6), "c41scaling": 1 / (0.1 * 10**-3), "c43scaling": 1 / (0.1 * 10**-3), "c45scaling": 1 / (0.1 * 10**-3),
-    "c50scaling": 1 / (10 * 10**-3), "c52scaling": 1 / (10 * 10**-3), "c54scaling": 1 / (10 * 10**-3), "c56scaling": 1 / (10 * 10**-3),
+    "c10scaling": 1, "c12scaling": 1 / (100 * 10**-9), "c21scaling": 1, "c23scaling": 1, 
+    "c30scaling": 1, "c32scaling": 1, "c34scaling": 1, "c41scaling": 1, "c43scaling": 1, "c45scaling": 1,
+    "c50scaling": 1, "c52scaling": 1, "c54scaling": 1, "c56scaling": 1,
 
-    "phi10scaling": 1, "phi12scaling": 1 / (2 * np.pi / 2), "phi21scaling": 1 / (2 * np.pi / 1), "phi23scaling": 1 / (2 * np.pi / 3), 
-    "phi30scaling": 1, "phi32scaling": 1 / (2 * np.pi / 2), "phi34scaling": 1 / (2 * np.pi / 4), "phi41scaling": 1 / (2 * np.pi / 1), "phi43scaling": 1 / (2 * np.pi / 3), "phi45scaling": 1 / (2 * np.pi / 5),
-    "phi50scaling": 1, "phi52scaling": 1 / (2 * np.pi / 2), "phi54scaling": 1 / (2 * np.pi / 4), "phi56scaling": 1 / (2 * np.pi / 6)
+    "phi10scaling": 1, "phi12scaling": 1 / (2 * np.pi / 2), "phi21scaling": 1, "phi23scaling": 1, 
+    "phi30scaling": 1, "phi32scaling": 1, "phi34scaling": 1, "phi41scaling": 1, "phi43scaling": 1, "phi45scaling": 1,
+    "phi50scaling": 1, "phi52scaling": 1, "phi54scaling": 1, "phi56scaling": 1
 } 
 
 
@@ -185,13 +186,14 @@ testSet.transform = testTransform
 
 
 # RONCHIGRAMS TO MAKE PRETTY PICTURES WITH
+seed = None
 
-chosenIndices = [0, round(len(testSet) / 4), round(len(testSet) / 2), round(len(testSet) * 3 / 4)]
+chosenIndices = default_rng(seed).integers(low=0, high=len(testSet), size=4)
 testSubset = Subset(testSet, chosenIndices)
 
 
 # DATA LOADING
-batchSize = 32
+batchSize = len(chosenIndices)
 numWorkers = 8
 
 testLoader = DataLoader(testSubset, batch_size=batchSize, num_workers=numWorkers, shuffle=False, drop_last=False, 
@@ -224,8 +226,7 @@ c12phi12scalingFactors = torch.tensor([usedScalingFactors[c12index]] + [usedScal
 # New batch with the same form as the old batch except with the labels only containing values for c12 & phi12
 batch = [ronchBatch, c12phi12batch]
 
-testingDataLoader = True
-
+testingDataLoader = False
 if testingDataLoader:
     for iBatch, batchedSample in enumerate([batch]):
 
@@ -282,3 +283,62 @@ simdim = 70 * 10**-3   # Convergence semi-angle/rad
 
 # NOTE: this will contain numpy arrays, not torch Tensors
 predictedRonchBatch = np.empty((batchSize, imdim, imdim, 1))
+
+for labelVectorIndex in range(batchSize):
+
+    labelVector = yPred[labelVectorIndex]
+
+    C12_mag, C12_ang = [element.item() for element in labelVector]
+
+    other_mags = [labelsBatch[labelVectorIndex][i].item() for i in [0] + list(range(2, 14))]
+    other_angs = [labelsBatch[labelVectorIndex][i].item() for i in [14] + list(range(16, 28))]
+
+    # Putting c12 and phi12 together with other aberration constants of the same type
+    other_mags.insert(1, C12_mag)
+    mag_list = other_mags
+
+    other_angs.insert(1, C12_ang)
+    ang_list = other_angs
+
+    I, t, seed = testSet.get_I_t_Seed(idx=chosenIndices[labelVectorIndex])
+    print(I, t, seed)
+    b = 1
+
+    predictedRonch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=I, b=b, t=t, aperture_size=simdim, 
+                                        zhiyuanRange=False, seed=seed)
+
+    # For the colour channel position in this numpy array
+    predictedRonch = np.expand_dims(predictedRonch, 2)
+
+    predictedRonchBatch[labelVectorIndex] = predictedRonch
+
+# TODO: figure out why the array elements seem to be 0, if that is even the case
+print(predictedRonchBatch[0])
+print(predictedRonchBatch[0].shape)
+
+# Retrieving the data inferred by the network in numpy array form this time (i.e. without transforms)
+testSet.transform = None
+testSubset = Subset(testSet, chosenIndices)
+
+
+# Plot calculated Ronchigrams alongside latest ones from RonchigramDataset, using a function like show_data in 
+# DataLoader2.py for inspiration
+
+# TODO: attach labels to the below plot in some way, even if it is a README.txt or something like that; just gotta 
+# show labels to Chen in presentation so maybe they need not be in the plot itself.
+for i in range(len(testSubset)):
+    plt.subplot(2, len(testSubset), i + 1)
+
+    plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    plt.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+
+    plt.imshow(testSubset[i][0], cmap="gray")
+
+    plt.subplot(2, len(testSubset), i + 5)
+
+    plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    plt.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+
+    plt.imshow(predictedRonchBatch[i], cmap="gray")
+
+plt.show()
