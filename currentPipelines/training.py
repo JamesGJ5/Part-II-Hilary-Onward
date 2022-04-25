@@ -24,6 +24,7 @@ from ignite.engine import Engine, Events, create_supervised_evaluator
 
 from ignite.metrics import RunningAverage, Loss
 from customIgniteMetrics import RMSPercentageError
+from ignite.contrib.metrics.regression import MedianAbsolutePercentageError
 from ignite.contrib.handlers import TensorboardLogger
 from ignite.contrib.handlers.tensorboard_logger import OutputHandler, OptimizerParamsHandler
 from ignite.contrib.handlers import ProgressBar
@@ -605,21 +606,22 @@ def phi23lossTransform(output):
     return perElementTransform(idx, output)
 
 constSpecificMetricsLoss = [f"Loss(criterion, output_transform={const}lossTransform)" for const in constsInLabel]
-constSpecificMetricsRMSPE = [f"RMSPercentageError(output_transform={const}lossTransform)" for const in constsInLabel]
+constSpecificMetricsRMSPE = [f"MedianAbsolutePercentageError(output_transform={const}lossTransform)" for const in constsInLabel]
 
 constMetricDictLoss = {f'{const} Validation Loss': eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetricsLoss)}
-constMetricDictRMSPE = {f'{const} Validation RMS Percentage Error': eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetricsRMSPE)}
+constMetricDictMedAPE = {f'{const} Validation MedAPE': eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetricsRMSPE)}
 
 print(f"Dictionary of included per-constant metrics (Loss): {constMetricDictLoss}")
-print(f"Dictionary of included per-constant metrics (RMSPE): {constMetricDictRMSPE}")
+print(f"Dictionary of included per-constant metrics (MedAPE): {constMetricDictMedAPE}")
 
 # TODO: 17th by creating custom metrics via method in https://pytorch.org/ignite/metrics.html, add a percentage error 
 # (loss) per element metric.
 metrics = {
     'Overall Validation Loss': Loss(criterion),
     **constMetricDictLoss,
-    'Overall Validation RMS Percentage Error': RMSPercentageError(),
-    **constMetricDictRMSPE
+    
+    'Overall Validation Median Absolute Percentage Error': MedianAbsolutePercentageError(),
+    **constMetricDictMedAPE
 }
 
 
