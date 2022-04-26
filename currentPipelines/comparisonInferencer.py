@@ -186,7 +186,7 @@ testSet.transform = testTransform
 
 
 # RONCHIGRAMS TO MAKE PRETTY PICTURES WITH
-seed = None
+seed = fixedSeed
 
 chosenIndices = default_rng(seed).integers(low=0, high=len(testSet), size=4)
 testSubset = Subset(testSet, chosenIndices)
@@ -312,7 +312,8 @@ for labelVectorIndex in range(batchSize):
 
     predictedRonchBatch[labelVectorIndex] = predictedRonch
 
-# TODO: figure out why the array elements seem to be 0, if that is even the case
+# NOTE: IF YOU SEE A BUNCH OF ZEROS WHEN YOU PRINT THE BELOW BUT THE PREDICTED RONCHIGRAM HAS NONZERO 2-FOLD 
+# ASTIGMATISM MAGNITUDE AND ANGLE, IT MAY JUST BE PLOTTING THE BITS MASKED BY THE OBJECTIVE APERTURE
 print(predictedRonchBatch[0])
 print(predictedRonchBatch[0].shape)
 
@@ -324,8 +325,6 @@ testSubset = Subset(testSet, chosenIndices)
 # Plot calculated Ronchigrams alongside latest ones from RonchigramDataset, using a function like show_data in 
 # DataLoader2.py for inspiration
 
-# TODO: attach labels to the below plot in some way, even if it is a README.txt or something like that; just gotta 
-# show labels to Chen in presentation so maybe they need not be in the plot itself.
 for i in range(len(testSubset)):
     plt.subplot(2, len(testSubset), i + 1)
 
