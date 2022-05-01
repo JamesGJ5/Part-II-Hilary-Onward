@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 70 * 10**-3
+    simdim = 100 * 10**-3
 
     # Essentially the convergence semi-angle/mrad; only called aperture_size because objective aperture size controls this 
     # quantity and wanted to be consistent with (Schnitzer, 2020c) in Primary_Simulation_1.py
@@ -32,8 +32,8 @@ if __name__ == "__main__":
     max_C10 = 100 * 10**-9  # Maximum C10 (defocus) magnitude/m
     max_C12 = 100 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
 
-    max_C21 = 300 * 10**-9  # Maximum C21 (axial coma) magnitude/m
-    max_C23 = 100 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
+    max_C21 = 10000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
+    max_C23 = 10000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
     max_C30 = 10.4 * 10**-6
     max_C32 = 10.4 * 10**-6
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forInference/22_04_22/simdim70mrad/partiallyCorrectedSTEM.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/01_05_22/c10.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -118,69 +118,113 @@ if __name__ == "__main__":
                 # Just for line 187 (i.e. status updates)
                 simulation_number += 1
 
+
                 C10 = randu(0, max_C10)
                 # C10 = max_C10 / 2
-                C12 = randu(0, max_C12)
+
+                C12 = 0
+                # C12 = randu(0, max_C12)
                 # C12 = linearC12[simulation]
 
-                C21 = randu(0, max_C21)
+                C21 = 0
+                # C21 = randu(0, max_C21)
                 # C21 = max_C21 / 2
-                C23 = randu(0, max_C23)
+
+                C23 = 0
+                # C23 = randu(0, max_C23)
                 # C23 = max_C23 / 2
 
-                C30 = randu(0, max_C30)
+                C30 = 0
+                # C30 = randu(0, max_C30)
                 # C30 = max_C30 / 2
-                C32 = randu(0, max_C32)
+
+                C32 = 0
+                # C32 = randu(0, max_C32)
                 # C32 = max_C32 / 2
-                C34 = randu(0, max_C34)
+
+                C34 = 0
+                # C34 = randu(0, max_C34)
                 # C34 = max_C34 / 2
 
-                C41 = randu(0, max_C41)
+                C41 = 0
+                # C41 = randu(0, max_C41)
                 # C41 = max_C41 / 2
-                C43 = randu(0, max_C43)
+
+                C43 = 0
+                # C43 = randu(0, max_C43)
                 # C43 = max_C43 / 2
-                C45 = randu(0, max_C45)
+
+                C45 = 0
+                # C45 = randu(0, max_C45)
                 # C45 = max_C45 / 2
 
-                C50 = randu(0, max_C50)
+                C50 = 0
+                # C50 = randu(0, max_C50)
                 # C50 = max_C50 / 2
-                C52 = randu(0, max_C52)
+
+                C52 = 0
+                # C52 = randu(0, max_C52)
                 # C52 = max_C52 / 2
-                C54 = randu(0, max_C54)
+
+                C54 = 0
+                # C54 = randu(0, max_C54)
                 # C54 = max_C54 / 2
-                C56 = randu(0, max_C56)
+
+                C56 = 0
+                # C56 = randu(0, max_C56)
                 # C56 = max_C56 / 2
 
 
                 phi10 = 0
-                phi12 = randu(0, 2 * np.pi / 2)
+
+                phi12 = 0
+                # phi12 = randu(0, 2 * np.pi / 2)
                 # phi12 = linearPhi12[simulation]
 
-                phi21 = randu(0, 2 * np.pi / 1)
+                phi21 = 0
+                # phi21 = randu(0, 2 * np.pi / 1)
                 # phi21 = 2 * np.pi / 2
-                phi23 = randu(0, 2 * np.pi / 3)
+
+                phi23 = 0
+                # phi23 = randu(0, 2 * np.pi / 3)
                 # phi23 = 2 * np.pi / 6
 
                 phi30 = 0
-                phi32 = randu(0, 2 * np.pi / 2)
+
+                phi32 = 0
+                # phi32 = randu(0, 2 * np.pi / 2)
                 # phi32 = 2 * np.pi / 4
-                phi34 = randu(0, 2 * np.pi / 4)
+
+                phi34 = 0
+                # phi34 = randu(0, 2 * np.pi / 4)
                 # phi34 = 2 * np.pi / 8
 
-                phi41 = randu(0, 2 * np.pi / 1)
+                phi41 = 0
+                # phi41 = randu(0, 2 * np.pi / 1)
                 # phi41 = 2 * np.pi / 2
-                phi43 = randu(0, 2 * np.pi / 3)
+
+                phi43 = 0
+                # phi43 = randu(0, 2 * np.pi / 3)
                 # phi43 = 2 * np.pi / 6
-                phi45 = randu(0, 2 * np.pi / 5)
+
+                phi45 = 0
+                # phi45 = randu(0, 2 * np.pi / 5)
                 # phi45 = 2 * np.pi / 10
 
                 phi50 = 0
-                phi52 = randu(0, 2 * np.pi / 2)
+
+                phi52 = 0
+                # phi52 = randu(0, 2 * np.pi / 2)
                 # phi52 = 2 * np.pi / 4
-                phi54 = randu(0, 2 * np.pi / 4)
+
+                phi54 = 0
+                # phi54 = randu(0, 2 * np.pi / 4)
                 # phi54 = 2 * np.pi / 8
-                phi56 = randu(0, 2 * np.pi / 6)
+
+                phi56 = 0
+                # phi56 = randu(0, 2 * np.pi / 6)
                 # phi56 = 2 * np.pi / 12
+
 
                 I = randu(min_I, max_I)
                 t = randu(min_t, max_t)
@@ -222,7 +266,7 @@ if __name__ == "__main__":
 
 
     # CPUs AND PROCESSES
-    total_simulations = 100
+    total_simulations = 85000
 
     number_processes = MPI.COMM_WORLD.size
     simulations_per_process = int(math.ceil(total_simulations / number_processes))
