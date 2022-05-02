@@ -606,10 +606,10 @@ def phi23lossTransform(output):
     return perElementTransform(idx, output)
 
 constSpecificMetricsLoss = [f"Loss(criterion, output_transform={const}lossTransform)" for const in constsInLabel]
-constSpecificMetricsRMSPE = [f"MedianAbsolutePercentageError(output_transform={const}lossTransform)" for const in constsInLabel]
+constSpecificMetricsMedAPE = [f"MedianAbsolutePercentageError(output_transform={const}lossTransform)" for const in constsInLabel]
 
 constMetricDictLoss = {f'{const} Validation Loss': eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetricsLoss)}
-constMetricDictMedAPE = {f'{const} Validation MedAPE': eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetricsRMSPE)}
+constMetricDictMedAPE = {f'{const} Validation MedAPE': eval(constMetric) for const, constMetric in zip(constsInLabel, constSpecificMetricsMedAPE)}
 
 print(f"Dictionary of included per-constant metrics (Loss): {constMetricDictLoss}")
 print(f"Dictionary of included per-constant metrics (MedAPE): {constMetricDictMedAPE}")
