@@ -341,36 +341,36 @@ if __name__ == "__main__":
     randu = numpy.random.uniform
 
     mag_list = [
-                50 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
+                5 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
                 # 50 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
-                50 * 10**-9,
-                150 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
+                5 * 10**-9,
+                500 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
                 # randu(0, 2 * 150 * 10**-9),
-                50 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                500 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
    
-                5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
+                0 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
                 # randu(0, 2 * 5.2 * 10**-6),
-                5.2 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
+                0 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
                 # randu(0, 2 * 5.2 * 10**-6),
-                2.61 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
+                0 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
                 # randu (0, 2 * 2.61 * 10**-6),
 
-                0.05 * 10**-3,   # C4,1 magnitude/m (4th-order axial coma)
+                0 * 10**-3,   # C4,1 magnitude/m (4th-order axial coma)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0.05 * 10**-3,   # C4,3 magnitude/m (3-lobe aberration)
+                0 * 10**-3,   # C4,3 magnitude/m (3-lobe aberration)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0.05 * 10**-3,   # C4,5 magnitude/m (5-fold astigmatism)
+                0 * 10**-3,   # C4,5 magnitude/m (5-fold astigmatism)
                 # randu(0, 2 * 0.05 * 10**-3),
 
-                5 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
+                0 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
                 # randu(0, 2 * 5 * 10**-3),
                 0 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
                 # randu(0, 2 * 5 * 10**-3),
                 0 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
                 # randu(0, 2 * 5 * 10**-3),
-                5 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
+                0 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
                 # randu(0, 2 * 5 * 10**-3))
 
     ang_list = (0,              # C1,0 angle/rad
