@@ -77,7 +77,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/02_05_22/c21.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/03_05_22/c23.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -127,12 +127,12 @@ if __name__ == "__main__":
                 # C12 = randu(0, max_C12)
                 # C12 = linearC12[simulation]
 
-                # C21 = 0
-                C21 = randu(0, max_C21)
+                C21 = 0
+                # C21 = randu(0, max_C21)
                 # C21 = max_C21 / 2
 
-                C23 = 0
-                # C23 = randu(0, max_C23)
+                # C23 = 0
+                C23 = randu(0, max_C23)
                 # C23 = max_C23 / 2
 
                 C30 = 0
@@ -182,12 +182,12 @@ if __name__ == "__main__":
                 # phi12 = randu(0, 2 * np.pi / 2)
                 # phi12 = linearPhi12[simulation]
 
-                # phi21 = 0
-                phi21 = randu(0, 2 * np.pi / 1)
+                phi21 = 0
+                # phi21 = randu(0, 2 * np.pi / 1)
                 # phi21 = 2 * np.pi / 2
 
-                phi23 = 0
-                # phi23 = randu(0, 2 * np.pi / 3)
+                # phi23 = 0
+                phi23 = randu(0, 2 * np.pi / 3)
                 # phi23 = 2 * np.pi / 6
 
                 phi30 = 0
