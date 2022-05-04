@@ -29,11 +29,11 @@ if __name__ == "__main__":
     aperture_size = simdim
 
     # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
-    max_C10 = 100 * 10**-9  # Maximum C10 (defocus) magnitude/m
-    max_C12 = 100 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
+    max_C10 = 10 * 10**-9  # Maximum C10 (defocus) magnitude/m
+    max_C12 = 10 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
 
-    max_C21 = 10000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
-    max_C23 = 10000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
+    max_C21 = 1000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
+    max_C23 = 1000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
     max_C30 = 10.4 * 10**-6
     max_C32 = 10.4 * 10**-6
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/03_05_22/c23.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/04_05_22/1st2ndOrder.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -119,16 +119,16 @@ if __name__ == "__main__":
                 simulation_number += 1
 
 
-                C10 = 0
-                # C10 = randu(0, max_C10)
+                # C10 = 0
+                C10 = randu(0, max_C10)
                 # C10 = max_C10 / 2
 
-                C12 = 0
-                # C12 = randu(0, max_C12)
+                # C12 = 0
+                C12 = randu(0, max_C12)
                 # C12 = linearC12[simulation]
 
-                C21 = 0
-                # C21 = randu(0, max_C21)
+                # C21 = 0
+                C21 = randu(0, max_C21)
                 # C21 = max_C21 / 2
 
                 # C23 = 0
@@ -178,12 +178,12 @@ if __name__ == "__main__":
 
                 phi10 = 0
 
-                phi12 = 0
-                # phi12 = randu(0, 2 * np.pi / 2)
+                # phi12 = 0
+                phi12 = randu(0, 2 * np.pi / 2)
                 # phi12 = linearPhi12[simulation]
 
-                phi21 = 0
-                # phi21 = randu(0, 2 * np.pi / 1)
+                # phi21 = 0
+                phi21 = randu(0, 2 * np.pi / 1)
                 # phi21 = 2 * np.pi / 2
 
                 # phi23 = 0
