@@ -77,7 +77,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/04_05_22/1st2ndOrder.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/04_05_22/1st2ndOrder100mrad_sameWhiteNoise.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -248,7 +248,8 @@ if __name__ == "__main__":
 
                 # Want to limit the chance of multiple simulations having the same seed.
                 # TODO: make disimilar random seeds
-                random_seed = chosenSeeds[simulation]
+                # random_seed = chosenSeeds[simulation]
+                random_seed = 17
                 random_seed_dset[rank, simulation] = random_seed
 
                 ronch = Primary_Simulation_1.calc_Ronchigram(imdim, simdim,
