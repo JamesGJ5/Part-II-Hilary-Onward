@@ -326,7 +326,7 @@ def calc_Ronchigram(imdim, simdim,
     # t is Ronchigram collection time/s (I overheard Chen and Angus perhaps mention 1s)
     # See 02/12/2021 entry to lab book for derivation of the below
     lam = I * t / sc.e * b * ronch / np.sum(ronch)
-    rng = np.random.default_rng()   # Random number generator that NumPy documentation recommends
+    rng = np.random.default_rng(seed)   # Random number generator that NumPy documentation recommends
     ronch = rng.poisson(lam)
 
     # print(np.amax(ronch))
