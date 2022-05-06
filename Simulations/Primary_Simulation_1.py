@@ -341,67 +341,66 @@ if __name__ == "__main__":
     randu = numpy.random.uniform
 
     mag_list = [
-                5 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
+                50 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
-                # 50 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
-                5 * 10**-9,
-                500 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
+                0 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                0 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
                 # randu(0, 2 * 150 * 10**-9),
-                500 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                800 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
    
-                0 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
+                5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
                 # randu(0, 2 * 5.2 * 10**-6),
-                0 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
+                5.2 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
                 # randu(0, 2 * 5.2 * 10**-6),
-                0 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
+                2.61 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
                 # randu (0, 2 * 2.61 * 10**-6),
 
-                0 * 10**-3,   # C4,1 magnitude/m (4th-order axial coma)
+                0.05 * 10**-3,   # C4,1 magnitude/m (4th-order axial coma)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0 * 10**-3,   # C4,3 magnitude/m (3-lobe aberration)
+                0.05 * 10**-3,   # C4,3 magnitude/m (3-lobe aberration)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0 * 10**-3,   # C4,5 magnitude/m (5-fold astigmatism)
+                0.05 * 10**-3,   # C4,5 magnitude/m (5-fold astigmatism)
                 # randu(0, 2 * 0.05 * 10**-3),
 
-                0 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
+                5 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
+                5 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
+                5 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
+                5 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
                 # randu(0, 2 * 5 * 10**-3))
 
-    ang_list = (0,              # C1,0 angle/rad
-                0,      # C1,2 angle/rad
+    ang_list = [0,              # C1,0 angle/rad
+                2 * np.pi / 2 * 1/2,      # C1,2 angle/rad
                 # 0,
 
-                0,      # C2,1 angle/rad
+                2 * np.pi / 1 * 1/2,      # C2,1 angle/rad
                 # randu(0, 2 * np.pi / 1),
-                0,      # C2,3 angle/rad
+                2 * np.pi / 3 * 1/2,      # C2,3 angle/rad
                 # randu(0, 2 * np.pi / 3),
 
 
                 0,              # C3,0 angle/rad
-                0,      # C3,2 angle/rad
+                2 * np.pi / 2 * 1/2,      # C3,2 angle/rad
                 # randu(0, 2 * np.pi / 2),
-                0,      # C3,4 angle/rad
+                2 * np.pi / 4 * 1/2,      # C3,4 angle/rad
                 # randu(0, 2 * np.pi / 4),
 
-                0,      # C4,1 angle/rad
+                2 * np.pi / 1 * 1/2,      # C4,1 angle/rad
                 # randu(0, 2 * np.pi / 1),
-                0 * np.pi / 3 * 1/2,      # C4,3 angle/rad
+                2 * np.pi / 3 * 1/2,      # C4,3 angle/rad
                 # randu(0, 2 * np.pi / 3),
-                0 * np.pi / 5 * 1/2,     # C4,5 angle/rad
+                2 * np.pi / 5 * 1/2,     # C4,5 angle/rad
                 # randu(0, 2 * np.pi / 5),
 
                 0,              # C5,0 angle/rad
-                0 * np.pi / 2 * 1/2,      # C5,2 angle/rad
+                2 * np.pi / 2 * 1/2,      # C5,2 angle/rad
                 # randu(0, 2 * np.pi / 2),
-                0 * np.pi / 4 * 1/2,      # C5,4 angle/rad
+                2 * np.pi / 4 * 1/2,      # C5,4 angle/rad
                 # randu(0, 2 * np.pi / 4),
-                0 * np.pi / 6 * 1/2)     # C5,6 angle/rad
+                2 * np.pi / 6 * 1/2]     # C5,6 angle/rad
                 # randu(0, 2 * np.pi / 6))
 
     # print(ang_list[1] / (2 * np.pi / 2))
@@ -471,16 +470,36 @@ if __name__ == "__main__":
 
     # sys.exit()
 
-    # p01 = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-6, 0 * 10**-6]
-    # p02 = [10 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-6, 0 * 10**-6]
-    # p03 = [3 * 10**-9, 5 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-6, 0 * 10**-6]
-    # p04 = [3 * 10**-9, 0 * 10**-9, 5 * 10**-9, 0 * 10**-9, 0 * 10**-6, 0 * 10**-6]
-    # p05 = [3 * 10**-9, 0 * 10**-9, 0 * 10**-9, 5 * 10**-9, 0 * 10**-6, 0 * 10**-6]
-    # p06 = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 2 * 10**-6, 0 * 10**-6]
+    p1m = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-9]
+    p1a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
 
-    # for idx, p in enumerate([p01, p02, p03, p04, p05, p06]):
+    p2m = [50 * 10**-9, 50 * 10**-9, 0 * 10**-9, 0 * 10**-9]
+    p2a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
 
-    #     mag_list[0: len(p)] = p
+    p3m = [50 * 10**-9, 50 * 10**-9, 0 * 10**-9, 0 * 10**-9]
+    p3a = [0, 2 * np.pi / 2 * 0, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
+
+
+    p4m = [0 * 10**-9, 0 * 10**-9, 800 * 10**-9, 0 * 10**-9]
+    p4a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
+
+    p5m = [0 * 10**-9, 0 * 10**-9, 800 * 10**-9, 0 * 10**-9]
+    p5a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 0, 2 * np.pi / 3 * 1/2]
+
+
+    p6m = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 800 * 10**-9]
+    p6a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
+
+    p7m = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 800 * 10**-9]
+    p7a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 0]
+
+
+    # for idx, p in enumerate(zip([p1m, p2m, p3m, p4m, p5m, p6m, p7m], [p1a, p2a, p3a, p4a, p5a, p6a, p7a])):
+
+    #     print(p)
+
+    #     mag_list[0: len(p[0])] = p[0]
+    #     ang_list[0: len(p[1])] = p[1]
 
     #     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
     #                         zhiyuanRange=False)
@@ -492,7 +511,7 @@ if __name__ == "__main__":
     #     saveFig = True
 
     #     if saveFig:
-    #         plt.savefig(f"/media/rob/hdd1/james-gj/exampleRonchigrams/Zhiyuan/For Zhiyuan Meeting 21 Apr/p0{idx + 1}")
+    #         plt.savefig(f"/media/rob/hdd1/james-gj/forReport/DemonstrateAberrations/p{idx + 1}")
 
     #     plt.show()
 
