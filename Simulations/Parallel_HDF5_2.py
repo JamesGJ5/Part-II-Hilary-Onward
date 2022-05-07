@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 50 * 10**-3
+    simdim = 100 * 10**-3
 
     # Essentially the convergence semi-angle/mrad; only called aperture_size because objective aperture size controls this 
     # quantity and wanted to be consistent with (Schnitzer, 2020c) in Primary_Simulation_1.py
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         :param max_C23: max. 3-fold astigmatism/m
         """
         
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/06_05_22/C10_to_C23_50mrad_constantNoise.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/07_05_22/C10_to_C23_100mrad_constantNoise.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # TODO: code in a way to add the value(s) of b to the HDF5 file if you choose to
@@ -226,9 +226,10 @@ if __name__ == "__main__":
                 # phi56 = randu(0, 2 * np.pi / 6)
                 # phi56 = 2 * np.pi / 12
 
+                random_seed = 17
 
-                I = randu(min_I, max_I)
-                t = randu(min_t, max_t)
+                I = default_rng(random_seed).uniform(min_I, max_I)
+                t = default_rng(random_seed).uniform(min_t, max_t)
 
                 # Note: simulations have toe be saved as below for the dataloader in DataLoader2.py to work, so be 
                 # careful when it comes to making changes to the below. Also, make sure that the spaces created in the 
@@ -250,7 +251,6 @@ if __name__ == "__main__":
                 # TODO: make disimilar random seeds
 
                 # random_seed = chosenSeeds[simulation]
-                random_seed = 17
                 random_seed_dset[rank, simulation] = random_seed
 
                 ronch = Primary_Simulation_1.calc_Ronchigram(imdim, simdim,
