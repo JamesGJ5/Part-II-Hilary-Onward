@@ -387,17 +387,15 @@ if __name__ == "__main__":
 
     # DATASET INSTANTIATION
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/07_05_22/C10_to_C23_100mrad_constantNoise.h5", 
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/08_05_22/C10_to_C23_50mrad_constantNoise.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
     c52=True, c54=True, c56=True,
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
     phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
 
-    ronchdset2 = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/08_05_22/C10_to_C23_50mrad_constantNoise.h5", 
-    c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
-    c52=True, c54=True, c56=True,
-    phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
-    phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
+    ronchdsetList = [
+        ronchdset,
+    ]
 
     # print(ronchdset[0][1])
     # print(ronchdset2[0][1])
@@ -411,9 +409,7 @@ if __name__ == "__main__":
 
     # sys.exit()
 
-
-
-    chosenIndices = [4723]
+    chosenIndices = [np.random.randint(len(ronchdset) - 1) for i in range(100)]
     # print(f"Chosen indices: {chosenIndices}")
 
     # print(f"Shape of Ronchigram in item at index {idx} of dataset: {ronchdset[idx][0].shape}")
@@ -431,20 +427,14 @@ if __name__ == "__main__":
 
     for idx in chosenIndices:
         print(f"\nIndex {idx}")
-        print(f"Label: {ronchdset[idx][1]}")
-        print(ronchdset.get_I_t_Seed(idx))
 
-        show_data(ronchdset[idx][0], ronchdset[idx][1])
-        plt.show()
+        for ronchdset in ronchdsetList:
 
-        print(f"\nIndex {idx}")
-        print(f"Label: {ronchdset2[idx][1]}")
-        print(ronchdset2.get_I_t_Seed(idx))
+            print(f"Label: {ronchdset[idx][1]}")
+            print(ronchdset.get_I_t_Seed(idx))
 
-        show_data(ronchdset2[idx][0], ronchdset2[idx][1])
-        plt.show()
-
-        
+            show_data(ronchdset[idx][0], ronchdset[idx][1])
+            plt.show()
 
     sys.exit()
 
