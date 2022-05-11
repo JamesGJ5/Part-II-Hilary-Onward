@@ -305,14 +305,6 @@ def calc_Ronchigram(imdim, simdim,
     ronch = abs(inverse)**2 # (Schnitzer, Sung and Hovden, 2020)
 
 
-    # NORMALISING THE RONCHIGRAM (TO ARRAY VALUES BETWEEN 0 AND 1)
-
-    # (Schnitzer, 2020c)
-    ronch -= np.amin(ronch)
-    ronch /= np.amax(ronch)
-
-    # print(np.amax(ronch))
-
     # APPLYING OBJECTIVE APERTURE
 
     # For detector Poisson noise, I previously followed https://stackoverflow.com/questions/19289470/adding-poisson-noise-to-an-image 
@@ -329,7 +321,13 @@ def calc_Ronchigram(imdim, simdim,
     rng = np.random.default_rng(seed)   # Random number generator that NumPy documentation recommends
     ronch = rng.poisson(lam)
 
-    # print(np.amax(ronch))
+
+    # NORMALISING THE RONCHIGRAM (TO ARRAY VALUES BETWEEN 0 AND 1)
+
+    # (Schnitzer, 2020c)
+    ronch = ronch.astype(np.float32)
+    ronch -= np.amin(ronch)
+    ronch /= np.amax(ronch)
 
     return ronch
 
