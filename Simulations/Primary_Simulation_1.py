@@ -280,9 +280,9 @@ def calc_Ronchigram(imdim, simdim,
     # fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
 
 
-    # fig, ax = plt.subplots()
-    # ax.axis("off")
-    # ax.imshow(abs(ifftshift(fft_psi_p))**2, interpolation="nearest")
+    fig, ax = plt.subplots()
+    ax.axis("off")
+    ax.imshow(abs(ifftshift(fft_psi_p))**2, interpolation="nearest")
     
 
     # print(calc_wavlen(av))
@@ -329,6 +329,8 @@ def calc_Ronchigram(imdim, simdim,
     ronch -= np.amin(ronch)
     ronch /= np.amax(ronch)
 
+    print(type(ronch))
+    print(ronch.shape)
     return ronch
 
 
@@ -339,72 +341,72 @@ if __name__ == "__main__":
     randu = numpy.random.uniform
 
     mag_list = [
-                0.5 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
+                2.5 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
-                50 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
-                500 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
+                25 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                78.5 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
                 # randu(0, 2 * 150 * 10**-9),
-                500 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                47.75 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
    
-                0 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
+                5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
                 # randu(0, 2 * 5.2 * 10**-6),
-                0 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
+                5.2 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
                 # randu(0, 2 * 5.2 * 10**-6),
-                0 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
+                2.61 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
                 # randu (0, 2 * 2.61 * 10**-6),
 
-                0 * 10**-3,   # C4,1 magnitude/m (4th-order axial coma)
+                0.05 * 10**-3,   # C4,1 magnitude/m (4th-order axial coma)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0 * 10**-3,   # C4,3 magnitude/m (3-lobe aberration)
+                0.05 * 10**-3,   # C4,3 magnitude/m (3-lobe aberration)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0 * 10**-3,   # C4,5 magnitude/m (5-fold astigmatism)
+                0.05 * 10**-3,   # C4,5 magnitude/m (5-fold astigmatism)
                 # randu(0, 2 * 0.05 * 10**-3),
 
-                0 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
+                5 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
+                5 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
+                5 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
+                5 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
                 # randu(0, 2 * 5 * 10**-3))
 
     ang_list = [0,              # C1,0 angle/rad
-                2 * np.pi / 2 * 1/2,      # C1,2 angle/rad
+                2 * np.pi/2 * 0/2,      # C1,2 angle/rad
                 # 0,
 
-                2 * np.pi / 1 * 1/2,      # C2,1 angle/rad
+                2 * np.pi/1 * 0/2,      # C2,1 angle/rad
                 # randu(0, 2 * np.pi / 1),
-                2 * np.pi / 3 * 1/2,      # C2,3 angle/rad
+                2 * np.pi/3 * 0/2,      # C2,3 angle/rad
                 # randu(0, 2 * np.pi / 3),
 
 
                 0,              # C3,0 angle/rad
-                2 * np.pi / 2 * 0,      # C3,2 angle/rad
+                2 * np.pi/2 * 0/2,      # C3,2 angle/rad
                 # randu(0, 2 * np.pi / 2),
-                2 * np.pi / 4 * 0,      # C3,4 angle/rad
+                2 * np.pi/4 * 0/2,      # C3,4 angle/rad
                 # randu(0, 2 * np.pi / 4),
 
-                2 * np.pi / 1 * 0,      # C4,1 angle/rad
+                2 * np.pi/1 * 0/2,      # C4,1 angle/rad
                 # randu(0, 2 * np.pi / 1),
-                2 * np.pi / 3 * 0,      # C4,3 angle/rad
+                2 * np.pi/3 * 0/2,      # C4,3 angle/rad
                 # randu(0, 2 * np.pi / 3),
-                2 * np.pi / 5 * 0,     # C4,5 angle/rad
+                2 * np.pi/5 * 0/2,     # C4,5 angle/rad
                 # randu(0, 2 * np.pi / 5),
 
                 0,              # C5,0 angle/rad
-                2 * np.pi / 2 * 0,      # C5,2 angle/rad
+                2 * np.pi/2 * 0/2,      # C5,2 angle/rad
                 # randu(0, 2 * np.pi / 2),
-                2 * np.pi / 4 * 0,      # C5,4 angle/rad
+                2 * np.pi/4 * 0/2,      # C5,4 angle/rad
                 # randu(0, 2 * np.pi / 4),
-                2 * np.pi / 6 * 0]     # C5,6 angle/rad
+                2 * np.pi/6 * 0/2]     # C5,6 angle/rad
                 # randu(0, 2 * np.pi / 6))
 
     # print(ang_list[1] / (2 * np.pi / 2))
     # print(mag_list[1] / (2 * 50 * 10**-9))
 
-    imdim = 1024
+    imdim = 256
 
     useZhiyuanParams = False
 
@@ -432,12 +434,12 @@ if __name__ == "__main__":
 
     else:
 
-        simdim = 100 * 10**-3
+        simdim = 70 * 10**-3
 
         aperture_size = simdim
 
     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
-                            zhiyuanRange=False, seed=10)
+                            zhiyuanRange=False, seed=18)
 
     # DEPICTING THE RONCHIGRAM
 
