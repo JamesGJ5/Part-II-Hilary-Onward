@@ -81,11 +81,11 @@ if write:
 
         # print(dAllResultSets)
 
-        with open('/home/james/VSCode/currentPipelines/aberCalcResults_2022_04_29.pkl', 'wb') as f2:
+        with open('/home/james/VSCode/currentPipelines/aberCalcResults_2022_04_29_OPQ.pkl', 'wb') as f2:
 
             pickle.dump(dAllResultSets, f2)
 
-with open('/home/james/VSCode/currentPipelines/aberCalcResults_2022_04_29.pkl', 'rb') as f3:
+with open('/home/james/VSCode/currentPipelines/aberCalcResults_2022_04_29_OPQ.pkl', 'rb') as f3:
 
     output = pickle.load(f3)
     print(output)
