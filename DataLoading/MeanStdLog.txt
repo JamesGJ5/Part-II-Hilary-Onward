@@ -1704,3 +1704,234 @@ Calculated mean: 0.5006572604179382
 Calculated std: 0.2551247477531433
 Mean and std calculated from 32 batches of size 32
 Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:14:57.550497
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 3.3011313682607124e-09
+Calculated std: 2.8528522761916975e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:16:26.247429
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 3.7871648039811134e-09
+Calculated std: 3.107175643890514e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:16:47.787265
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 4.303631673252539e-09
+Calculated std: 3.241501644879463e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:17:08.660596
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 4.8083554915479e-09
+Calculated std: 3.3741134757292457e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:21:35.932223
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234459381061e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:22:10.695484
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234459381061e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:23:53.930296
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234459381061e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:25:02.764801
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234459381061e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:25:53.324189
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234459381061e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:26:25.851593
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234181825305e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:48:33.991839
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234181825305e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:49:34.069381
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234459381061e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:49:40.716487
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234459381061e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:49:50.388996
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 7.952624669904651e-10
+Calculated std: 1.32046613998682e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:49:59.234001
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234459381061e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:50:03.406159
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234181825305e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:50:07.952481
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.982234459381061e-10
+Calculated std: 8.086171305876633e-07
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:51:37.581968
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 0.5000771880149841
+Calculated std: 0.25719377398490906
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 15:54:05.073111
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 1.1935976651500368e-09
+Calculated std: 1.8691405330173438e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:01:47.432899
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 1.1935976651500368e-09
+Calculated std: 1.8691406467041816e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:03:51.727591
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 1.730449783465815e-09
+Calculated std: 1.9880931176885497e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:15:41.982973
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 2.2354764706022934e-09
+Calculated std: 2.219130237790523e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:22:07.614772
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 1.730449783465815e-09
+Calculated std: 1.9880928903148742e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:22:38.208951
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 3.797448577813611e-09
+Calculated std: 3.8483080970763694e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:23:23.783674
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 3.5840947987253458e-09
+Calculated std: 3.582786121114623e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:23:38.726644
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 4.678689879966669e-09
+Calculated std: 4.1140247049042955e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:23:51.981690
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 3.1572580105887482e-09
+Calculated std: 3.4563036024337634e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:24:06.808026
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 3.799971892703979e-09
+Calculated std: 3.848971573461313e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:24:36.214231
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 3.2320293108512033e-09
+Calculated std: 3.4870890885940753e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:24:51.887103
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 4.401424114064412e-09
+Calculated std: 4.196903773845406e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:25:26.636947
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 3.637650403121029e-09
+Calculated std: 3.697217834996991e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:25:44.745022
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 3.2396638705023406e-09
+Calculated std: 3.4582531043270137e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-15 16:27:01.528415
+/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5
+Calculated mean: 4.38046043882423e-09
+Calculated std: 3.958935394621221e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
