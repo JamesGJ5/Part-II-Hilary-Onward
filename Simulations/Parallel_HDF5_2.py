@@ -9,6 +9,7 @@ from mpi4py import MPI
 import cmath
 import sys
 from numpy.random import default_rng
+import pickle
 
 from datetime import datetime
 
@@ -20,42 +21,48 @@ if __name__ == "__main__":
     # This is the file from which you may be intending to copy certain parameters. For example, might be wanting to 
     # copy just magnitudes and angles (where applicable) for C10-C23 in the function below, but change simdim, for 
     # example
-    mimicFile = True
+    mimicFile = False
 
     if mimicFile:
         
-        mimickedFile = '/media/rob/hdd1/james-gj/Simulations/forTraining/07_05_22/C10_to_C23_100mrad_constantNoise.h5'
+        mimickedFile = None
 
     # Output Ronchigram will be an array of size imdim x imdim in pixels
     imdim = 1024
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 50 * 10**-3
+    simdim = 180 * 10**-3
 
     # Essentially the convergence semi-angle/mrad; only called aperture_size because objective aperture size controls this 
     # quantity and wanted to be consistent with (Schnitzer, 2020c) in Primary_Simulation_1.py
     aperture_size = simdim
 
+    f = open('/home/james/VSCode/currentPipelines/max_magList.pkl', 'rb')
+    max_magList = pickle.load(f)
+    f.close()
+
+    max_C10, max_C12, max_C21, max_C23, max_C30, max_C32, max_C34, max_C41, max_C43, max_C45, max_C50, max_C52, max_C54, max_C56 = max_magList
+
     # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
-    max_C10 = 10 * 10**-9  # Maximum C10 (defocus) magnitude/m
-    max_C12 = 10 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
+    # max_C10 = 10 * 10**-9  # Maximum C10 (defocus) magnitude/m
+    # max_C12 = 10 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
 
-    max_C21 = 1000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
-    max_C23 = 1000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
+    # max_C21 = 1000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
+    # max_C23 = 1000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
-    max_C30 = 10.4 * 10**-6
-    max_C32 = 10.4 * 10**-6
-    max_C34 = 5.22 * 10**-6
+    # max_C30 = 10.4 * 10**-6
+    # max_C32 = 10.4 * 10**-6
+    # max_C34 = 5.22 * 10**-6
 
-    max_C41 = 0.1 * 10**-3
-    max_C43 = 0.1 * 10**-3
-    max_C45 = 0.1 * 10**-3
+    # max_C41 = 0.1 * 10**-3
+    # max_C43 = 0.1 * 10**-3
+    # max_C45 = 0.1 * 10**-3
 
-    max_C50 = 10 * 10**-3
-    max_C52 = 10 * 10**-3
-    max_C54 = 10 * 10**-3
-    max_C56 = 10 * 10**-3
+    # max_C50 = 10 * 10**-3
+    # max_C52 = 10 * 10**-3
+    # max_C54 = 10 * 10**-3
+    # max_C56 = 10 * 10**-3
 
     # min_Cnm will be 0 since negative values are redundant, I THINK (see lab book's 29/11/2021 entry)
     # phi_n,m will be between 0 and pi/m radians since, I believe, other angles are redundant (see lab book's 29/11/2021 entry)
@@ -99,7 +106,7 @@ if __name__ == "__main__":
 
             simulations_per_process = randMags.shape[1]
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/08_05_22/C10_to_C23_50mrad_constantNoise.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # print(f"Simulations per process is {simulations_per_process}")
@@ -129,11 +136,11 @@ if __name__ == "__main__":
             simulation_number = 0
 
             # linearC10 = np.linspace(rank / number_processes * max_C10, (rank + 1) / number_processes * max_C10, simulations_per_process, endpoint=False)
-            linearC12 = np.linspace(rank / number_processes * max_C12, (rank + 1) / number_processes * max_C12, simulations_per_process, endpoint=False)
+            # linearC12 = np.linspace(rank / number_processes * max_C12, (rank + 1) / number_processes * max_C12, simulations_per_process, endpoint=False)
             # linearC21 = np.linspace(rank / number_processes * max_C21, (rank + 1) / number_processes * max_C21, simulations_per_process, endpoint=False)
             # linearC23 = np.linspace(rank / number_processes * max_C23, (rank + 1) / number_processes * max_C23, simulations_per_process, endpoint=False)
 
-            linearPhi12 = np.linspace(rank / number_processes * 2*np.pi/2, (rank + 1) / number_processes * 2*np.pi/2, simulations_per_process, endpoint=False)
+            # linearPhi12 = np.linspace(rank / number_processes * 2*np.pi/2, (rank + 1) / number_processes * 2*np.pi/2, simulations_per_process, endpoint=False)
             # linearPhi21 = np.linspace(rank / number_processes * 2*np.pi, (rank + 1) / number_processes * 2*np.pi, simulations_per_process, endpoint=False)
             # linearPhi23 = np.linspace(rank / number_processes * 2*np.pi/3, (rank + 1) / number_processes * 2*np.pi/3, simulations_per_process, endpoint=False)
 
@@ -143,122 +150,123 @@ if __name__ == "__main__":
                 simulation_number += 1
 
                 # C10 = 0
-                # C10 = randu(0, max_C10)
+                C10 = randu(0, max_C10)
                 # C10 = max_C10 / 2
-                C10 = randMags[rank, simulation, 0]
+                # C10 = randMags[rank, simulation, 0]
 
                 # C12 = 0
-                # C12 = randu(0, max_C12)
+                C12 = randu(0, max_C12)
                 # C12 = linearC12[simulation]
-                C12 = randMags[rank, simulation, 1]
+                # C12 = randMags[rank, simulation, 1]
 
                 # C21 = 0
-                # C21 = randu(0, max_C21)
+                C21 = randu(0, max_C21)
                 # C21 = max_C21 / 2
-                C21 = randMags[rank, simulation, 2]
+                # C21 = randMags[rank, simulation, 2]
 
                 # C23 = 0
-                # C23 = randu(0, max_C23)
+                C23 = randu(0, max_C23)
                 # C23 = max_C23 / 2
-                C23 = randMags[rank, simulation, 3]
+                # C23 = randMags[rank, simulation, 3]
 
-                C30 = 0
-                # C30 = randu(0, max_C30)
+                # C30 = 0
+                C30 = randu(0, max_C30)
                 # C30 = max_C30 / 2
 
-                C32 = 0
-                # C32 = randu(0, max_C32)
+                # C32 = 0
+                C32 = randu(0, max_C32)
                 # C32 = max_C32 / 2
 
-                C34 = 0
-                # C34 = randu(0, max_C34)
+                # C34 = 0
+                C34 = randu(0, max_C34)
                 # C34 = max_C34 / 2
 
-                C41 = 0
-                # C41 = randu(0, max_C41)
+                # C41 = 0
+                C41 = randu(0, max_C41)
                 # C41 = max_C41 / 2
 
-                C43 = 0
-                # C43 = randu(0, max_C43)
+                # C43 = 0
+                C43 = randu(0, max_C43)
                 # C43 = max_C43 / 2
 
-                C45 = 0
-                # C45 = randu(0, max_C45)
+                # C45 = 0
+                C45 = randu(0, max_C45)
                 # C45 = max_C45 / 2
 
-                C50 = 0
-                # C50 = randu(0, max_C50)
+                # C50 = 0
+                C50 = randu(0, max_C50)
                 # C50 = max_C50 / 2
 
-                C52 = 0
-                # C52 = randu(0, max_C52)
+                # C52 = 0
+                C52 = randu(0, max_C52)
                 # C52 = max_C52 / 2
 
-                C54 = 0
-                # C54 = randu(0, max_C54)
+                # C54 = 0
+                C54 = randu(0, max_C54)
                 # C54 = max_C54 / 2
 
-                C56 = 0
-                # C56 = randu(0, max_C56)
+                # C56 = 0
+                C56 = randu(0, max_C56)
                 # C56 = max_C56 / 2
 
 
                 phi10 = 0
 
                 # phi12 = 0
-                # phi12 = randu(0, 2 * np.pi / 2)
+                phi12 = randu(0, 2 * np.pi / 2)
                 # phi12 = linearPhi12[simulation]
-                phi12 = randAngs[rank, simulation, 1]
+                # phi12 = randAngs[rank, simulation, 1]
 
                 # phi21 = 0
-                # phi21 = randu(0, 2 * np.pi / 1)
+                phi21 = randu(0, 2 * np.pi / 1)
                 # phi21 = 2 * np.pi / 2
-                phi21 = randAngs[rank, simulation, 2]
+                # phi21 = randAngs[rank, simulation, 2]
 
                 # phi23 = 0
-                # phi23 = randu(0, 2 * np.pi / 3)
+                phi23 = randu(0, 2 * np.pi / 3)
                 # phi23 = 2 * np.pi / 6
-                phi23 = randAngs[rank, simulation, 3]
+                # phi23 = randAngs[rank, simulation, 3]
 
                 phi30 = 0
 
-                phi32 = 0
-                # phi32 = randu(0, 2 * np.pi / 2)
+                # phi32 = 0
+                phi32 = randu(0, 2 * np.pi / 2)
                 # phi32 = 2 * np.pi / 4
 
-                phi34 = 0
-                # phi34 = randu(0, 2 * np.pi / 4)
+                # phi34 = 0
+                phi34 = randu(0, 2 * np.pi / 4)
                 # phi34 = 2 * np.pi / 8
 
-                phi41 = 0
-                # phi41 = randu(0, 2 * np.pi / 1)
+                # phi41 = 0
+                phi41 = randu(0, 2 * np.pi / 1)
                 # phi41 = 2 * np.pi / 2
 
-                phi43 = 0
-                # phi43 = randu(0, 2 * np.pi / 3)
+                # phi43 = 0
+                phi43 = randu(0, 2 * np.pi / 3)
                 # phi43 = 2 * np.pi / 6
 
-                phi45 = 0
-                # phi45 = randu(0, 2 * np.pi / 5)
+                # phi45 = 0
+                phi45 = randu(0, 2 * np.pi / 5)
                 # phi45 = 2 * np.pi / 10
 
                 phi50 = 0
 
-                phi52 = 0
-                # phi52 = randu(0, 2 * np.pi / 2)
+                # phi52 = 0
+                phi52 = randu(0, 2 * np.pi / 2)
                 # phi52 = 2 * np.pi / 4
 
-                phi54 = 0
-                # phi54 = randu(0, 2 * np.pi / 4)
+                # phi54 = 0
+                phi54 = randu(0, 2 * np.pi / 4)
                 # phi54 = 2 * np.pi / 8
 
-                phi56 = 0
-                # phi56 = randu(0, 2 * np.pi / 6)
+                # phi56 = 0
+                phi56 = randu(0, 2 * np.pi / 6)
                 # phi56 = 2 * np.pi / 12
 
                 if not mimicFile:
 
-                    random_seed = 17
+                    # random_seed = 17
+                    random_seed = None
 
                     I = default_rng(random_seed).uniform(min_I, max_I)
                     t = default_rng(random_seed).uniform(min_t, max_t)
@@ -290,7 +298,7 @@ if __name__ == "__main__":
                 # TODO: make disimilar random seeds
 
                 # random_seed = chosenSeeds[simulation]
-                random_seed_dset[rank, simulation] = random_seed
+                # random_seed_dset[rank, simulation] = random_seed
 
                 ronch = Primary_Simulation_1.calc_Ronchigram(imdim, simdim,
                                                             C10, C12, C21, C23, C30, C32, C34, C41, C43, C45, C50, C52, C54, C56,
@@ -318,7 +326,7 @@ if __name__ == "__main__":
     
     if not mimicFile:
     
-        total_simulations = 18
+        total_simulations = 100
         simulations_per_process = int(math.ceil(total_simulations / number_processes))
 
         # print(f"Simulations per process is {simulations_per_process}")
