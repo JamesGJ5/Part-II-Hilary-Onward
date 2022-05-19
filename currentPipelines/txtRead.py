@@ -1,7 +1,7 @@
 # Okay, for reading from /media/rob/hdd1/james-gj/forReport/2022-04-29/cosmo.txt to be efficient, I am going to have 
 # to catalogue things quite well. Things to be catalogued for a given aberration set:
 # 
-# - Time at which aberration constants were obtained
+# - Time at which aberration constants were obtained (saved as key in larger dictionary)
 # 
 # - Aberration in question
 # 
@@ -21,21 +21,19 @@
 
 import pickle
 
-write = False
+write = True
 
 if write:
 
     with open('/media/rob/hdd1/james-gj/forReport/2022-04-29/cosmo.txt', 'r') as f:
 
-        # Initialising dictionary where key is index of aberration calculation result and value is aberration calculation 
+        # Initialising dictionary where key is time of aberration calculation result and value is aberration calculation 
         # result (containing results for all aberrations)
         dAllResultSets = {}
         aberList = [
             'Aberration', 'O2', 'A2', 'P3', 'A3', 'O4', 'Q4', 'A4', 'P5', 'R5', 'A5', 'O6', 'Q6', 'S6', 'A6', 'P7', 'R7', 
             'T7', 'A7'
         ]
-
-        resultSetIndex = 0
 
         # Initialising dictionary where key is name of parameter of aberration result (e.g. aberration symbol, 
         # aberration magnitude/unit, time)
@@ -56,7 +54,7 @@ if write:
                 if 'Aberration' in lineSegmentList:
 
                     # print(True)
-                    dSingleResultSet['timeString'] = lineSegmentList[9]
+                    timeString = lineSegmentList[9]
 
                 else:
 
@@ -74,8 +72,7 @@ if write:
 
                     if 'A7' in line:
 
-                        dAllResultSets[resultSetIndex] = dSingleResultSet
-                        resultSetIndex += 1
+                        dAllResultSets[timeString] = dSingleResultSet
 
                         dSingleResultSet = {}
 
@@ -90,4 +87,4 @@ with open('/home/james/VSCode/currentPipelines/aberCalcResults_2022_04_29_OPQ.pk
     output = pickle.load(f3)
     print(output)
     print('\n\n\n')
-    print(output[5])
+    print(output["8:49:12"])
