@@ -2,3 +2,4 @@ faces/
 cifar-10-batches-py/
 MNIST/raw/
 cifar-10-python.tar.gz
+currentPipelines/max_magList.pkl
