@@ -274,6 +274,8 @@ def getMeanAndStd(dataloader, reducedBatches=None, specificDevice=None):
         # Mean over all tensor elements in batch
         batchedRonchs = batch[0]
 
+        print(batchedRonchs[0])
+
         if specificDevice:
             batchedRonchs = convert_tensor(batchedRonchs, device=device, non_blocking=True)
 
@@ -324,6 +326,8 @@ def getMeanAndStd2(ronchdset, trainingResolution, diagnosticBatchSize=4, diagnos
     ronchdset.transform = diagnosticTransform
 
     diagnosticDataloader = DataLoader(ronchdset, batch_size=diagnosticBatchSize, shuffle=diagnosticShuffle, num_workers=8)
+
+
 
     mean, std = getMeanAndStd(diagnosticDataloader, batchesTested, specificDevice=specificDevice)
 
@@ -387,7 +391,7 @@ if __name__ == "__main__":
 
     # DATASET INSTANTIATION
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/11_05_22/test.h5", 
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
     c52=True, c54=True, c56=True,
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
@@ -397,9 +401,9 @@ if __name__ == "__main__":
         ronchdset,
     ]
 
-    print(np.amax(ronchdset[0][0]))
+    # print(np.amax(ronchdset[0][0]))
 
-    sys.exit()
+    # sys.exit()
 
     # print(ronchdset[0][1])
     # print(ronchdset2[0][1])
@@ -427,20 +431,20 @@ if __name__ == "__main__":
 
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
-    plt.figure()
+    # plt.figure()
 
-    for idx in chosenIndices:
-        print(f"\nIndex {idx}")
+    # for idx in chosenIndices:
+    #     print(f"\nIndex {idx}")
 
-        for ronchdset in ronchdsetList:
+    #     for ronchdset in ronchdsetList:
 
-            print(f"Label: {ronchdset[idx][1]}")
-            print(ronchdset.get_I_t_Seed(idx))
+    #         print(f"Label: {ronchdset[idx][1]}")
+    #         print(ronchdset.get_I_t_Seed(idx))
+    #         print("{:.40f}".format(ronchdset[idx][0][512][512].item()))
+    #         show_data(ronchdset[idx][0], ronchdset[idx][1])
+    #         plt.show()
 
-            show_data(ronchdset[idx][0], ronchdset[idx][1])
-            plt.show()
-
-    sys.exit()
+    # sys.exit()
 
     # ESTIMATING MEAN AND STD
 
@@ -456,7 +460,7 @@ if __name__ == "__main__":
 
     scriptTime = datetime.datetime.now()
 
-    ratio = 30 / 70
+    ratio = 180 / 180
 
     apertureSize = 1024 / 2 * ratio # Aperture radius in pixels
 
@@ -469,7 +473,7 @@ if __name__ == "__main__":
 
         print(calculatedMean, calculatedStd)
 
-    sys.exit()
+    # sys.exit()
 
     # APPLYING TRANSFORMS
 
@@ -483,7 +487,7 @@ if __name__ == "__main__":
     # "sees".
 
     # Image size must be 300 x 300 for EfficientNet-B3
-    resolution = 300
+    resolution = 260
 
     # TODO: try works if mean and std of data are being calculated earlier in the script; except assigns fixed values to them, 
     # preferably values found previously - going to develop that bit such that it changes depending on mean and std already 
@@ -492,8 +496,8 @@ if __name__ == "__main__":
         mean = calculatedMean
         std = calculatedStd
     except:
-        mean = 0.5006
-        std = 0.2591
+        mean = 4.3877 * 10**-10
+        std = 1.1205 * 10**-6
 
     trainTransform = Compose([
         ToTensor(),
@@ -525,8 +529,12 @@ if __name__ == "__main__":
 
     if testingDataLoader:
         for iBatch, batchedSample in enumerate(dataloader):
-            print(iBatch, batchedSample[0].size(),
-                    batchedSample[1].size())
+            # print(iBatch, batchedSample[0].size(),
+            #         batchedSample[1].size())
+
+            # print(batchedSample[0][0])
+
+            # sys.exit()
 
             if iBatch == 0:
                 plt.figure()
@@ -552,4 +560,4 @@ if __name__ == "__main__":
 
     trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
 
-    print(f"I/A and t/s respectively: {ronchdset.getIt(10)}")
+    # print(f"I/A and t/s respectively: {ronchdset.getIt(10)}")
