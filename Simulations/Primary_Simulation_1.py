@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 from matplotlib_scalebar.scalebar import ScaleBar
 import random
 import sys
+from math import radians
+import pickle
+from matplotlib import patches
 
 
 # SEED
@@ -280,9 +283,9 @@ def calc_Ronchigram(imdim, simdim,
     # fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
 
 
-    fig, ax = plt.subplots()
-    ax.axis("off")
-    ax.imshow(abs(ifftshift(fft_psi_p))**2, interpolation="nearest")
+    # fig, ax = plt.subplots()
+    # ax.axis("off")
+    # ax.imshow(abs(ifftshift(fft_psi_p))**2, interpolation="nearest")
     
 
     # print(calc_wavlen(av))
@@ -329,8 +332,8 @@ def calc_Ronchigram(imdim, simdim,
     ronch -= np.amin(ronch)
     ronch /= np.amax(ronch)
 
-    print(type(ronch))
-    print(ronch.shape)
+    # print(type(ronch))
+    # print(ronch.shape)
     return ronch
 
 
@@ -338,75 +341,162 @@ if __name__ == "__main__":
 
     # RONCHIGRAM CALCULATION
 
-    randu = numpy.random.uniform
+    # randu = numpy.random.uniform
+
+    # aberList = [
+    # 'O2', 'A2', 'P3', 'A3', 'O4', 'Q4', 'A4', 'P5', 'R5', 'A5', 'O6', 'Q6', 'S6', 'A6', 'P7', 'R7', 'T7', 'A7'
+    # ]
+
+    # f = open('/home/james/VSCode/currentPipelines/aberCalcResults_2022_04_29_OPQ.pkl', 'rb')
+
+    # allResultSets = pickle.load(f)
+
+    # mag_units = [10**-9] * 4 + [10**-6] * 6 + [10**-3] * 4
+
+    # # time = '8:41:47'
+
+    # # aberCalcResult = output[time]
+
+    # # mag_list = [eval(aberCalcResult[aber]['mag']) for aber in aberList if aber not in ['P7', 'R7', 'T7', 'A7']]
+    # # mag_units = [aberCalcResult[aber]['magUnit'] for aber in aberList]
+
+
+    # # for i, mag_in_unit in enumerate(mag_list):
+
+    # #     unit = mag_units[i]
+
+    # #     if unit == 'nm': mag_in_m = mag_in_unit * 10**-9
+    # #     elif unit == 'um': mag_in_m = mag_in_unit * 10**-6
+    # #     elif unit == 'mm': mag_in_m = mag_in_unit * 10**-3
+
+    # #     mag_list[i] = mag_in_m
+
+
+    # # ang_list = [eval(aberCalcResult[aber]['angle']) for aber in aberList if aber not in ['P7', 'R7', 'T7', 'A7']]
+
+    # # for i, ang_in_deg in enumerate(ang_list):
+
+    # #     ang_in_rad = radians(ang_in_deg)
+
+    # #     ang_list[i] = ang_in_rad
+
+    # max_magList = []
+
+    # for aber in aberList:
+
+    #     if aber == 'P7': break
+
+    #     max_mag_in_unit = 0.0
+
+    #     for singleResultSet in allResultSets.values():
+    #         aberMag = eval(singleResultSet[aber]['mag'])
+
+    #         if aberMag > max_mag_in_unit:
+    #             max_mag_in_unit = aberMag
+
+    #     max_magList.append(max_mag_in_unit)
+
+    # print(max_magList)
+
+    # for i, max_mag in enumerate(max_magList):
+
+    #     max_magList[i] = max_mag * mag_units[i]
+
+    # print(max_magList)
+
+    # with open('/home/james/VSCode/currentPipelines/max_magList.pkl', 'wb') as f2:
+
+    #     pickle.dump(max_magList, f2)
+
+    # mag_list = [max_mag/2 for max_mag in max_magList]
+
+    # print('\n')
+    # print(mag_list)
+
+    # mList = [0, 2, 1, 3, 0, 2, 4, 1, 3, 5, 0, 2, 4, 6]
+
+    # ang_list = []
+
+    # for m in mList:
+
+    #     if m == 0: ang_list.append(0.0)
+    #     else: ang_list.append(2 * np.pi / m * 2/4 * m**3)
+
+    # print(ang_list)
+
+    # f.close()
+
+    # print(max_mags)
+
+    # sys.exit()
 
     mag_list = [
-                2.5 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
+                5 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
-                25 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
-                78.5 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
+                5 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                500 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
                 # randu(0, 2 * 150 * 10**-9),
-                47.75 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                500 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
    
-                5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
+                0 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
                 # randu(0, 2 * 5.2 * 10**-6),
-                5.2 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
+                0 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
                 # randu(0, 2 * 5.2 * 10**-6),
-                2.61 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
+                0 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
                 # randu (0, 2 * 2.61 * 10**-6),
 
-                0.05 * 10**-3,   # C4,1 magnitude/m (4th-order axial coma)
+                0 * 10**-6,   # C4,1 magnitude/m (4th-order axial coma)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0.05 * 10**-3,   # C4,3 magnitude/m (3-lobe aberration)
+                0 * 10**-6,   # C4,3 magnitude/m (3-lobe aberration)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0.05 * 10**-3,   # C4,5 magnitude/m (5-fold astigmatism)
+                0 * 10**-6,   # C4,5 magnitude/m (5-fold astigmatism)
                 # randu(0, 2 * 0.05 * 10**-3),
 
-                5 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
+                0 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                5 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
+                0 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                5 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
+                0 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
                 # randu(0, 2 * 5 * 10**-3),
-                5 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
+                0 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
                 # randu(0, 2 * 5 * 10**-3))
 
     ang_list = [0,              # C1,0 angle/rad
-                2 * np.pi/2 * 0/2,      # C1,2 angle/rad
+                2 * np.pi / 2 * 1/2,      # C1,2 angle/rad
                 # 0,
 
-                2 * np.pi/1 * 0/2,      # C2,1 angle/rad
+                2 * np.pi / 1 * 1/2,      # C2,1 angle/rad
                 # randu(0, 2 * np.pi / 1),
-                2 * np.pi/3 * 0/2,      # C2,3 angle/rad
+                2 * np.pi / 3 * 1/2,      # C2,3 angle/rad
                 # randu(0, 2 * np.pi / 3),
 
 
                 0,              # C3,0 angle/rad
-                2 * np.pi/2 * 0/2,      # C3,2 angle/rad
+                2 * np.pi / 2 * 1/2,      # C3,2 angle/rad
                 # randu(0, 2 * np.pi / 2),
-                2 * np.pi/4 * 0/2,      # C3,4 angle/rad
+                2 * np.pi / 4 * 1/2,      # C3,4 angle/rad
                 # randu(0, 2 * np.pi / 4),
 
-                2 * np.pi/1 * 0/2,      # C4,1 angle/rad
+                2 * np.pi / 1 * 1/2,      # C4,1 angle/rad
                 # randu(0, 2 * np.pi / 1),
-                2 * np.pi/3 * 0/2,      # C4,3 angle/rad
+                2 * np.pi / 3 * 1/2,      # C4,3 angle/rad
                 # randu(0, 2 * np.pi / 3),
-                2 * np.pi/5 * 0/2,     # C4,5 angle/rad
+                2 * np.pi / 5 * 1/2,     # C4,5 angle/rad
                 # randu(0, 2 * np.pi / 5),
 
                 0,              # C5,0 angle/rad
-                2 * np.pi/2 * 0/2,      # C5,2 angle/rad
+                2 * np.pi / 2 * 1/2,      # C5,2 angle/rad
                 # randu(0, 2 * np.pi / 2),
-                2 * np.pi/4 * 0/2,      # C5,4 angle/rad
+                2 * np.pi / 4 * 1/2,      # C5,4 angle/rad
                 # randu(0, 2 * np.pi / 4),
-                2 * np.pi/6 * 0/2]     # C5,6 angle/rad
+                2 * np.pi / 6 * 1/2]     # C5,6 angle/rad
                 # randu(0, 2 * np.pi / 6))
 
     # print(ang_list[1] / (2 * np.pi / 2))
     # print(mag_list[1] / (2 * 50 * 10**-9))
 
-    imdim = 256
+    imdim = 1024
 
     useZhiyuanParams = False
 
@@ -434,12 +524,14 @@ if __name__ == "__main__":
 
     else:
 
-        simdim = 70 * 10**-3
+        simdim = 100 * 10**-3
 
         aperture_size = simdim
 
     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
-                            zhiyuanRange=False, seed=18)
+                            zhiyuanRange=False, seed=None)
+
+    # print(ronch[512][512])
 
     # DEPICTING THE RONCHIGRAM
 
@@ -455,20 +547,27 @@ if __name__ == "__main__":
     ax.axis("off")
     ax.imshow(ronch, cmap="gray", interpolation="nearest")
 
-    # scale = 2*simdim/imdim    # radians per pixel
-    # scale_mrad = scale * 10**3  # mrad per pixel
-    # scalebar = ScaleBar(scale_mrad, units="m", dimension="si-length")
+    scale = 2*simdim/imdim * 1000    # mrad per pixel
+    scalebar = ScaleBar(scale, units="mrad", dimension="angle")
 
-    # ax.add_artist(scalebar)
+    ax.add_artist(scalebar)
 
-    saveFig = False
+    outerCropLength = np.sqrt(2) * 512
+    outerCropSquare = patches.Rectangle((512 - outerCropLength / 2, 512 - outerCropLength / 2), outerCropLength, outerCropLength, edgecolor='b', facecolor='none')
+    ax.add_patch(outerCropSquare)
+
+    innerCropLength = outerCropLength / 2
+    innerCropSquare = patches.Rectangle((512 - innerCropLength / 2, 512 - innerCropLength / 2), innerCropLength, innerCropLength, edgecolor='g', facecolor='none')
+    ax.add_patch(innerCropSquare)
+
+    saveFig = True
 
     if saveFig:
-        plt.savefig(f"/media/rob/hdd2/james/simulations/exampleRonchigrams/toFindNegligibleRanges/{dominantcnm}Dominant/c10_{mag_list[0]/10**-9}_c12_{mag_list[1]/10**-9}_c21_{mag_list[2]/10**-9}_c23_{mag_list[3]/10**-9}.png")
+        plt.savefig('/media/rob/hdd1/james-gj/forReport/Elementary Ronchigram Training Runs/100mradWithCros.png')
 
     plt.show()
 
-    # sys.exit()
+    sys.exit()
 
     p1m = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-9]
     p1a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
