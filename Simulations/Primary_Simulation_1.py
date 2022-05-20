@@ -634,7 +634,7 @@ if __name__ == "__main__":
         mag_list[0: len(p[0])] = p[0]
         ang_list[0: len(p[1])] = p[1]
 
-        ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-10000, b=1, t=10000, aperture_size=aperture_size, 
+        ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
                             zhiyuanRange=False, seed = 17)
 
         fig, ax = plt.subplots()
