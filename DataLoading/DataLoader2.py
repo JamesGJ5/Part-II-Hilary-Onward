@@ -269,12 +269,12 @@ def getMeanAndStd(dataloader, reducedBatches=None, specificDevice=None):
     # is a single tensor containing all Ronchigram tensors in batch) and "aberrations" (whose value is a single tensor 
     # containg all aberration tensors in batch)
     for iBatch, batch in enumerate(dataloader):
-        print(f"Looking at batch at index {iBatch}...")
+        # print(f"Looking at batch at index {iBatch}...")
 
         # Mean over all tensor elements in batch
         batchedRonchs = batch[0]
 
-        print(batchedRonchs[0])
+        # print(batchedRonchs[0])
 
         if specificDevice:
             batchedRonchs = convert_tensor(batchedRonchs, device=device, non_blocking=True)
