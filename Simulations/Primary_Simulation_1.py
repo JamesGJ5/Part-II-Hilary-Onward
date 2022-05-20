@@ -65,7 +65,9 @@ def calc_Ronchigram(imdim, simdim,
     # These are the magnitudes of each aberration Cn,m (Cn,m are aberration names in Krivanek notation (Krivanek, Dellby
     # and Lupini, 1999)). The terms below are named in Table 1 of (Kirkland, 2011), which is compiled from (Krivanek,
     # Dellby and Lupini, 1999) and (Krivanek et al., 2008).
-    mag_list = (C10_mag,    # C1,0 magnitude/m (defocus)
+    mag_list = (
+                # C01_mag,    # C0,1 magnitude/m (image shift)
+                C10_mag,    # C1,0 magnitude/m (defocus)
                 C12_mag,    # C1,2 magnitude/m (2-fold astigmatism)
 
                 C21_mag,    # C2,1 magnitude/m (axial coma)
@@ -91,7 +93,9 @@ def calc_Ronchigram(imdim, simdim,
     # TODO: check if chromatic aberration should be accounted for
 
     # Orientation angles phi_n,m for each aberration; follows same convention as np.arctan2
-    ang_list = (C10_ang,    # C1,0 angle/rad
+    ang_list = (
+                # C01_ang,    # C0,1 angle/rad (image shift)
+                C10_ang,    # C1,0 angle/rad
                 C12_ang,    # C1,2 angle/rad
 
                 C21_ang,    # C2,1 angle/rad
@@ -226,11 +230,13 @@ def calc_Ronchigram(imdim, simdim,
     nnoise = 1
     noisefact = 16
 
-    assert imdim % noisefact == 0
-    noise_kernel_size = int(imdim/noisefact)    # 256 ->32, 512 ~ 32, 1024 -> 128   # Comment meaning
+    initialNoiseImdim = imdim
 
-    assert imdim % noise_kernel_size == 0
-    resize_factor = int(imdim/noise_kernel_size)
+    assert initialNoiseImdim % noisefact == 0
+    noise_kernel_size = int(initialNoiseImdim/noisefact)    # 256 ->32, 512 ~ 32, 1024 -> 128   # Comment meaning
+
+    assert initialNoiseImdim % noise_kernel_size == 0
+    resize_factor = int(initialNoiseImdim/noise_kernel_size)
 
     noise_fn = np.zeros((noise_kernel_size, noise_kernel_size))
 
@@ -265,6 +271,24 @@ def calc_Ronchigram(imdim, simdim,
     new_shape = tuple([resize_factor * i for i in noise_fn.shape])
     noise_fun = np.array(Image.fromarray(noise_fn).resize(size=new_shape))
 
+    # if imdim == 256:
+
+    #     with open('/home/james/VSCode/Simulations/noise_funSeed17imdim256.pkl', 'wb') as f:
+
+    #         pickle.dump(noise_fun, f)
+
+    # else:
+
+    #     f = open('/home/james/VSCode/Simulations/noise_funSeed17imdim256.pkl', 'rb')
+
+    #     print(True)
+
+    #     noise_fun = pickle.load(f)
+
+    #     f.close()
+
+    #     noise_fun = np.resize(noise_fun, (imdim, imdim))
+
 
     # CALCULATING THE TRANSMISSION FUNCTION PSI_T(X)
 
@@ -286,6 +310,11 @@ def calc_Ronchigram(imdim, simdim,
     # fig, ax = plt.subplots()
     # ax.axis("off")
     # ax.imshow(abs(ifftshift(fft_psi_p))**2, interpolation="nearest")
+
+    # scale = 2*simdim/imdim * 1000    # mrad per pixel
+    # scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+
+    # ax.add_artist(scalebar)
     
 
     # print(calc_wavlen(av))
@@ -431,38 +460,41 @@ if __name__ == "__main__":
     # sys.exit()
 
     mag_list = [
-                5 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
+                # 0 * 10**-9, # C0,1 magnitude/m (image shift)
+                25 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
-                5 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
-                500 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
+                25 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                78.5 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
                 # randu(0, 2 * 150 * 10**-9),
-                500 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                47.75 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
    
-                0 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
+                5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
                 # randu(0, 2 * 5.2 * 10**-6),
-                0 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
+                5.2 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
                 # randu(0, 2 * 5.2 * 10**-6),
-                0 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
+                2.61 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
                 # randu (0, 2 * 2.61 * 10**-6),
 
-                0 * 10**-6,   # C4,1 magnitude/m (4th-order axial coma)
+                50 * 10**-6,   # C4,1 magnitude/m (4th-order axial coma)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0 * 10**-6,   # C4,3 magnitude/m (3-lobe aberration)
+                50 * 10**-6,   # C4,3 magnitude/m (3-lobe aberration)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0 * 10**-6,   # C4,5 magnitude/m (5-fold astigmatism)
+                50 * 10**-6,   # C4,5 magnitude/m (5-fold astigmatism)
                 # randu(0, 2 * 0.05 * 10**-3),
 
-                0 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
+                5 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
+                5 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
+                5 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
+                5 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
                 # randu(0, 2 * 5 * 10**-3))
 
-    ang_list = [0,              # C1,0 angle/rad
+    ang_list = [
+                # 2 * np.pi / 1 * 1/2,  # C0,1 angle/rad (image shift)
+                0,              # C1,0 angle/rad
                 2 * np.pi / 2 * 1/2,      # C1,2 angle/rad
                 # 0,
 
@@ -524,12 +556,12 @@ if __name__ == "__main__":
 
     else:
 
-        simdim = 100 * 10**-3
+        simdim = 70 * 10**-3
 
         aperture_size = simdim
 
     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
-                            zhiyuanRange=False, seed=None)
+                            zhiyuanRange=False, seed=17)
 
     # print(ronch[512][512])
 
@@ -552,15 +584,15 @@ if __name__ == "__main__":
 
     ax.add_artist(scalebar)
 
-    outerCropLength = np.sqrt(2) * 512
-    outerCropSquare = patches.Rectangle((512 - outerCropLength / 2, 512 - outerCropLength / 2), outerCropLength, outerCropLength, edgecolor='b', facecolor='none')
-    ax.add_patch(outerCropSquare)
+    # outerCropLength = np.sqrt(2) * 512
+    # outerCropSquare = patches.Rectangle((512 - outerCropLength / 2, 512 - outerCropLength / 2), outerCropLength, outerCropLength, edgecolor='b', facecolor='none')
+    # ax.add_patch(outerCropSquare)
 
-    innerCropLength = outerCropLength / 2
-    innerCropSquare = patches.Rectangle((512 - innerCropLength / 2, 512 - innerCropLength / 2), innerCropLength, innerCropLength, edgecolor='g', facecolor='none')
-    ax.add_patch(innerCropSquare)
+    # innerCropLength = outerCropLength / 2
+    # innerCropSquare = patches.Rectangle((512 - innerCropLength / 2, 512 - innerCropLength / 2), innerCropLength, innerCropLength, edgecolor='g', facecolor='none')
+    # ax.add_patch(innerCropSquare)
 
-    saveFig = True
+    saveFig = False
 
     if saveFig:
         plt.savefig('/media/rob/hdd1/james-gj/forReport/Elementary Ronchigram Training Runs/100mradWithCros.png')
@@ -578,6 +610,8 @@ if __name__ == "__main__":
     p3m = [50 * 10**-9, 50 * 10**-9, 0 * 10**-9, 0 * 10**-9]
     p3a = [0, 2 * np.pi / 2 * 0, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
 
+    p3_2m = [0, 50 * 10**-9, 0 * 10**-9, 0 * 10**-9]
+    p3_2a = [0, 2 * np.pi / 2 * 0, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
 
     p4m = [0 * 10**-9, 0 * 10**-9, 800 * 10**-9, 0 * 10**-9]
     p4a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
@@ -593,26 +627,41 @@ if __name__ == "__main__":
     p7a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 0]
 
 
-    # for idx, p in enumerate(zip([p1m, p2m, p3m, p4m, p5m, p6m, p7m], [p1a, p2a, p3a, p4a, p5a, p6a, p7a])):
+    for idx, p in enumerate(zip([p1m, p2m, p3m, p3_2m, p4m, p5m, p6m, p7m], [p1a, p2a, p3a, p3_2a, p4a, p5a, p6a, p7a])):
 
-    #     print(p)
+        print(p)
 
-    #     mag_list[0: len(p[0])] = p[0]
-    #     ang_list[0: len(p[1])] = p[1]
+        mag_list[0: len(p[0])] = p[0]
+        ang_list[0: len(p[1])] = p[1]
 
-    #     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
-    #                         zhiyuanRange=False)
+        ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-10000, b=1, t=10000, aperture_size=aperture_size, 
+                            zhiyuanRange=False, seed = 17)
 
-    #     fig, ax = plt.subplots()
-    #     ax.axis("off")
-    #     ax.imshow(ronch, cmap="gray", interpolation="nearest")
+        fig, ax = plt.subplots()
+        ax.axis("off")
+        ax.imshow(ronch, cmap="gray", interpolation="nearest")
 
-    #     saveFig = True
+        scale = 2*simdim/imdim * 1000    # mrad per pixel
+        scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+        ax.add_artist(scalebar)
 
-    #     if saveFig:
-    #         plt.savefig(f"/media/rob/hdd1/james-gj/forReport/DemonstrateAberrations/p{idx + 1}")
+        saveFig = True
 
-    #     plt.show()
+        if saveFig:
+
+            if idx > 3:
+
+                plt.savefig(f"/media/rob/hdd1/james-gj/forReport/DemonstrateAberrations/With Scalebar/p{idx}")
+
+            elif idx == 3:
+
+                plt.savefig(f"/media/rob/hdd1/james-gj/forReport/DemonstrateAberrations/With Scalebar/p3_2")
+
+            else:
+
+                plt.savefig(f"/media/rob/hdd1/james-gj/forReport/DemonstrateAberrations/With Scalebar/p{idx + 1}")
+
+        plt.show()
 
 
     # REFERENCES
