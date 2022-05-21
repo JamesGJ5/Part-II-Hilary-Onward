@@ -461,35 +461,35 @@ if __name__ == "__main__":
 
     mag_list = [
                 # 0 * 10**-9, # C0,1 magnitude/m (image shift)
-                5 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
+                50 * 10**-9,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
-                5 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
-                500 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
+                50 * 10**-9,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                150 * 10**-9,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
                 # randu(0, 2 * 150 * 10**-9),
-                500 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                50 * 10**-9,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
                 # randu(0, 2 * 50 * 10**-9),
    
-                0 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
+                5.2 * 10**-6,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
                 # randu(0, 2 * 5.2 * 10**-6),
-                0 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
+                5.2 * 10**-6,  # C3,2 magnitude/m (3rd-order axial star aberration)
                 # randu(0, 2 * 5.2 * 10**-6),
-                0 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
+                2.61 * 10**-6,  # C3,4 magnitude/m (4-fold astigmatism)
                 # randu (0, 2 * 2.61 * 10**-6),
 
-                0 * 10**-6,   # C4,1 magnitude/m (4th-order axial coma)
+                50 * 10**-6,   # C4,1 magnitude/m (4th-order axial coma)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0 * 10**-6,   # C4,3 magnitude/m (3-lobe aberration)
+                50 * 10**-6,   # C4,3 magnitude/m (3-lobe aberration)
                 # randu(0, 2 * 0.05 * 10**-3),
-                0 * 10**-6,   # C4,5 magnitude/m (5-fold astigmatism)
+                50 * 10**-6,   # C4,5 magnitude/m (5-fold astigmatism)
                 # randu(0, 2 * 0.05 * 10**-3),
 
-                0 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
+                5 * 10**-3,    # C5,0 magnitude/m (5th-order spherical aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
+                5 * 10**-3,    # C5,2 magnitude/m (5th-order axial star aberration)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
+                5 * 10**-3,    # C5,4 magnitude/m (5th-order rosette)
                 # randu(0, 2 * 5 * 10**-3),
-                0 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
+                5 * 10**-3]    # C5,6 magnitude/m (6-fold astigmatism)
                 # randu(0, 2 * 5 * 10**-3))
 
     ang_list = [
@@ -556,7 +556,7 @@ if __name__ == "__main__":
 
     else:
 
-        simdim = 100 * 10**-3
+        simdim = 70 * 10**-3
 
         aperture_size = simdim
 
@@ -588,80 +588,80 @@ if __name__ == "__main__":
     # outerCropSquare = patches.Rectangle((512 - outerCropLength / 2, 512 - outerCropLength / 2), outerCropLength, outerCropLength, edgecolor='b', facecolor='none')
     # ax.add_patch(outerCropSquare)
 
-    # innerCropLength = outerCropLength / 2
+    # innerCropLength = outerCropLength * 30 / 70
     # innerCropSquare = patches.Rectangle((512 - innerCropLength / 2, 512 - innerCropLength / 2), innerCropLength, innerCropLength, edgecolor='g', facecolor='none')
     # ax.add_patch(innerCropSquare)
 
-    saveFig = False
+    plt.show()
+
+    saveFig = input('Save figure? Enter True or False: ')
 
     if saveFig:
-        plt.savefig('/media/rob/hdd1/james-gj/forReport/Elementary Ronchigram Training Runs/100mradWithCros.png')
-
-    plt.show()
+        fig.figure.savefig('_.png')
 
     sys.exit()
 
-    p1m = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-9]
-    p1a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
+    # p1m = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 0 * 10**-9]
+    # p1a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
 
-    p2m = [50 * 10**-9, 50 * 10**-9, 0 * 10**-9, 0 * 10**-9]
-    p2a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
+    # p2m = [50 * 10**-9, 50 * 10**-9, 0 * 10**-9, 0 * 10**-9]
+    # p2a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
 
-    p3m = [50 * 10**-9, 50 * 10**-9, 0 * 10**-9, 0 * 10**-9]
-    p3a = [0, 2 * np.pi / 2 * 0, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
+    # p3m = [50 * 10**-9, 50 * 10**-9, 0 * 10**-9, 0 * 10**-9]
+    # p3a = [0, 2 * np.pi / 2 * 0, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
 
-    p3_2m = [0, 50 * 10**-9, 0 * 10**-9, 0 * 10**-9]
-    p3_2a = [0, 2 * np.pi / 2 * 0, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
+    # p3_2m = [0, 50 * 10**-9, 0 * 10**-9, 0 * 10**-9]
+    # p3_2a = [0, 2 * np.pi / 2 * 0, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
 
-    p4m = [0 * 10**-9, 0 * 10**-9, 800 * 10**-9, 0 * 10**-9]
-    p4a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
+    # p4m = [0 * 10**-9, 0 * 10**-9, 800 * 10**-9, 0 * 10**-9]
+    # p4a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
 
-    p5m = [0 * 10**-9, 0 * 10**-9, 800 * 10**-9, 0 * 10**-9]
-    p5a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 0, 2 * np.pi / 3 * 1/2]
-
-
-    p6m = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 800 * 10**-9]
-    p6a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
-
-    p7m = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 800 * 10**-9]
-    p7a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 0]
+    # p5m = [0 * 10**-9, 0 * 10**-9, 800 * 10**-9, 0 * 10**-9]
+    # p5a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 0, 2 * np.pi / 3 * 1/2]
 
 
-    for idx, p in enumerate(zip([p1m, p2m, p3m, p3_2m, p4m, p5m, p6m, p7m], [p1a, p2a, p3a, p3_2a, p4a, p5a, p6a, p7a])):
+    # p6m = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 800 * 10**-9]
+    # p6a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 1/2]
 
-        print(p)
+    # p7m = [0 * 10**-9, 0 * 10**-9, 0 * 10**-9, 800 * 10**-9]
+    # p7a = [0, 2 * np.pi / 2 * 1/2, 2 * np.pi / 1 * 1/2, 2 * np.pi / 3 * 0]
 
-        mag_list[0: len(p[0])] = p[0]
-        ang_list[0: len(p[1])] = p[1]
 
-        ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
-                            zhiyuanRange=False, seed = 17)
+    # for idx, p in enumerate(zip([p1m, p2m, p3m, p3_2m, p4m, p5m, p6m, p7m], [p1a, p2a, p3a, p3_2a, p4a, p5a, p6a, p7a])):
 
-        fig, ax = plt.subplots()
-        ax.axis("off")
-        ax.imshow(ronch, cmap="gray", interpolation="nearest")
+    #     print(p)
 
-        scale = 2*simdim/imdim * 1000    # mrad per pixel
-        scalebar = ScaleBar(scale, units="mrad", dimension="angle")
-        ax.add_artist(scalebar)
+    #     mag_list[0: len(p[0])] = p[0]
+    #     ang_list[0: len(p[1])] = p[1]
 
-        saveFig = False
+    #     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
+    #                         zhiyuanRange=False, seed = 17)
 
-        if saveFig:
+    #     fig, ax = plt.subplots()
+    #     ax.axis("off")
+    #     ax.imshow(ronch, cmap="gray", interpolation="nearest")
 
-            if idx > 3:
+    #     scale = 2*simdim/imdim * 1000    # mrad per pixel
+    #     scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+    #     ax.add_artist(scalebar)
 
-                plt.savefig(f"/media/rob/hdd1/james-gj/forReport/DemonstrateAberrations/With Scalebar/p{idx}")
+    #     saveFig = False
 
-            elif idx == 3:
+    #     if saveFig:
 
-                plt.savefig(f"/media/rob/hdd1/james-gj/forReport/DemonstrateAberrations/With Scalebar/p3_2")
+    #         if idx > 3:
 
-            else:
+    #             plt.savefig(f"/media/rob/hdd1/james-gj/forReport/DemonstrateAberrations/With Scalebar/p{idx}")
 
-                plt.savefig(f"/media/rob/hdd1/james-gj/forReport/DemonstrateAberrations/With Scalebar/p{idx + 1}")
+    #         elif idx == 3:
 
-        plt.show()
+    #             plt.savefig(f"/media/rob/hdd1/james-gj/forReport/DemonstrateAberrations/With Scalebar/p3_2")
+
+    #         else:
+
+    #             plt.savefig(f"/media/rob/hdd1/james-gj/forReport/DemonstrateAberrations/With Scalebar/p{idx + 1}")
+
+    #     plt.show()
 
 
     # REFERENCES
