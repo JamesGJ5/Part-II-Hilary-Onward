@@ -597,7 +597,7 @@ if __name__ == "__main__":
     saveFig = input('Save figure? Enter True or False: ')
 
     if saveFig:
-        fig.figure.savefig('_.png')
+        # fig.figure.savefig('_.png')
 
     sys.exit()
 
