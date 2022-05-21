@@ -4,33 +4,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-simdim100mrad = '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220520-202849'
-simdim100mradTo50mrad = '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220520-202914'
+eightyFiveThousand = '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220409-105451'
 
 figureTitles = {
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220520-202849': '100mrad', 
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220520-202914': '100mrad Cropped to 50mrad'
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220409-105451': '85,000 Ronchigrams'
     }
 
-trainingRunDirs = [simdim100mrad, simdim100mradTo50mrad]
+trainingRunDirs = [eightyFiveThousand]
 
 lossCurveFiles = [
-    '/trainingLossRunningAverage.json', '/overallValidationLoss.json', '/c23ValidationLoss.json', 
-    '/phi23ValidationLoss.json'
+    '/trainingLossRunningAverage.json', '/overallValidationLoss.json'
     ]
 
 curveColours = {
     '/trainingLossRunningAverage.json': 'b', 
-    '/overallValidationLoss.json': 'r',
-    '/c23ValidationLoss.json': 'c',
-    '/phi23ValidationLoss.json': 'y'
+    '/overallValidationLoss.json': 'r'
     }
 
 curveLabels = {
     '/trainingLossRunningAverage.json': 'Training Loss Running Average', 
     '/overallValidationLoss.json': 'Overall Validation Loss',
-    '/c23ValidationLoss.json': 'c2,3 Validation Loss',
-    '/phi23ValidationLoss.json': '\u03A62,3 Validation Loss'
     }
 
 assert lossCurveFiles[0] == '/trainingLossRunningAverage.json'
@@ -111,4 +104,4 @@ for directory in trainingRunDirs:
 
     saveFig = input('Save figure? Input True or False: ')
     if saveFig:
-        fig.figure.savefig(f'/media/rob/hdd1/james-gj/forReport/Elementary Ronchigram Training Runs/Loss Curves/Recognising Just C23/{title}')
+        fig.figure.savefig(f'/media/rob/hdd1/james-gj/forReport/Partially-Corrected STEM/{title}')
