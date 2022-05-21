@@ -4,17 +4,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-simdim100mrad = '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220509-180434'
-simdim50mrad = '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220509-081430'
-simdim100mradTo50mrad = '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220508-211133'
+simdim100mrad = '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220520-202849'
+simdim100mradTo50mrad = '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220520-202914'
 
 figureTitles = {
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220509-180434': '100mrad', 
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220509-081430': '50mrad',
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220508-211133': '100mrad Cropped to 50mrad'
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220520-202849': '100mrad', 
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220520-202914': '100mrad Cropped to 50mrad'
     }
 
-trainingRunDirs = [simdim100mrad, simdim50mrad, simdim100mradTo50mrad]
+trainingRunDirs = [simdim100mrad, simdim100mradTo50mrad]
 
 lossCurveFiles = [
     '/trainingLossRunningAverage.json', '/overallValidationLoss.json', '/c23ValidationLoss.json', 
@@ -113,4 +111,4 @@ for directory in trainingRunDirs:
 
     saveFig = input('Save figure? Input True or False: ')
     if saveFig:
-        fig.figure.savefig(f'/media/rob/hdd1/james-gj/forReport/Elementary Ronchigram Training Runs/Loss Curves/{title}')
+        fig.figure.savefig(f'/media/rob/hdd1/james-gj/forReport/Elementary Ronchigram Training Runs/Loss Curves/Recognising Just C23/{title}')
