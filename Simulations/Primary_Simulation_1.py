@@ -12,6 +12,7 @@ import sys
 from math import radians
 import pickle
 from matplotlib import patches
+import math
 
 
 # SEED
@@ -563,20 +564,25 @@ if __name__ == "__main__":
     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
                             zhiyuanRange=False, seed=17)
 
-    # print(ronch[512][512])
 
-    # DEPICTING THE RONCHIGRAM
-
-    # todo: consider changing the interpolation in order to match pixels for a better image
-    # source: https://stackoverflow.com/questions/33282368/plotting-a-2d-heatmap-with-matplotlib
-    # plt.imshow(ronch, cmap="gray", interpolation="nearest")
-
-    # fig, ax = plt.subplots()
-    # ax.axis("off")
-    # ax.imshow(abs(ifftshift(fft_psi_p)), cmap="gray", interpolation="nearest")
+    # Plotting
 
     fig, ax = plt.subplots()
     ax.axis("off")
+
+    outerCropLength = np.sqrt(2) * 512
+    # outerCropSquare = patches.Rectangle((512 - outerCropLength / 2, 512 - outerCropLength / 2), outerCropLength, outerCropLength, edgecolor='b', facecolor='none')
+    # ax.add_patch(outerCropSquare)
+
+    innerCropLength = outerCropLength * 30 / 70
+    # innerCropSquare = patches.Rectangle((512 - innerCropLength / 2, 512 - innerCropLength / 2), innerCropLength, innerCropLength, edgecolor='g', facecolor='none')
+    # ax.add_patch(innerCropSquare)
+
+        # Selecting the 30mrad/70mrad part of the Ronchigram while ensuring the scalebar stuff below works properly
+
+    # halfInnerCropLength = math.floor(innerCropLength / 2)
+    # ronch = ronch[512 - halfInnerCropLength: 512 + halfInnerCropLength, 512 - halfInnerCropLength: 512 + halfInnerCropLength]
+
     ax.imshow(ronch, cmap="gray", interpolation="nearest")
 
     scale = 2*simdim/imdim * 1000    # mrad per pixel
@@ -584,20 +590,12 @@ if __name__ == "__main__":
 
     ax.add_artist(scalebar)
 
-    # outerCropLength = np.sqrt(2) * 512
-    # outerCropSquare = patches.Rectangle((512 - outerCropLength / 2, 512 - outerCropLength / 2), outerCropLength, outerCropLength, edgecolor='b', facecolor='none')
-    # ax.add_patch(outerCropSquare)
-
-    # innerCropLength = outerCropLength * 30 / 70
-    # innerCropSquare = patches.Rectangle((512 - innerCropLength / 2, 512 - innerCropLength / 2), innerCropLength, innerCropLength, edgecolor='g', facecolor='none')
-    # ax.add_patch(innerCropSquare)
-
     plt.show()
 
-    saveFig = input('Save figure? Enter True or False: ')
+    # saveFig = input('Save figure? Enter True or False: ')
 
-    if saveFig:
-        # fig.figure.savefig('_.png')
+    # if saveFig:
+    #     fig.figure.savefig('/media/rob/hdd1/james-gj/forReport/_.png')
 
     sys.exit()
 
