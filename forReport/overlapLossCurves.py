@@ -15,10 +15,10 @@ fiveHundredThousandRuns = [
     ]
 
 figureTitles = {
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-104953': 'Run 1', 
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-194108': 'Run 2', 
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220419-101845': 'Run 3', 
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220425-104947': 'Run 4'
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-104953': '500,000 Ronchigrams Run 1', 
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-194108': '500,000 Ronchigrams Run 2', 
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220419-101845': '500,000 Ronchigrams Run 3', 
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220425-104947': '500,000 Ronchigrams Run 4'
     }
 
 trainingRunDirs = fiveHundredThousandRuns
