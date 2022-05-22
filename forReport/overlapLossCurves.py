@@ -4,26 +4,39 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-eightyFiveThousand = '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220409-105451'
+fiveHundredThousandRuns = [
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-104953', 
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-194108', 
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220419-101845', 
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220425-104947'
+    ]
 
 figureTitles = {
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220409-105451': '85,000 Ronchigrams'
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-104953': 'Run 1', 
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-194108': 'Run 2', 
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220419-101845': 'Run 3', 
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220425-104947': 'Run 4'
     }
 
-trainingRunDirs = [eightyFiveThousand]
+trainingRunDirs = fiveHundredThousandRuns
 
 lossCurveFiles = [
-    '/trainingLossRunningAverage.json', '/overallValidationLoss.json'
+    '/trainingLossRunningAverage.json', '/overallValidationLoss.json', 
+    '/c12ValidationLoss.json', '/phi12ValidationLoss.json'
     ]
 
 curveColours = {
     '/trainingLossRunningAverage.json': 'b', 
-    '/overallValidationLoss.json': 'r'
+    '/overallValidationLoss.json': 'r', 
+    '/c12ValidationLoss.json': 'c', 
+    '/phi12ValidationLoss.json': 'y'
     }
 
 curveLabels = {
     '/trainingLossRunningAverage.json': 'Training Loss Running Average', 
     '/overallValidationLoss.json': 'Overall Validation Loss',
+    '/c12ValidationLoss.json': 'c1,2 Validation Loss',
+    '/phi12ValidationLoss.json': '\u03A61,2 Validation Loss'
     }
 
 assert lossCurveFiles[0] == '/trainingLossRunningAverage.json'
