@@ -1,3 +1,6 @@
+# File to overlap different loss curves (training loss running average, overall validation loss... on the same figure, 
+# a different figure being used for each training run)
+
 import json
 import sys
 import matplotlib.pyplot as plt
