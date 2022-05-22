@@ -57,7 +57,7 @@ from Primary_Simulation_1 import calc_Ronchigram
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
 GPU = 1
-usingGPU = False
+usingGPU = True
 
 if not usingGPU:
     os.environ["CUDA_VISIBLE_DEVICES"]=""
@@ -457,6 +457,7 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
 
             os.mkdir(f'{trendGraphsDir}/{dateToday}/{whichNetwork}')
 
+        fig, ax = plt.subplots()
 
         # Limiting y-axis so that presence of anomalies don't result in a squashed, un-expandable useful section of the 
         # graph plotted in its current formulation
@@ -470,7 +471,7 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
             yLower = -0.2 * targetArray[-1]
             yUpper = 1.2 * targetArray[-1]
 
-            plt.ylim((yLower, yUpper))
+            ax.set_ylim((yLower, yUpper))
 
             filenameSuffix = "axesLimited"
 
@@ -488,22 +489,22 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
             filenameSuffix = "noAxisLimits"
 
 
-        # Saving arrays for later manipulation
-        with open(f"{trendGraphsDir}/{dateToday}/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.npy", 'wb') as f:
+        # # Saving arrays for later manipulation
+        # with open(f"{trendGraphsDir}/{dateToday}/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.npy", 'wb') as f:
             
-            np.save(f, targetArray)
-            np.save(f, predArray)
+        #     np.save(f, targetArray)
+        #     np.save(f, predArray)
 
 
         # Plotting trend graph
-        fig, ax = plt.subplots()
 
         ax.plot(np.linspace(1, len(targetArray), len(targetArray)), targetArray, 'b')
-        ax.plot(np.linspace(1, len(predArray), len(predArray)), predArray, 'ro')
+        ax.plot(np.linspace(1, len(predArray), len(predArray)), predArray, 'ro', markersize=2)
 
         ax.set_xlabel("Ronchigram Number")
         ax.set_ylabel(f"{const} / {constUnit}")
 
         ax.set_title("Blue points target values, red points predictions")
+        plt.show()
 
-        fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.png")
+        # fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.png")
