@@ -1935,3 +1935,17 @@ Calculated mean: 4.38046043882423e-09
 Calculated std: 3.958935394621221e-06
 Mean and std calculated from 32 batches of size 32
 Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-23 10:29:20.814597
+/media/rob/hdd1/james-gj/Simulations/forTraining/07_05_22/C10_to_C23_100mrad_constantNoise.h5
+Calculated mean: 0.499997615814209
+Calculated std: 0.24851812422275543
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22
+
+2022-05-23 10:31:23.876995
+/media/rob/hdd1/james-gj/Simulations/forTraining/14_05_22/correctedSTEM.h5
+Calculated mean: 3.145607108123727e-09
+Calculated std: 3.006400675076293e-06
+Mean and std calculated from 32 batches of size 32
+Shuffling was True; random module's seed and torch's seed were 22

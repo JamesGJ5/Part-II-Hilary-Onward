@@ -269,7 +269,7 @@ def getMeanAndStd(dataloader, reducedBatches=None, specificDevice=None):
     # is a single tensor containing all Ronchigram tensors in batch) and "aberrations" (whose value is a single tensor 
     # containg all aberration tensors in batch)
     for iBatch, batch in enumerate(dataloader):
-        # print(f"Looking at batch at index {iBatch}...")
+        print(f"Looking at batch at index {iBatch}...")
 
         # Mean over all tensor elements in batch
         batchedRonchs = batch[0]
@@ -380,7 +380,7 @@ if __name__ == "__main__":
 
 
     # GPU STUFF
-    usingGPU = False
+    usingGPU = True
 
     if usingGPU:
         GPU = 1
@@ -391,11 +391,24 @@ if __name__ == "__main__":
 
     # DATASET INSTANTIATION
 
-    ronchdset = RonchigramDataset("/media/rob/hdd2/james/simulations/20_05_22/simdim100mrad", 
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/14_05_22/correctedSTEM.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
     c52=True, c54=True, c56=True,
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
     phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
+
+    # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/07_05_22/C10_to_C23_100mrad_constantNoise.h5", 
+    # c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
+    # c52=True, c54=True, c56=True,
+    # phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
+    # phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
+
+    # mean = np.mean(ronchdset[0][0])
+    # print(mean)
+
+    # sys.exit()
+
+    print('Dataset instantiated')
 
     ronchdsetList = [
         ronchdset,
@@ -431,20 +444,20 @@ if __name__ == "__main__":
 
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
-    plt.figure()
+    # plt.figure()
 
-    for idx in chosenIndices:
-        print(f"\nIndex {idx}")
+    # for idx in chosenIndices:
+    #     print(f"\nIndex {idx}")
 
-        for ronchdset in ronchdsetList:
+    #     for ronchdset in ronchdsetList:
 
-            print(f"Label: {ronchdset[idx][1]}")
-            print(ronchdset.get_I_t_Seed(idx))
-            print("{:.40f}".format(ronchdset[idx][0][512][512].item()))
-            show_data(ronchdset[idx][0], ronchdset[idx][1])
-            plt.show()
+    #         print(f"Label: {ronchdset[idx][1]}")
+    #         print(ronchdset.get_I_t_Seed(idx))
+    #         print("{:.40f}".format(ronchdset[idx][0][512][512].item()))
+    #         show_data(ronchdset[idx][0], ronchdset[idx][1])
+    #         plt.show()
 
-    sys.exit()
+    # sys.exit()
 
     # ESTIMATING MEAN AND STD
 
@@ -456,22 +469,22 @@ if __name__ == "__main__":
 
     # Image size must be 260 x 260 for EfficientNet-B2; be careful if you instead want to look at things for a different model 
     # of EfficientNet
-    resolution = 260
+    # resolution = 260
 
-    scriptTime = datetime.datetime.now()
+    # scriptTime = datetime.datetime.now()
 
-    ratio = 180 / 180
+    ratio = 100 / 100
 
     apertureSize = 1024 / 2 * ratio # Aperture radius in pixels
 
-    estimateMeanStd = True
+    # estimateMeanStd = True
 
-    if estimateMeanStd:
+    # if estimateMeanStd:
 
-        calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, 
-        apertureSize=apertureSize, diagnosticBatchSize=32)
+    #     calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, 
+    #     apertureSize=apertureSize, diagnosticBatchSize=32)
 
-        print(calculatedMean, calculatedStd)
+    #     print(calculatedMean, calculatedStd)
 
     # sys.exit()
 
@@ -492,12 +505,12 @@ if __name__ == "__main__":
     # TODO: try works if mean and std of data are being calculated earlier in the script; except assigns fixed values to them, 
     # preferably values found previously - going to develop that bit such that it changes depending on mean and std already 
     # found, and stored somewhere, since don't want to calculate mean and std for same data over and over again.
-    try:
-        mean = calculatedMean
-        std = calculatedStd
-    except:
-        mean = 4.3877 * 10**-10
-        std = 1.1205 * 10**-6
+    # try:
+    #     mean = calculatedMean
+    #     std = calculatedStd
+    # except:
+    mean = 0.5000
+    std = 0.2485
 
     trainTransform = Compose([
         ToTensor(),
@@ -521,6 +534,21 @@ if __name__ == "__main__":
     # incorporated, and testing the dataloader
 
     dataloader = DataLoader(ronchSubset, batch_size=4, shuffle=False, num_workers=0)
+
+    for iBatch, batchedSample in enumerate(dataloader):
+
+        # print(batchedSample[0].size())
+
+        # sys.exit()
+        batchedRonch1 = batchedSample[0][0]
+        batchedRonch2 = batchedSample[0][1]
+        # print(batchedRonch)
+        mean1 = torch.mean(batchedRonch1).item()
+        mean2 = torch.mean(batchedRonch2).item()
+
+        sys.exit()
+
+    sys.exit()
 
 
     # TESTING THE DATALOADER
