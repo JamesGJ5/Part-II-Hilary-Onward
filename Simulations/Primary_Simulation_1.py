@@ -337,6 +337,8 @@ def calc_Ronchigram(imdim, simdim,
 
     ronch = abs(inverse)**2 # (Schnitzer, Sung and Hovden, 2020)
 
+    # NOTE: it is physically inaccurate for this (particularly the incrementation bit) to come before the Poisson noise 
+    # application UNLESS there is a mask applied recently as above, for reasons mentioned in Google Drive on 11/05/22
     ronch -= np.amin(ronch)
     ronch /= np.amax(ronch)
 
