@@ -391,7 +391,7 @@ if __name__ == "__main__":
 
     # DATASET INSTANTIATION
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/14_05_22/correctedSTEM.h5", 
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/23_05_22/test.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
     c52=True, c54=True, c56=True,
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
@@ -469,22 +469,22 @@ if __name__ == "__main__":
 
     # Image size must be 260 x 260 for EfficientNet-B2; be careful if you instead want to look at things for a different model 
     # of EfficientNet
-    # resolution = 260
+    resolution = 260
 
     # scriptTime = datetime.datetime.now()
 
-    ratio = 100 / 100
+    ratio = 180 / 180
 
     apertureSize = 1024 / 2 * ratio # Aperture radius in pixels
 
-    # estimateMeanStd = True
+    estimateMeanStd = True
 
-    # if estimateMeanStd:
+    if estimateMeanStd:
 
-    #     calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, 
-    #     apertureSize=apertureSize, diagnosticBatchSize=32)
+        calculatedMean, calculatedStd = getMeanAndStd2(ronchdset=ronchdset, trainingResolution=resolution, 
+        apertureSize=apertureSize, diagnosticBatchSize=32)
 
-    #     print(calculatedMean, calculatedStd)
+        print(calculatedMean, calculatedStd)
 
     # sys.exit()
 
@@ -505,12 +505,12 @@ if __name__ == "__main__":
     # TODO: try works if mean and std of data are being calculated earlier in the script; except assigns fixed values to them, 
     # preferably values found previously - going to develop that bit such that it changes depending on mean and std already 
     # found, and stored somewhere, since don't want to calculate mean and std for same data over and over again.
-    # try:
-    #     mean = calculatedMean
-    #     std = calculatedStd
-    # except:
-    mean = 0.5000
-    std = 0.2485
+    try:
+        mean = calculatedMean
+        std = calculatedStd
+    except:
+        mean = 0.5010
+        std = 0.2543
 
     trainTransform = Compose([
         ToTensor(),
@@ -542,9 +542,15 @@ if __name__ == "__main__":
         # sys.exit()
         batchedRonch1 = batchedSample[0][0]
         batchedRonch2 = batchedSample[0][1]
+        batchedRonch3 = batchedSample[0][2]
+        batchedRonch4 = batchedSample[0][3]
         # print(batchedRonch)
         mean1 = torch.mean(batchedRonch1).item()
         mean2 = torch.mean(batchedRonch2).item()
+        mean3 = torch.mean(batchedRonch3).item()
+        mean4 = torch.mean(batchedRonch4).item()
+
+        print(mean1, mean2, mean3, mean4)
 
         sys.exit()
 
