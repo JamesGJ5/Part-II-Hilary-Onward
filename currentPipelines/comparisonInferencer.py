@@ -19,6 +19,8 @@ from ignite.utils import convert_tensor
 from configparser import ConfigParser
 from datetime import date
 from numpy.random import default_rng
+from matplotlib_scalebar.scalebar import ScaleBar
+from textwrap import wrap
 
 
 # Seed information (may not use the same test set as in training but might as well set the torch seed to be 17 anyway, 
@@ -56,7 +58,7 @@ from Primary_Simulation_1 import calc_Ronchigram
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
 GPU = 1
-usingGPU = False
+usingGPU = True
 
 if not usingGPU:
     os.environ["CUDA_VISIBLE_DEVICES"]=""
@@ -76,7 +78,8 @@ efficientNetModel = "EfficientNet-B2"
 
 # Choosing which labels are going to be returned alongside the Ronchigrams returned by the RonchigramDataset object that 
 # shall be instantiated.
-chosenVals = {"c10": True, "c12": True, "c21": True, "c23": True, "c30": True,
+chosenVals = {
+    "c10": True, "c12": True, "c21": True, "c23": True, "c30": True,
     "c32": True, "c34": True, "c41": True, "c43": True, "c45": True,
     "c50": True, "c52": True, "c54": True, "c56": True,
 
@@ -85,12 +88,15 @@ chosenVals = {"c10": True, "c12": True, "c21": True, "c23": True, "c30": True,
     "phi50": True, "phi52": True, "phi54": True, "phi56": True
 }
 
+c12scaling = 1 / (100 * 10**-9)
+phi12scaling = 1 / (2 * np.pi / 2)
+
 scalingVals = {
-    "c10scaling": 1, "c12scaling": 1 / (100 * 10**-9), "c21scaling": 1, "c23scaling": 1, 
+    "c10scaling": 1, "c12scaling": c12scaling, "c21scaling": 1, "c23scaling": 1, 
     "c30scaling": 1, "c32scaling": 1, "c34scaling": 1, "c41scaling": 1, "c43scaling": 1, "c45scaling": 1,
     "c50scaling": 1, "c52scaling": 1, "c54scaling": 1, "c56scaling": 1,
 
-    "phi10scaling": 1, "phi12scaling": 1 / (2 * np.pi / 2), "phi21scaling": 1, "phi23scaling": 1, 
+    "phi10scaling": 1, "phi12scaling": phi12scaling, "phi21scaling": 1, "phi23scaling": 1, 
     "phi30scaling": 1, "phi32scaling": 1, "phi34scaling": 1, "phi41scaling": 1, "phi43scaling": 1, "phi45scaling": 1,
     "phi50scaling": 1, "phi52scaling": 1, "phi54scaling": 1, "phi56scaling": 1
 } 
@@ -325,19 +331,97 @@ testSubset = Subset(testSet, chosenIndices)
 # Plot calculated Ronchigrams alongside latest ones from RonchigramDataset, using a function like show_data in 
 # DataLoader2.py for inspiration
 
+scale = 2*simdim/imdim * 1000    # mrad per pixel
+# scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+
 for i in range(len(testSubset)):
-    plt.subplot(2, len(testSubset), i + 1)
+# for i in [0]:
+    ax = plt.subplot(1, 2, 1)
 
-    plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    plt.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    ax.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
 
-    plt.imshow(testSubset[i][0], cmap="gray")
+    ax.imshow(testSubset[i][0], cmap="gray")
 
-    plt.subplot(2, len(testSubset), i + 5)
+    scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+    ax.add_artist(ScaleBar(scale, units="mrad", dimension="angle"))
 
-    plt.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    plt.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    aberConstants = testSubset[i][1]
 
-    plt.imshow(predictedRonchBatch[i], cmap="gray")
+    l1 = []
 
-plt.show()
+    for j, const in enumerate(aberConstants):
+
+        if j <= 13:
+
+            if j in [0, 2, 3]:
+
+                # print(const)
+                const /= 10**-9
+
+            elif j == 1:
+
+                const /= c12scaling
+                const /= 10**-9
+
+            elif j in [4, 5, 6]:
+
+                const /= 10**-6
+
+            else:
+
+                const /= 10**-3
+        
+        if j >= 14:
+
+            if j in [14, 18, 24]:
+
+                continue
+
+            elif j == 15:
+
+                const /= phi12scaling
+                const /= np.pi
+
+            else:
+                
+                const /= np.pi
+
+        const = const.item()
+        const = round(const, 2)
+
+        l1.append(const)
+
+    # aberConstantsString = f'c1,0={l1[0]}nm, \33[1mc1,2={l1[1]}nm' + f'\33[m, c2,1={l1[2]}nm, c2,3={l1[3]}nm, c3,0={l1[4]}um, c3,2={l1[5]}um, c3,4={l1[6]}um, c4,1={l1[7]}mm, c4,3={l1[8]}mm, c4,5={l1[9]}mm, c5,0={l1[10]}mm, c5,2={l1[11]}mm, c5,4={l1[12]}mm, c5,6={l1[13]}mm, \33[1m\u03A61,2={l1[14]}\u03C0' + f'\33[m, \u03A62,1={l1[15]}\u03C0, \u03A62,3={l1[16]}\u03C0, \u03A63,2={l1[17]}\u03C0, \u03A63,4={l1[18]}\u03C0, \u03A64,1={l1[19]}\u03C0, \u03A64,3={l1[20]}\u03C0, \u03A64,5={l1[21]}\u03C0, \u03A65,2={l1[22]}\u03C0, \u03A65,4={l1[23]}\u03C0, \u03A65,6={l1[24]}\u03C0'
+    aberConstantsString = f'c1,0={l1[0]}nm, c1,2={l1[1]}nm, c2,1={l1[2]}nm, c2,3={l1[3]}nm, c3,0={l1[4]}um, c3,2={l1[5]}um, c3,4={l1[6]}um, c4,1={l1[7]}mm, c4,3={l1[8]}mm, c4,5={l1[9]}mm, c5,0={l1[10]}mm, c5,2={l1[11]}mm, c5,4={l1[12]}mm, c5,6={l1[13]}mm, \u03A61,2={l1[14]}\u03C0, \u03A62,1={l1[15]}\u03C0, \u03A62,3={l1[16]}\u03C0, \u03A63,2={l1[17]}\u03C0, \u03A63,4={l1[18]}\u03C0, \u03A64,1={l1[19]}\u03C0, \u03A64,3={l1[20]}\u03C0, \u03A64,5={l1[21]}\u03C0, \u03A65,2={l1[22]}\u03C0, \u03A65,4={l1[23]}\u03C0, \u03A65,6={l1[24]}\u03C0'
+
+    # print(aberConstantsString)
+
+    ax.title.set_text('\n'.join(wrap(aberConstantsString, width=60)))
+
+
+    ax = plt.subplot(1, 2, 2)
+
+    ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+    ax.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+
+    ax.imshow(predictedRonchBatch[i], cmap="gray")
+
+    scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+    ax.add_artist(ScaleBar(scale, units="mrad", dimension="angle"))
+
+    c12Pred = (yPred[i][0]).item()
+    c12Pred /= 10**-9
+    c12Pred = round(c12Pred, 2)
+
+    phi12Pred = (yPred[i][1]).item()
+    phi12Pred /= np.pi
+    phi12Pred = round(phi12Pred, 2)
+
+    predConstsString = f'c1,2={c12Pred}nm, \u03A61,2={phi12Pred}\u03C0'
+
+    ax.title.set_text('\n'.join(wrap(predConstsString, width=60)))
+
+    plt.subplots_adjust(wspace=0, hspace=0, top=0.9)
+
+    plt.show()
