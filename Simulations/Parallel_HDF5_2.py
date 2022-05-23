@@ -44,7 +44,12 @@ if __name__ == "__main__":
 
     max_C10, max_C12, max_C21, max_C23, max_C30, max_C32, max_C34, max_C41, max_C43, max_C45, max_C50, max_C52, max_C54, max_C56 = max_magList
 
-    # The maxima below apply when making Ronchigrams in which the aberration in question is to be significant
+    # print(max_C10 / 10**-9, max_C12 / 10**-9, max_C21 / 10**-9, max_C23 / 10**-9, \
+    # max_C30 / 10**-6, max_C32 / 10**-6, max_C34 / 10**-6, \
+    # max_C41 / 10**-6, max_C43 / 10**-6, max_C45 / 10**-6, \
+    # max_C50 / 10**-3, max_C52 / 10**-3, max_C54 / 10**-3, max_C56 / 10**-3)
+
+    # The maxima below for C10-C23 apply when making Ronchigrams in which the aberration in question is to be significant
     # max_C10 = 10 * 10**-9  # Maximum C10 (defocus) magnitude/m
     # max_C12 = 10 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
 
@@ -106,7 +111,7 @@ if __name__ == "__main__":
 
             simulations_per_process = randMags.shape[1]
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/15_05_22/test.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/23_05_22/correctedSTEM.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # print(f"Simulations per process is {simulations_per_process}")
@@ -297,8 +302,8 @@ if __name__ == "__main__":
                 # Want to limit the chance of multiple simulations having the same seed.
                 # TODO: make disimilar random seeds
 
-                # random_seed = chosenSeeds[simulation]
-                # random_seed_dset[rank, simulation] = random_seed
+                random_seed = chosenSeeds[simulation]
+                random_seed_dset[rank, simulation] = random_seed
 
                 ronch = Primary_Simulation_1.calc_Ronchigram(imdim, simdim,
                                                             C10, C12, C21, C23, C30, C32, C34, C41, C43, C45, C50, C52, C54, C56,
@@ -326,7 +331,7 @@ if __name__ == "__main__":
     
     if not mimicFile:
     
-        total_simulations = 100
+        total_simulations = 500000
         simulations_per_process = int(math.ceil(total_simulations / number_processes))
 
         # print(f"Simulations per process is {simulations_per_process}")
