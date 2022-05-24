@@ -126,22 +126,30 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
 
     # 3. Make sure the normalization of the above is adequate
 
+
+    # 4. Save dose/% alongside the above Ronchigrams
+
     idxDosePctDict = acquisitionParamsDict['Dose(%)']
 
     for idx, dosePct in idxDosePctDict.items():
         
         dosePct = np.array([eval(dosePct)])
+
         dose_pct_dset[0, idx] = dosePct
-
-
-    # 4. Save dose/% alongside the above Ronchigrams
-
 
 
     # 5. Converting dose/% to current/A and save alongside the above Ronchigrams
 
 
     # 6. Saving cosmo t (s), which I still don't really know how to descirbe yet, alongside each Ronchigram
+
+    idxCosmo_t_sDict = acquisitionParamsDict['Cosmo t (s)']
+
+    for idx, cosmo_t_s in idxCosmo_t_sDict.items():
+
+        cosmo_t_s = np.array([eval(cosmo_t_s)])
+
+        comso_t_s_dset[0, idx] = cosmo_t_s
 
 
     # 7. Saving Orius t (s), which I believe is Ronchigram capture time/s needed for Poisson noise recreation, alongside 
