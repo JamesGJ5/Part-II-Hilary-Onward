@@ -2,6 +2,8 @@ import h5py
 from mpi4py import MPI
 import pandas as pd
 import numpy as np
+import pickle
+import sys
 
 # Creating this file to conveniently group together each experimental Ronchigram with properties like aberration 
 # constants, acquisition times, noise levels etc, so that inference (particularly predicting c1,2 and phi1,2) can be 
@@ -25,7 +27,7 @@ import numpy as np
 # 
 # -> d1 = {aberrationCalculationTime: aberrationCalculationResult}
 # 
-# -> aberrationCalculationTime = {aberrationType: aberrationParameters}, were aberrationType is either O2 (C1,0), A2 (C1,2), P3 (C2,1) etc.
+# -> aberrationCalculationResult = {aberrationType: aberrationParameters}, were aberrationType is either O2 (C1,0), A2 (C1,2), P3 (C2,1) etc.
 # 
 # -> aberrationParameters = {
 #                           'mag': aberration magnitude in magUnit,
@@ -59,16 +61,13 @@ acquisitionParams = pd.read_excel(
     skiprows=[4, 6, 9, 12],
     dtype=str
     )
-print(acquisitionParams)
+# print(acquisitionParams)
 
 acquisitionParamsDict = acquisitionParams.to_dict()
-print(acquisitionParamsDict)
+# print(acquisitionParamsDict)
 
 # Just a dictionary of idx: Image (number), which will be used later when choosing the image to save to a certain idx of the HDF5 file
 idxImageNumberDict = acquisitionParamsDict['Image']
-
-# Just a dictionary of idx: Time, which will be used later when saving aberration constant sets to the right location in the HDF5 file
-idxTimeDict = acquisitionParamsDict['Time']
 
 
 # 1. Create the HDF5 datasets as in Parallel_HDF5_2.py; keep the number of processes sort of thing, although this will 
@@ -166,10 +165,51 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
 
     # 8. For each time in the list from step 1, remembering to save these constants to position imageIdx in the HDF5 dataset, 
     # get the aberration parameters recorded at this time:
-    # -> Aberration magnitude/m
-    # -> Aberration angle/degree (will have to convert to radians then multiply by whatever needs multiplying by to get the 
-    #    Krivanek notation aberration angle value)
-    # -> Aberration magnitude error/unknown unit
-    # -> Aberration angle error/unknown unit
-    # -> pi/4 limit in metres
-    # -> Later, will have to add a way to a
+
+    idxTimeDict = acquisitionParamsDict['Time']
+
+    with open('/home/james/VSCode/currentPipelines/aberCalcResults_2022_04_29_OPQ.pkl', 'rb') as f:
+
+        allResultSets = pickle.load(f)
+
+        unitsToBaseUnitsIn_m = {'nm': 10**-9, 'um': 10**-6, 'mm': 10**-3}
+
+        for idx, timeOfAcquisition in idxTimeDict.items():
+
+            mags = np.array([])
+            angs = np.array([])
+            
+            magErrors = np.array([])
+            angErrors = np.array([])
+            pi_over_4_limits_in_m = np.array([])
+
+            # The 1: because in the .xlsx file there's a 0 at the beginning of each time whereas there's not in the 
+            # file cosmo.txt
+            aberCalcSet = allResultSets[timeOfAcquisition[1:]]
+
+            for aber in ('O2', 'A2', 'P3', 'A3', 'O4', 'Q4', 'A4', 'P5', 'R5', 'A5', 'O6', 'Q6', 'S6', 'A6'):
+
+                aberParams = aberCalcSet[aber]
+
+                # -> Aberration magnitude/m
+
+                magUnit = aberParams['magUnit']
+
+                if magUnit in unitsToBaseUnitsIn_m:
+
+                    mag_in_m = eval(aberParams['mag']) * unitsToBaseUnitsIn_m[magUnit]
+                    mags = np.append(mags, mag_in_m)
+
+                else:
+
+                    sys.exit('Magnitude was not saved in m, must add another multiplier to the above to account for the' + \
+                    'different unit')
+
+                # -> Aberration angle/degree (will have to convert to radians then multiply by whatever needs multiplying by to get the 
+                #    Krivanek notation aberration angle value)
+                # -> Aberration magnitude error/unknown unit
+                # -> Aberration angle error/unknown unit
+                # -> pi/4 limit in metres
+                # -> Later, will have to add a way to a
+
+            random_mags_dset[0, idx] = mags
