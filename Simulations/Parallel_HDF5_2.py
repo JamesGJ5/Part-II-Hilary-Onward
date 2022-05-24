@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
             simulations_per_process = randMags.shape[1]
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/23_05_22/correctedSTEM.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/_/correctedSTEM.h5", "w", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # print(f"Simulations per process is {simulations_per_process}")
