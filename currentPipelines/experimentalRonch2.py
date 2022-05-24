@@ -57,7 +57,7 @@ acquisitionParams = pd.read_excel(
     header=0,
     usecols="C:E, G, H",
     skiprows=[4, 6, 9, 12],
-    dtype=np.str
+    dtype=str
     )
 print(acquisitionParams)
 
@@ -154,6 +154,14 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
 
     # 7. Saving Orius t (s), which I believe is Ronchigram capture time/s needed for Poisson noise recreation, alongside 
     # each Ronchigram
+
+    idxOrius_t_sDict = acquisitionParamsDict['Orius t (s)']
+
+    for idx, orius_t_s in idxOrius_t_sDict.items():
+
+        orius_t_s = np.array([eval(orius_t_s)])
+
+        random_t_dset[0, idx] = orius_t_s
 
 
     # 8. For each time in the list from step 1, remembering to save these constants to position imageIdx in the HDF5 dataset, 
