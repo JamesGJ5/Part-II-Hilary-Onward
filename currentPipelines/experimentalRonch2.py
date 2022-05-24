@@ -1,5 +1,7 @@
 import h5py
 from mpi4py import MPI
+import pandas as pd
+import numpy as np
 
 # Creating this file to conveniently group together each experimental Ronchigram with properties like aberration 
 # constants, acquisition times, noise levels etc, so that inference (particularly predicting c1,2 and phi1,2) can be 
@@ -48,6 +50,27 @@ from mpi4py import MPI
 # mentioned in the aforementioned file
 
 
+# 0: Read the .xlsx file containing the image acquisition parameters
+
+acquisitionParams = pd.read_excel(
+    io='/media/rob/hdd1/james-gj/forReport/2022-04-29/20220429_Ronchigram.xlsx', 
+    header=0,
+    usecols="C:E, G, H",
+    skiprows=[4, 6, 9, 12],
+    dtype=np.str
+    )
+print(acquisitionParams)
+
+acquisitionParamsDict = acquisitionParams.to_dict()
+print(acquisitionParamsDict)
+
+# Just a dictionary of idx: Image (number), which will be used later when choosing the image to save to a certain idx of the HDF5 file
+idxImageNumberDict = acquisitionParamsDict['Image']
+
+# Just a dictionary of idx: Time, which will be used later when saving aberration constant sets to the right location in the HDF5 file
+idxTimeDict = acquisitionParamsDict['Time']
+
+
 # 1. Create the HDF5 datasets as in Parallel_HDF5_2.py; keep the number of processes sort of thing, although this will 
 # probably just be given a value of 1
 # -> Implement a way to save dose/% (if you haven't yet found out how to convert to current); Cosmo t (s); each aberration 
@@ -56,6 +79,9 @@ from mpi4py import MPI
 #    each aberration
 
 with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5', 'w', driver='mpio', comm=MPI.COMM_WORLD) as f:
+
+    number_processes = 1
+    simulations_per_process = len(acquisitionParamsDict['Image'])
 
     try:
         # dtype is float64 rather than float32 to reduce the memory taken up in storage.
@@ -87,32 +113,47 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
         pi_over_4_limit_in_m_dset = f['pi_over_4_limit_in_m dataset']
 
 
-# Probably going to have a for loop for each time a file is being read--don't really want to open a file over and over 
-# again
+    # Probably going to have a for loop for each time a file is being read--don't really want to open a file over and over 
+    # again
 
-# 2. Reading the images and saving them to ronch_dset
-# -> Use /media/rob/hdd1/james-gj/forReport/2022-04-29/20220429_Ronchigram.xlsx to get the numbers of the Ronchigram 
-#    images to save, as well as the times for each image
-# -> Create a dictionary of imageIdx:time for each image, so the correct aberration constants can be collected later for saving 
-#    alongside them; here, imageIdx = image number - 1
 
-# 3. Make sure the normalization of the above is adequate
+    # 2. Reading the images and saving them to ronch_dset
+    # -> Use /media/rob/hdd1/james-gj/forReport/2022-04-29/20220429_Ronchigram.xlsx to get the numbers of the Ronchigram 
+    #    images to save, as well as the times for each image
+    # -> Create a dictionary of imageIdx:time for each image, so the correct aberration constants can be collected later for saving 
+    #    alongside them; here, imageIdx = image number - 1
 
-# 4. Save dose/% alongside the above Ronchigrams
 
-# 5. Converting dose/% to current/A and save alongside the above Ronchigrams
+    # 3. Make sure the normalization of the above is adequate
 
-# 6. Saving cosmo t (s), which I still don't really know how to descirbe yet, alongside each Ronchigram
+    idxDosePctDict = acquisitionParamsDict['Dose(%)']
 
-# 7. Saving Orius t (s), which I believe is Ronchigram capture time/s needed for Poisson noise recreation, alongside 
-# each Ronchigram
+    for idx, dosePct in idxDosePctDict.items():
+        
+        dosePct = np.array([eval(dosePct)])
+        dose_pct_dset[0, idx] = dosePct
 
-# 8. For each time in the list from step 1, remembering to save these constants to position imageIdx in the HDF5 dataset, 
-# get the aberration parameters recorded at this time:
-# -> Aberration magnitude/m
-# -> Aberration angle/degree (will have to convert to radians then multiply by whatever needs multiplying by to get the 
-#    Krivanek notation aberration angle value)
-# -> Aberration magnitude error/unknown unit
-# -> Aberration angle error/unknown unit
-# -> pi/4 limit in metres
-# -> Later, will have to add a way to a
+
+    # 4. Save dose/% alongside the above Ronchigrams
+
+
+
+    # 5. Converting dose/% to current/A and save alongside the above Ronchigrams
+
+
+    # 6. Saving cosmo t (s), which I still don't really know how to descirbe yet, alongside each Ronchigram
+
+
+    # 7. Saving Orius t (s), which I believe is Ronchigram capture time/s needed for Poisson noise recreation, alongside 
+    # each Ronchigram
+
+
+    # 8. For each time in the list from step 1, remembering to save these constants to position imageIdx in the HDF5 dataset, 
+    # get the aberration parameters recorded at this time:
+    # -> Aberration magnitude/m
+    # -> Aberration angle/degree (will have to convert to radians then multiply by whatever needs multiplying by to get the 
+    #    Krivanek notation aberration angle value)
+    # -> Aberration magnitude error/unknown unit
+    # -> Aberration angle error/unknown unit
+    # -> pi/4 limit in metres
+    # -> Later, will have to add a way to a
