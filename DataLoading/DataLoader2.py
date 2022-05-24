@@ -473,11 +473,11 @@ if __name__ == "__main__":
 
     # scriptTime = datetime.datetime.now()
 
-    ratio = 180 / 180
+    ratio = 80 / 180
 
     apertureSize = 1024 / 2 * ratio # Aperture radius in pixels
 
-    estimateMeanStd = True
+    estimateMeanStd = False
 
     if estimateMeanStd:
 
@@ -535,26 +535,26 @@ if __name__ == "__main__":
 
     dataloader = DataLoader(ronchSubset, batch_size=4, shuffle=False, num_workers=0)
 
-    for iBatch, batchedSample in enumerate(dataloader):
+    # for iBatch, batchedSample in enumerate(dataloader):
 
-        # print(batchedSample[0].size())
+    #     # print(batchedSample[0].size())
 
-        # sys.exit()
-        batchedRonch1 = batchedSample[0][0]
-        batchedRonch2 = batchedSample[0][1]
-        batchedRonch3 = batchedSample[0][2]
-        batchedRonch4 = batchedSample[0][3]
-        # print(batchedRonch)
-        mean1 = torch.mean(batchedRonch1).item()
-        mean2 = torch.mean(batchedRonch2).item()
-        mean3 = torch.mean(batchedRonch3).item()
-        mean4 = torch.mean(batchedRonch4).item()
+    #     # sys.exit()
+    #     batchedRonch1 = batchedSample[0][0]
+    #     batchedRonch2 = batchedSample[0][1]
+    #     batchedRonch3 = batchedSample[0][2]
+    #     batchedRonch4 = batchedSample[0][3]
+    #     # print(batchedRonch)
+    #     mean1 = torch.mean(batchedRonch1).item()
+    #     mean2 = torch.mean(batchedRonch2).item()
+    #     mean3 = torch.mean(batchedRonch3).item()
+    #     mean4 = torch.mean(batchedRonch4).item()
 
-        print(mean1, mean2, mean3, mean4)
+    #     print(mean1, mean2, mean3, mean4)
 
-        sys.exit()
+    #     sys.exit()
 
-    sys.exit()
+    # sys.exit()
 
 
     # TESTING THE DATALOADER
@@ -563,10 +563,10 @@ if __name__ == "__main__":
 
     if testingDataLoader:
         for iBatch, batchedSample in enumerate(dataloader):
-            # print(iBatch, batchedSample[0].size(),
-            #         batchedSample[1].size())
+            print(iBatch, batchedSample[0].size(),
+                    batchedSample[1].size())
 
-            # print(batchedSample[0][0])
+            print(batchedSample[0][0])
 
             # sys.exit()
 
