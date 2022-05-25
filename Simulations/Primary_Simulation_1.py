@@ -572,6 +572,11 @@ if __name__ == "__main__":
     ronch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=10**-9, b=1, t=1, aperture_size=aperture_size, 
                             zhiyuanRange=False, seed=17)
 
+    # print(ronch[512][512])
+    # sum = np.sum(ronch)
+    # print(sum)
+    # sys.exit()
+
 
     # Plotting
 
