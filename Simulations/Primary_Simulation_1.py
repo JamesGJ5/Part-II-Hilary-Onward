@@ -565,7 +565,7 @@ if __name__ == "__main__":
 
     else:
 
-        simdim = 80 * 10**-3
+        simdim = 180 * 10**-3
 
         aperture_size = simdim
 
