@@ -177,8 +177,8 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
         # autocorrelation function" by Sawada et al.. N.B., there are no unique angles for the O aberrations (they are 
         # rotationally symmetric) so the 1 is arbitrary in those cases but it is unused; for the rest, the coefficient 
         # will be later multiplied by respective aberration angles to get these in Krivanek notation; I assume the 
-        # errors are percentage errors so not done in their case
-        # TODO: if the errors are not percentage errors, but in degrees or rad, then do multiply them by the coefficients
+        # errors are have the same units as what they are evaluating error for so this is indeed done.
+        # TODO: if the errors are instead percentage errors, but in degrees or rad, then get rid of the multiplication
         aberAngleCoefficientDict = {'O2': 1, 'A2': 2, 'P3': 1, 'A3': 3, 'O4': 1, 'Q4': 2, 'A4': 4, 'P5': 1, 'R5': 3, 
                                     'A5': 5, 'O6': 1, 'Q6': 2, 'S6': 4, 'A6': 6}
 
@@ -233,21 +233,46 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
                     'account for the unit it has in this case.')
 
 
-                # # -> Aberration magnitude error/unknown unit
+                # -> Aberration magnitude error/unknown unit
 
-                # magErrors = np.append(magErrors, eval(aberParams['magError']))
+                # TODO: I believe the aberration magnitude errors in cosmo.txt are in the same units as the magnitudes 
+                # because I think the aberration angle errors are in degrees for reasons given below. But, if not, I must
+                # disable the following two lines and just append eval(aberParams['magError']) directly to angErrors 
+                # instead
+                magErrorInMagUnit = eval(aberParams['magError'])
+                magErrorIn_m = magErrorInMagUnit * unitsToBaseUnitsIn_m[magUnit]
+
+                magErrors = np.append(magErrors, magErrorIn_m)
 
 
-                # # -> Aberration angle error/unknown unit
+                # -> Aberration angle error/unknown unit
 
-                # angErrors = np.append(angErrors, eval(aberParams['angleError']))
+                # TODO: I believe the aberration angle errors in cosmo.txt are in degrees because of how large the values are 
+                # but, if not, I must disable the following two lines and just append eval(aberParams['angleError']) 
+                # directly to angErrors instead
+                angErrorDeg = eval(aberParams['angleError'])
+                krivanekAngErrorRad = radians(angErrorDeg) * aberAngleCoefficientDict[aber]
+
+                angErrors = np.append(angErrors, krivanekAngErrorRad)
 
 
                 # -> pi/4 limit in metres
+
+                # TODO: if it turns out pi/4 limit must be converted from OPQ to Krivanek notation or something, amend the 
+                # below
+                piOver4LimitInUnit = eval(aberParams['pi/4Limit'])
+
+                piOver4LimitUnit = aberParams['pi/4LimitUnit']
+                piOver4LimitIn_m = piOver4LimitInUnit * unitsToBaseUnitsIn_m[piOver4LimitUnit]
+
+                pi_over_4_limits_in_m = np.append(pi_over_4_limits_in_m, piOver4LimitIn_m)
+
+
                 # -> Later, will have to add a way to a
 
             random_mags_dset[0, idx] = mags
             random_angs_dset[0, idx] = angs
 
-            # magErrors[0, idx] = magErrors
-            # angErrors[0, idx] = angErrors
+            magnitude_error_unknownUnit_dset[0, idx] = magErrors
+            angle_error_unknownUnit_dset[0, idx] = angErrors
+            pi_over_4_limit_in_m_dset[0, idx] = pi_over_4_limits_in_m
