@@ -78,7 +78,7 @@ if write:
 
         # print(dAllResultSets)
 
-        with open('/home/james/VSCode/currentPipelines/aberCalcResults_2022_04_29_OPQ.pkl', 'wb') as f2:
+        with open('/home/james/VSCode/currentPipelines/aberCalcResults_2022_04_29_OPQ.pkl', 'xb') as f2:
 
             pickle.dump(dAllResultSets, f2)
 
