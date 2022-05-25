@@ -374,8 +374,10 @@ lr_scheduler = eval(lr_scheduler_string)
 
 if pretrainedModel:
 
-    optimiser.load_state_dict(torch.load(configSection["pretrainedModelPath"])["optimiser"])
-    lr_scheduler.load_state_dict(torch.load(configSection["pretrainedModelPath"])["lr_scheduler"])
+    if eval(configSection['pretrainedModelLrOptimiser']):
+
+        optimiser.load_state_dict(torch.load(configSection["pretrainedModelPath"])["optimiser"])
+        lr_scheduler.load_state_dict(torch.load(configSection["pretrainedModelPath"])["lr_scheduler"])
 
 
 # update_fn DEFINITION
