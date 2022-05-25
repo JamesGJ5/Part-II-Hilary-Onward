@@ -9,6 +9,7 @@ import numpy as np
 import torch
 import datetime
 import random
+import scipy.constants as sc
 
 from torch.utils.data import Dataset, DataLoader, random_split, Subset
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize, CenterCrop
@@ -188,7 +189,7 @@ class RonchigramDataset(Dataset):
             # The below is so that ToTensor() normalises the Ronchigram to between 0 and 1 inclusive; the resultant torch 
             # Tensor (after transformation by ToTensor()) will have dtype torch.FloatTensor
             ronch = ronch.astype(np.uint8)
-            
+
             ronch = self.transform(ronch)
 
         # NOTE: here I changed the return to look more like an MNIST return, since the model I am using doesn't seem 
@@ -397,6 +398,20 @@ if __name__ == "__main__":
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
     phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
 
+    # ronchExample = ronchdset[0][0]
+    # print(ronchExample)
+
+    # print(np.sum(ronchExample))
+
+    # I, t, _ = ronchdset.get_I_t_Seed(0)
+    # print(I, t)
+
+    # totalElectronCountsExpected = I * 1 * t / sc.e
+    # print(totalElectronCountsExpected)
+
+    # sys.exit()
+
+
     # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/07_05_22/C10_to_C23_100mrad_constantNoise.h5", 
     # c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
     # c52=True, c54=True, c56=True,
@@ -527,6 +542,26 @@ if __name__ == "__main__":
     ])
 
     ronchdset.transform = trainTransform
+
+
+    # ronchExample = ronchdset[2][0]
+    # print(ronchExample)
+
+    # print(torch.sum(ronchExample))
+
+    # I, t, _ = ronchdset.get_I_t_Seed(0)
+    # print(I, t)
+
+    # totalElectronCountsExpected = I * 1 * t / sc.e
+    # print(totalElectronCountsExpected)
+
+    # print(torch.min(ronchExample), torch.max(ronchExample))
+
+    # print(ronchExample.size())
+
+    # print(ronchExample.type())
+
+    sys.exit()
 
     ronchSubset = Subset(ronchdset, chosenIndices)
 
