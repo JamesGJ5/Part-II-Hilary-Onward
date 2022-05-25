@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import pickle
 import sys
+from math import radians
 
 # Creating this file to conveniently group together each experimental Ronchigram with properties like aberration 
 # constants, acquisition times, noise levels etc, so that inference (particularly predicting c1,2 and phi1,2) can be 
@@ -172,6 +173,15 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
 
         allResultSets = pickle.load(f)
 
+        # These are the coefficient of the theta angles in "Measurement method of aberration from Ronchigra by 
+        # autocorrelation function" by Sawada et al.. N.B., there are no unique angles for the O aberrations (they are 
+        # rotationally symmetric) so the 1 is arbitrary in those cases but it is unused; for the rest, the coefficient 
+        # will be later multiplied by respective aberration angles to get these in Krivanek notation; I assume the 
+        # errors are percentage errors so not done in their case
+        # TODO: if the errors are not percentage errors, but in degrees or rad, then do multiply them by the coefficients
+        aberAngleCoefficientDict = {'O2': 1, 'A2': 2, 'P3': 1, 'A3': 3, 'O4': 1, 'Q4': 2, 'A4': 4, 'P5': 1, 'R5': 3, 
+                                    'A5': 5, 'O6': 1, 'Q6': 2, 'S6': 4, 'A6': 6}
+
         unitsToBaseUnitsIn_m = {'nm': 10**-9, 'um': 10**-6, 'mm': 10**-3}
 
         for idx, timeOfAcquisition in idxTimeDict.items():
@@ -187,9 +197,10 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
             # file cosmo.txt
             aberCalcSet = allResultSets[timeOfAcquisition[1:]]
 
-            for aber in ('O2', 'A2', 'P3', 'A3', 'O4', 'Q4', 'A4', 'P5', 'R5', 'A5', 'O6', 'Q6', 'S6', 'A6'):
+            for aber in aberAngleCoefficientDict:
 
                 aberParams = aberCalcSet[aber]
+
 
                 # -> Aberration magnitude/m
 
@@ -197,19 +208,46 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
 
                 if magUnit in unitsToBaseUnitsIn_m:
 
-                    mag_in_m = eval(aberParams['mag']) * unitsToBaseUnitsIn_m[magUnit]
-                    mags = np.append(mags, mag_in_m)
+                    magIn_m = eval(aberParams['mag']) * unitsToBaseUnitsIn_m[magUnit]
+                    mags = np.append(mags, magIn_m)
 
                 else:
 
-                    sys.exit('Magnitude was not saved in m, must add another multiplier to the above to account for the' + \
-                    'different unit')
+                    sys.exit('Magnitude was not initially saved in nm, um, or mm; must add another multiplier to the above to' + \
+                    'account for the unit it has in this case.')
+
 
                 # -> Aberration angle/degree (will have to convert to radians then multiply by whatever needs multiplying by to get the 
                 #    Krivanek notation aberration angle value)
-                # -> Aberration magnitude error/unknown unit
-                # -> Aberration angle error/unknown unit
+
+                if aberParams['angleUnit'] == 'degree':
+
+                    angInRad = radians(eval(aberParams['angle']))
+                    krivanekAngInRad = angInRad * aberAngleCoefficientDict[aber]
+
+                    angs = np.append(angs, angInRad)
+
+                else:
+
+                    sys.exit('Angle was not initially saved in degrees; must add another multiplier to the above to' + \
+                    'account for the unit it has in this case.')
+
+
+                # # -> Aberration magnitude error/unknown unit
+
+                # magErrors = np.append(magErrors, eval(aberParams['magError']))
+
+
+                # # -> Aberration angle error/unknown unit
+
+                # angErrors = np.append(angErrors, eval(aberParams['angleError']))
+
+
                 # -> pi/4 limit in metres
                 # -> Later, will have to add a way to a
 
             random_mags_dset[0, idx] = mags
+            random_angs_dset[0, idx] = angs
+
+            # magErrors[0, idx] = magErrors
+            # angErrors[0, idx] = angErrors
