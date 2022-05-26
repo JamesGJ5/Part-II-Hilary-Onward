@@ -101,6 +101,7 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
         magnitude_error_unknownUnit_dset = f.create_dataset("magnitude_error_unknownUnit dataset", (number_processes, simulations_per_process, 14), dtype="float32")
         angle_error_unknownUnit_dset = f.create_dataset("angle_error_unknownUnit dataset", (number_processes, simulations_per_process, 14), dtype="float32")
         pi_over_4_limit_in_m_dset = f.create_dataset("pi_over_4_limit_in_m dataset", (number_processes, simulations_per_process, 14), dtype="float32")
+        pixel_size_dset = f.create_dataset('pixel_size dataset', (number_processes, simulations_per_process, 2), dtype='float32')
 
     except:
         random_mags_dset = f["random_mags dataset"]
@@ -115,6 +116,7 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
         magnitude_error_unknownUnit_dset = f['magnitude_error_unknownUnit dataset']
         angle_error_unknownUnit_dset = f['angle_error_unknownUnit dataset']
         pi_over_4_limit_in_m_dset = f['pi_over_4_limit_in_m dataset']
+        pixel_size_dset = f['pixel_size dataset']
 
 
     # Probably going to have a for loop for each time a file is being read--don't really want to open a file over and over 
@@ -143,6 +145,9 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
 
         imgContents = dm.dmReader(f"/media/rob/hdd1/james-gj/forReport/2022-04-29/2022-04-29/Orius SC600A 2_20kX_00{imageNumber.rjust(2, '0')}.dm3")
         
+        pixelSizeData = imgContents['pixelSize']
+        pixel_size_dset[0, idx] = np.array(pixelSizeData)
+
         imgArray = imgContents['data']
 
 
@@ -198,8 +203,8 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
         ronch_dset[0, idx] = imgArray[:]
 
 
-
     # 3. Make sure the normalization of the above is adequate
+    # TODO: use DataLoader2.py to figure this out
 
 
     # 4. Save dose/% alongside the above Ronchigrams
