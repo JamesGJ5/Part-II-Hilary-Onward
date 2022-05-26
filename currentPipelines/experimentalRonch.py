@@ -194,13 +194,15 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
 
         # N.B: since clipping is done beforehand, vmin=0 isn't strictly needed to display the Ronchigram realistically, 
         # but I keep it here anyway
-        plt.imshow(imgArray, cmap='gray', vmin=0, vmax=np.amax(imgArray))
-        plt.show()
+        # plt.imshow(imgArray, cmap='gray', vmin=0, vmax=np.amax(imgArray))
+        # plt.show()
 
 
         # 6. The part where the image is actually saved to HDF5
 
         ronch_dset[0, idx] = imgArray[:]
+
+        print(f"Image number {imageNumber} saved...")
 
 
     # 3. Make sure the normalization of the above is adequate
