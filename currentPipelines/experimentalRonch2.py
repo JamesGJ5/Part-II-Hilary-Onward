@@ -5,6 +5,10 @@ import numpy as np
 import pickle
 import sys
 from math import radians
+from ncempy.io import dm
+import matplotlib.pyplot as plt
+import math
+import cv2
 
 # Creating this file to conveniently group together each experimental Ronchigram with properties like aberration 
 # constants, acquisition times, noise levels etc, so that inference (particularly predicting c1,2 and phi1,2) can be 
@@ -118,10 +122,81 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
 
 
     # 2. Reading the images and saving them to ronch_dset
-    # -> Use /media/rob/hdd1/james-gj/forReport/2022-04-29/20220429_Ronchigram.xlsx to get the numbers of the Ronchigram 
-    #    images to save, as well as the times for each image
-    # -> Create a dictionary of imageIdx:time for each image, so the correct aberration constants can be collected later for saving 
-    #    alongside them; here, imageIdx = image number - 1
+    # -> Use the values of idxImageNumberDict above to find the image numbers (present in .dm3 file names) of the Ronchigrams to be saved; 
+    #    extract the Ronchigrams from the .dm3 files whose names feature said numbers and save them to the [0, idx] (idx being the corresponding 
+    #    key of idxImageNumberDict) position of ronch_dset
+
+    # The images are numpy arrays of type float32. Orius SC600A 2_20kX_0001.dm3 has size 2688x2672. The images are 2D (there is no colour 
+    # channel).
+
+    # im0 = dm.dmReader('/media/rob/hdd1/james-gj/forReport/2022-04-29/2022-04-29/Orius SC600A 2_20kX_0001.dm3')
+    # print("Data has been read, I think")
+    # imgArray = im0['data']
+    # pxSize = im0['pixelSize']
+    # print(pxSize)
+    # plt.imshow(imgArray, cmap='gray', vmin=0, vmax=np.amax(imgArray))
+    # plt.show()
+
+    for idx, imageNumber in idxImageNumberDict.items():
+
+        # 1. Loading the image array itself using dm.dmReader then accessing the 'data' key from the resulting dictionary
+
+        imgContents = dm.dmReader(f"/media/rob/hdd1/james-gj/forReport/2022-04-29/2022-04-29/Orius SC600A 2_20kX_00{imageNumber.rjust(2, '0')}.dm3")
+        
+        imgArray = imgContents['data']
+
+
+        # 2. Clip the array such that negative elements are converted to zero
+
+        imgArray = imgArray.clip(min=0)
+
+
+        # 3. Crop the array such that the borders of the array are tangential to the circle in which the Ronchigrammy bit exists.
+
+        # Got these indices from looking at Orius SC600A 2_20kX_0001.dm3 in ImageJ
+        imgArray = imgArray[116:2544, 132:2536]
+
+
+        # 4. If the image is not a square at this point, but a x b pixels where a is smaller than b, centercrop the image to a square of 
+        # length a
+
+        shape = imgArray.shape
+
+        cropSquareLength = min(shape)
+
+        assert imgArray.ndim == 2
+        imgArray = imgArray[
+            math.ceil(shape[0] / 2) - math.ceil(cropSquareLength / 2): math.ceil(shape[0] / 2) + math.floor(cropSquareLength / 2),
+            math.ceil(shape[0] / 2) - math.floor(cropSquareLength / 2): math.ceil(shape[0] / 2) + math.floor(cropSquareLength / 2)
+            ]
+
+        shape = imgArray.shape
+
+        # N.B: since clipping is done beforehand, vmin=0 isn't strictly needed to display the Ronchigram realistically, 
+        # but I keep it here anyway
+        # plt.imshow(imgArray, cmap='gray', vmin=0, vmax=np.amax(imgArray))
+        # plt.show()
+
+
+        # 5. Resize image to 1024 x 1024 but fail if initial image is smaller than this (want to be wary if I am upsizing since I have not 
+        # yet done this)
+
+        assert shape[0] >= 1024
+        
+        # Here, I chose inter_cubic because it is a bicubic interpolation, and I use a bicubic interpolation in my 
+        # Resize() transform in training.py
+        imgArray = cv2.resize(imgArray, dsize=(1024, 1024), interpolation=cv2.INTER_CUBIC)
+
+        # N.B: since clipping is done beforehand, vmin=0 isn't strictly needed to display the Ronchigram realistically, 
+        # but I keep it here anyway
+        plt.imshow(imgArray, cmap='gray', vmin=0, vmax=np.amax(imgArray))
+        plt.show()
+
+
+        # 6. The part where the image is actually saved to HDF5
+
+        ronch_dset[0, idx] = imgArray[:]
+
 
 
     # 3. Make sure the normalization of the above is adequate
@@ -139,6 +214,8 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
 
 
     # 5. Converting dose/% to current/A and save alongside the above Ronchigrams
+    # NOTE: will have to wait for Chen to give me the current corresponding to 100% dose, which he will probably be able 
+    # to do on Monday 30/05/22
 
 
     # 6. Saving cosmo t (s), which I still don't really know how to descirbe yet, alongside each Ronchigram
@@ -268,7 +345,8 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
                 pi_over_4_limits_in_m = np.append(pi_over_4_limits_in_m, piOver4LimitIn_m)
 
 
-                # -> Later, will have to add a way to a
+                # NOTE: forgot what I was writing in the below comment lol
+                # -> Later, will have to add a way to a...
 
             random_mags_dset[0, idx] = mags
             random_angs_dset[0, idx] = angs
