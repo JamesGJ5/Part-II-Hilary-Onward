@@ -1,6 +1,8 @@
 import h5py
 from mpi4py import MPI
 import sys
+import matplotlib.pyplot as plt
+import numpy as np
 
 with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5', 'r', driver='mpio', comm=MPI.COMM_WORLD) as f:
 
@@ -57,3 +59,16 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
     # for pi_over_4_limit_in_m in pi_over_4_limit_dset:
 
     #     print(pi_over_4_limit_in_m)
+
+
+    # ronch_dset = f['ronch dataset']
+
+    # print(ronch_dset)
+
+    # for ronch in ronch_dset[0, :]:
+
+    #     # ronch = ronch[0]
+    #     print(ronch.shape)
+
+    #     plt.imshow(ronch, cmap='gray')
+    #     plt.show()
