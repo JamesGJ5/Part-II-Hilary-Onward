@@ -72,10 +72,10 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
     #     plt.imshow(ronch, cmap='gray')
     #     plt.show()
 
-    pixel_size_dset = f['pixel_size dataset']
+    # pixel_size_dset = f['pixel_size dataset']
 
-    print(pixel_size_dset)
+    # print(pixel_size_dset)
 
-    for pixelSize in pixel_size_dset[0, :]:
+    # for pixelSize in pixel_size_dset[0, :]:
 
-        print(pixelSize)
+    #     print(pixelSize)
