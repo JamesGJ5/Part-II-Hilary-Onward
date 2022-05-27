@@ -8,7 +8,7 @@ from math import radians
 from ncempy.io import dm
 import matplotlib.pyplot as plt
 import math
-import cv2
+import cv2  # N.B., you'll want to use the conda environment pytorch3copycopy, in which opencv is installed
 
 # Creating this file to conveniently group together each experimental Ronchigram with properties like aberration 
 # constants, acquisition times, noise levels etc, so that inference (particularly predicting c1,2 and phi1,2) can be 
