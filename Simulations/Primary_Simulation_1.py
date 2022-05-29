@@ -469,70 +469,70 @@ if __name__ == "__main__":
     max_C10, max_C12, max_C21, max_C23, max_C30, max_C32, max_C34, max_C41, max_C43, max_C45, max_C50, max_C52, max_C54, max_C56 = max_magList
 
     mag_list = [
-                # 0 * 10**-9, # C0,1 magnitude/m (image shift)
-                max_C10 / 2,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
-                # randu(0, 2 * 50 * 10**-9),
-                max_C12 / 2,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
-                max_C21 / 2,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
-                # randu(0, 2 * 150 * 10**-9),
-                max_C23 / 2,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
-                # randu(0, 2 * 50 * 10**-9),
+                2.904 * 10**-9,
+                # max_C10 / 2,   # C1,0 magnitude/m (defocus) (aim for maximum of 100nm according to Chen 04/04/22)
+                0.675 * 10**-9,
+                # max_C12 / 2,    # C1,2 magnitude/m (2-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                # max_C21 / 2,   # C2,1 magnitude/m (2nd-order axial coma) (aim for maximum of 300nm according to Chen 04/04/22)
+                15.962 * 10**-9,
+                # max_C23 / 2,  # C2,3 magnitude/m (3-fold astigmatism) (aim for maximum of 100nm according to Chen 04/04/22)
+                6.686 * 10**-9,
    
-                max_C30 / 2,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
-                # randu(0, 2 * 5.2 * 10**-6),
-                max_C32 / 2,  # C3,2 magnitude/m (3rd-order axial star aberration)
-                # randu(0, 2 * 5.2 * 10**-6),
-                max_C34 / 2,  # C3,4 magnitude/m (4-fold astigmatism)
-                # randu (0, 2 * 2.61 * 10**-6),
+                # max_C30 / 2,  # C3,0 magnitude/m (3rd-order spherical aberration) (aim for range between 1um and 1mm)
+                -0.662 * 10**-6,
+                # max_C32 / 2,  # C3,2 magnitude/m (3rd-order axial star aberration)
+                0.081 * 10**-6,
+                # max_C34 / 2,  # C3,4 magnitude/m (4-fold astigmatism)
+                0.216 * 10**-6,
 
-                max_C41 / 2,   # C4,1 magnitude/m (4th-order axial coma)
-                # randu(0, 2 * 0.05 * 10**-3),
-                max_C43 / 2,   # C4,3 magnitude/m (3-lobe aberration)
-                # randu(0, 2 * 0.05 * 10**-3),
-                max_C45 / 2,   # C4,5 magnitude/m (5-fold astigmatism)
-                # randu(0, 2 * 0.05 * 10**-3),
+                # max_C41 / 2,   # C4,1 magnitude/m (4th-order axial coma)
+                2.637 * 10**-6,
+                # max_C43 / 2,   # C4,3 magnitude/m (3-lobe aberration)
+                0.621 * 10**-6,
+                # max_C45 / 2,   # C4,5 magnitude/m (5-fold astigmatism)
+                0.414 * 10**-6,
 
-                max_C50 / 2,    # C5,0 magnitude/m (5th-order spherical aberration)
-                # randu(0, 2 * 5 * 10**-3),
-                max_C52 / 2,    # C5,2 magnitude/m (5th-order axial star aberration)
-                # randu(0, 2 * 5 * 10**-3),
-                max_C54 / 2,    # C5,4 magnitude/m (5th-order rosette)
-                # randu(0, 2 * 5 * 10**-3),
-                max_C56 / 2]    # C5,6 magnitude/m (6-fold astigmatism)
-                # randu(0, 2 * 5 * 10**-3))
+                # max_C50 / 2,    # C5,0 magnitude/m (5th-order spherical aberration)
+                0.047 * 10**-3,
+                # max_C52 / 2,    # C5,2 magnitude/m (5th-order axial star aberration)
+                0.000999 * 10**-3,
+                # max_C54 / 2,    # C5,4 magnitude/m (5th-order rosette)
+                0.000999 * 10**-3,
+                # max_C56 / 2]    # C5,6 magnitude/m (6-fold astigmatism)
+                0.004 * 10**-3]
 
     ang_list = [
-                # 2 * np.pi / 1 * 1/2,  # C0,1 angle/rad (image shift)
+                # 2 * np.pi / 1 * 1/2,
                 0,              # C1,0 angle/rad
-                2 * np.pi / 2 * 1/2,      # C1,2 angle/rad
-                # 0,
+                # 2 * np.pi / 2 * 1/2,      # C1,2 angle/rad
+                radians(50.61) * 2 + np.pi / 2,
 
-                2 * np.pi / 1 * 1/2,      # C2,1 angle/rad
-                # randu(0, 2 * np.pi / 1),
-                2 * np.pi / 3 * 1/2,      # C2,3 angle/rad
-                # randu(0, 2 * np.pi / 3),
+                # 2 * np.pi / 1 * 1/2,      # C2,1 angle/rad
+                radians(70.38) * 1 + np.pi / 1,
+                # 2 * np.pi / 3 * 1/2,      # C2,3 angle/rad
+                radians(-25.66) * 3 + np.pi / 3,
 
 
                 0,              # C3,0 angle/rad
-                2 * np.pi / 2 * 1/2,      # C3,2 angle/rad
-                # randu(0, 2 * np.pi / 2),
-                2 * np.pi / 4 * 1/2,      # C3,4 angle/rad
-                # randu(0, 2 * np.pi / 4),
+                # 2 * np.pi / 2 * 1/2,      # C3,2 angle/rad
+                radians(-32.39) * 2 + np.pi / 2,
+                # 2 * np.pi / 4 * 1/2,      # C3,4 angle/rad
+                radians(16.85) * 4 + np.pi / 4,
 
-                2 * np.pi / 1 * 1/2,      # C4,1 angle/rad
-                # randu(0, 2 * np.pi / 1),
-                2 * np.pi / 3 * 1/2,      # C4,3 angle/rad
-                # randu(0, 2 * np.pi / 3),
-                2 * np.pi / 5 * 1/2,     # C4,5 angle/rad
-                # randu(0, 2 * np.pi / 5),
+                # 2 * np.pi / 1 * 1/2,      # C4,1 angle/rad
+                radians(-86.56) * 1 + np.pi / 1,
+                # 2 * np.pi / 3 * 1/2,      # C4,3 angle/rad
+                radians(36.89) * 3 + np.pi / 3,
+                # 2 * np.pi / 5 * 1/2,     # C4,5 angle/rad
+                radians(-0.20) * 5 + np.pi / 5,
 
                 0,              # C5,0 angle/rad
-                2 * np.pi / 2 * 1/2,      # C5,2 angle/rad
-                # randu(0, 2 * np.pi / 2),
-                2 * np.pi / 4 * 1/2,      # C5,4 angle/rad
-                # randu(0, 2 * np.pi / 4),
-                2 * np.pi / 6 * 1/2]     # C5,6 angle/rad
-                # randu(0, 2 * np.pi / 6))
+                # 2 * np.pi / 2 * 1/2,      # C5,2 angle/rad
+                radians(0.00999) * 2 + np.pi / 2,
+                # 2 * np.pi / 4 * 1/2,      # C5,4 angle/rad
+                radians(0.00999) * 4 + np.pi / 4,
+                # 2 * np.pi / 6 * 1/2]     # C5,6 angle/rad
+                radians(25.03) * 6 + np.pi / 6]
 
     # print(ang_list[1] / (2 * np.pi / 2))
     # print(mag_list[1] / (2 * 50 * 10**-9))
