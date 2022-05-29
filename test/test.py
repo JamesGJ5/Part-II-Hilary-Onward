@@ -3,8 +3,9 @@ from mpi4py import MPI
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
+import pickle
 
-with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5', 'r', driver='mpio', comm=MPI.COMM_WORLD) as f:
+# with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5', 'r', driver='mpio', comm=MPI.COMM_WORLD) as f:
 
     # dose_pct_dset = f['dose_pct dataset']
 
@@ -79,3 +80,9 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
     # for pixelSize in pixel_size_dset[0, :]:
 
     #     print(pixelSize)
+
+f = open('/home/james/VSCode/currentPipelines/max_magList.pkl', 'rb')
+max_magList = pickle.load(f)
+f.close()
+
+print(max_magList)
