@@ -145,8 +145,26 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
 
         imgContents = dm.dmReader(f"/media/rob/hdd1/james-gj/forReport/2022-04-29/2022-04-29/Orius SC600A 2_20kX_00{imageNumber.rjust(2, '0')}.dm3")
         
-        pixelSizeData = imgContents['pixelSize']
-        pixel_size_dset[0, idx] = np.array(pixelSizeData)
+        pixelSize = imgContents['pixelSize']
+        pixel_size_dset[0, idx] = np.array(pixelSize)
+
+        # NOTE: as well as pixelSize and pixelUnit, https://openncem.readthedocs.io/en/latest/_modules/ncempy/io/dm.html#dmReader
+
+        # Initial thought: below, pixelUnit is returned as ['', ''] for Orius SC600A 2_20kX_0001.dm3. I thought initially that these might be 
+        # arcseconds; since pixelSize is returned as [1.0, 1.0] for said image and its size is 2688 x 2672, which would thus be 198mrad x 
+        # 196mrad, which seems reasonable.
+
+        # However: having exactly 1 arcsecond per pixel seems a little bit suspicious, unless for some reason calibration was done such that 
+        # this is indeed the case. After all, '' is actually probably just an empty string--if it really was that '' was the unit, it would 
+        # probably be encapsulated in an outer pair of quotation marks, like "''".
+
+        # Realistically, printing [1.0, 1.0] and ['', ''] for pixelSize and pixelUnit respectively is probably just the default--if you go into 
+        # ImageJ, open Orius SC600A 2_20kX_0001.dm3, click Image > Show Info... and then scroll to the bottom of the opened file, there's a line 
+        # reading Pixel size: 1x1 pixels^2, which resembles the aforementioned lists in terms of being the default.
+        # TODO: ask Chen about this anyway, although I think I am correct.
+
+        # pixelUnit = imgContents['pixelUnit']
+        # pixelOrigin = imgContents['pixelorigin']
 
         imgArray = imgContents['data']
 
