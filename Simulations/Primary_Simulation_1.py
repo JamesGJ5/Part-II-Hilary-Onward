@@ -423,7 +423,7 @@ if __name__ == "__main__":
     #     for singleResultSet in allResultSets.values():
     #         aberMag = eval(singleResultSet[aber]['mag'])
 
-    #         if aberMag > max_mag_in_unit:
+    #         if abs(aberMag) > abs(max_mag_in_unit):
     #             max_mag_in_unit = aberMag
 
     #     max_magList.append(max_mag_in_unit)
