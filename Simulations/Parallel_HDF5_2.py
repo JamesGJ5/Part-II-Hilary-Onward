@@ -25,14 +25,14 @@ if __name__ == "__main__":
 
     if mimicFile:
         
-        mimickedFile = None
+        mimickedFile = input("Input the path of the file to be mimicked: ")
 
     # Output Ronchigram will be an array of size imdim x imdim in pixels
     imdim = 1024
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 180 * 10**-3
+    simdim = 70 * 10**-3
 
     # Essentially the convergence semi-angle/mrad; only called aperture_size because objective aperture size controls this 
     # quantity and wanted to be consistent with (Schnitzer, 2020c) in Primary_Simulation_1.py
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     max_magList = pickle.load(f)
     f.close()
 
-    max_C10, max_C12, max_C21, max_C23, max_C30, max_C32, max_C34, max_C41, max_C43, max_C45, max_C50, max_C52, max_C54, max_C56 = max_magList
+    # max_C10, max_C12, max_C21, max_C23, max_C30, max_C32, max_C34, max_C41, max_C43, max_C45, max_C50, max_C52, max_C54, max_C56 = max_magList
 
     # print(max_C10 / 10**-9, max_C12 / 10**-9, max_C21 / 10**-9, max_C23 / 10**-9, \
     # max_C30 / 10**-6, max_C32 / 10**-6, max_C34 / 10**-6, \
@@ -50,24 +50,24 @@ if __name__ == "__main__":
     # max_C50 / 10**-3, max_C52 / 10**-3, max_C54 / 10**-3, max_C56 / 10**-3)
 
     # The maxima below for C10-C23 apply when making Ronchigrams in which the aberration in question is to be significant
-    # max_C10 = 10 * 10**-9  # Maximum C10 (defocus) magnitude/m
-    # max_C12 = 10 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
+    max_C10 = 100 * 10**-9  # Maximum C10 (defocus) magnitude/m
+    max_C12 = 100 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
 
-    # max_C21 = 1000 * 10**-9  # Maximum C21 (axial coma) magnitude/m
-    # max_C23 = 1000 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
+    max_C21 = 300 * 10**-9  # Maximum C21 (axial coma) magnitude/m
+    max_C23 = 100 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
-    # max_C30 = 10.4 * 10**-6
-    # max_C32 = 10.4 * 10**-6
-    # max_C34 = 5.22 * 10**-6
+    max_C30 = 10.4 * 10**-6
+    max_C32 = 10.4 * 10**-6
+    max_C34 = 5.22 * 10**-6
 
-    # max_C41 = 0.1 * 10**-3
-    # max_C43 = 0.1 * 10**-3
-    # max_C45 = 0.1 * 10**-3
+    max_C41 = 0.1 * 10**-3
+    max_C43 = 0.1 * 10**-3
+    max_C45 = 0.1 * 10**-3
 
-    # max_C50 = 10 * 10**-3
-    # max_C52 = 10 * 10**-3
-    # max_C54 = 10 * 10**-3
-    # max_C56 = 10 * 10**-3
+    max_C50 = 10 * 10**-3
+    max_C52 = 10 * 10**-3
+    max_C54 = 10 * 10**-3
+    max_C56 = 10 * 10**-3
 
     # min_Cnm will be 0 since negative values are redundant, I THINK (see lab book's 29/11/2021 entry)
     # phi_n,m will be between 0 and pi/m radians since, I believe, other angles are redundant (see lab book's 29/11/2021 entry)
@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     def simulate_single_aberrations(simulations_per_process: int, imdim: int, simdim: float, max_C10: float, 
         max_C12: float, max_C21: float, max_C23: float, min_I: float, max_I: float, 
-        min_t: float, max_t: float) -> None:
+        min_t: float, max_t: float, saveFile: str, mimickedFile = None, min_C12: float = 0) -> None:
         # TODO: take this outside of function because, unlike the multiprocessing method I found in a video, MPI 
         # doesn't need the script being parallelised to be put in a function definition.
         """Simulates single-aberration Ronchigrams and saves them along with the magnitudes and angles individually. 
@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
             simulations_per_process = randMags.shape[1]
 
-        with h5py.File(f"/media/rob/hdd1/james-gj/Simulations/forTraining/_/correctedSTEM.h5", "x", driver="mpio", comm=MPI.COMM_WORLD) as f:
+        with h5py.File(saveFile, "x", driver="mpio", comm=MPI.COMM_WORLD) as f:
             # Be wary that you are in write mode
 
             # print(f"Simulations per process is {simulations_per_process}")
@@ -160,7 +160,7 @@ if __name__ == "__main__":
                 # C10 = randMags[rank, simulation, 0]
 
                 # C12 = 0
-                C12 = randu(0, max_C12)
+                C12 = randu(min_C12, max_C12)
                 # C12 = linearC12[simulation]
                 # C12 = randMags[rank, simulation, 1]
 
@@ -331,7 +331,7 @@ if __name__ == "__main__":
     
     if not mimicFile:
     
-        total_simulations = 500000
+        total_simulations = 1000
         simulations_per_process = int(math.ceil(total_simulations / number_processes))
 
         # print(f"Simulations per process is {simulations_per_process}")
@@ -357,7 +357,22 @@ if __name__ == "__main__":
 
 
     # CALLING THE SIMULATION FUNCTION ABOVE
-    simulate_single_aberrations(simulations_per_process, imdim, simdim, max_C10, max_C12, max_C21, max_C23, min_I, max_I, min_t, max_t)
+    # Here, X are just the maximum percentages of c1,2 in the range being sampled from; the corresponding minimum % is 
+    # (X - 10)
+    XList = [10 * (i + 1) for i in range(10)]
+
+    for X in XList:
+
+        saveFileX = f'/media/rob/hdd1/james-gj/Simulations/forInference/30_05_22/c12_{X-10}to{X}pct.h5'
+
+        currentMin_C12 = max_C12 * (X - 10) / 100
+        currentMax_C12 = max_C12 * X / 100
+
+        print(currentMin_C12, currentMax_C12)
+
+        simulate_single_aberrations(simulations_per_process=simulations_per_process, imdim=imdim, simdim=simdim, 
+        max_C10=max_C10, max_C12=currentMax_C12, max_C21=max_C21, max_C23=max_C23, min_I=min_I, max_I=max_I, min_t=min_t, 
+        max_t=max_t, saveFile=saveFileX, min_C12=currentMin_C12)
 
 
     # FINISH TIME METRICS
