@@ -17,7 +17,6 @@ import numpy as np
 import time
 import torchvision.utils as vutils
 import datetime
-from ignite.utils import convert_tensor
 from configparser import ConfigParser
 from datetime import date
 
