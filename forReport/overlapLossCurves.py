@@ -83,35 +83,10 @@ for directory in trainingRunDirs:
 
             ax.plot(iterationNumbers, lossVals, color=curveColours[lossCurve], label=curveLabels[lossCurve])
 
-            # Each data point seems to have the format [time recorded, recording step (i.e. 1st recording, 2nd), 
-            # recorded value]; each loaded json file seems to have the format [data point, data point ... data point]
-
-            # Secondly, now that we have the data, must find a way to make the x-axis of each set of data such that the 
-            # data lines up probably with data from other files
-
-                # First of all, a good thing to do seems to be to remember that, while in the validation loss curves times 
-                # corresponding to associated data points are different, the values "step" are the same
-
-                # It might be a good idea to make the step values from /trainingLossRunningAverage.json the x-axis values 
-                # and convert each step in the validation loss curve to the corresponding "step" in training loss running 
-                # average, i.e. the final step of the epoch after which the validation is done.
-
-                    # Firstly, must see if step in /trainingLossRunningAverage.json lines up with number of iterations. 
-                    # The highest number of step shown in this file is 21870. Training was done for 10 epochs and there 
-                    # were 85014 * 14/17 (so 70012) training images per epoch, with a batch size of 32, meaning 2187
-                    # iterations per epoch and 21870 iterations overall. THEREFORE, I THINK IT IS SAFE TO ASSUME THAT, IN 
-                    # /trainingLossRunningAverage.json, STEP NUMBER IS THE SAME AS ITERATION NUMBER
-
-                # For each /trainingLossRunningAverage.json file, going to make the step number the x axis as a numpy array 
-                # (taking the highest value of this array for later reference), the loss value the y axis value
-
-                # For each validation loss file, going to add recording step to x labels numpy array (then multiply this array elementwise by 
-                # the scalar that is the highest step number in /trainingLossRunningAverage.json); going to have y values 
-                # be the loss value in each data point, of course
 
     ax.legend()
     plt.show()
 
     saveFig = input('Save figure? Input True or False: ')
     if saveFig:
-        fig.figure.savefig(f'/media/rob/hdd1/james-gj/forReport/Partially-Corrected STEM/{title}')
+        fig.figure.savefig(f'/media/rob/hdd1/james-gj/forReport/_/{title}')
