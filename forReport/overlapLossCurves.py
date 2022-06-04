@@ -7,21 +7,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 
-fiveHundredThousandRuns = [
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-104953', 
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-194108', 
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220419-101845', 
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220425-104947'
+correctedSTEMRuns = [
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220525-194703',
     ]
 
 figureTitles = {
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-104953': '500,000 Ronchigrams Run 1', 
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220413-194108': '500,000 Ronchigrams Run 2', 
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220419-101845': '500,000 Ronchigrams Run 3', 
-    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220425-104947': '500,000 Ronchigrams Run 4'
+    '/media/rob/hdd2/james/training/fineTuneEfficientNet/20220525-194703': 'C3,0-Corrected STEM Training Run', 
     }
 
-trainingRunDirs = fiveHundredThousandRuns
+trainingRunDirs = correctedSTEMRuns
 
 lossCurveFiles = [
     '/trainingLossRunningAverage.json', '/overallValidationLoss.json', 
