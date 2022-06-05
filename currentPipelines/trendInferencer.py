@@ -55,7 +55,7 @@ from Primary_Simulation_1 import calc_Ronchigram
 
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
-GPU = 1
+GPU = 0
 usingGPU = True
 
 if not usingGPU:
@@ -84,9 +84,9 @@ chosenVals = {"c10": False, "c12": True, "c21": False, "c23": False, "c30": Fals
 }
 
 scalingVals = {
-    "c10scaling": 1 / (100 * 10**-9), "c12scaling": 1 / (100 * 10**-9), "c21scaling": 1 / (300 * 10**-9), "c23scaling": 1 / (100 * 10**-9), 
-    "c30scaling": 1 / (10.4 * 10**-6), "c32scaling": 1 / (10.4 * 10**-6), "c34scaling": 1 / (5.22 * 10**-6), "c41scaling": 1 / (0.1 * 10**-3), "c43scaling": 1 / (0.1 * 10**-3), "c45scaling": 1 / (0.1 * 10**-3),
-    "c50scaling": 1 / (10 * 10**-3), "c52scaling": 1 / (10 * 10**-3), "c54scaling": 1 / (10 * 10**-3), "c56scaling": 1 / (10 * 10**-3),
+    "c10scaling": 1 / (7.619 * 10**-9), "c12scaling": 1 / (2.449 * 10**-9), "c21scaling": 1 / (33.883 * 10**-9), "c23scaling": 1 / (13.849 * 10**-9), 
+    "c30scaling": 1 / (1.045 * 10**-6), "c32scaling": 1 / (0.277 * 10**-6), "c34scaling": 1 / (0.28 * 10**-6), "c41scaling": 1 / (4.159 * 10**-6), "c43scaling": 1 / (1.951 * 10**-6), "c45scaling": 1 / (0.791 * 10**-6),
+    "c50scaling": 1 / (0.0470 * 10**-3), "c52scaling": 1 / 1, "c54scaling": 1 / 1, "c56scaling": 1 / (0.010 * 10**-3),
 
     "phi10scaling": 1, "phi12scaling": 1 / (2 * np.pi / 2), "phi21scaling": 1 / (2 * np.pi / 1), "phi23scaling": 1 / (2 * np.pi / 3), 
     "phi30scaling": 1, "phi32scaling": 1 / (2 * np.pi / 2), "phi34scaling": 1 / (2 * np.pi / 4), "phi41scaling": 1 / (2 * np.pi / 1), "phi43scaling": 1 / (2 * np.pi / 3), "phi45scaling": 1 / (2 * np.pi / 5),
@@ -445,16 +445,13 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
         # Just for file names and saving
         trendGraphsDir = '/media/rob/hdd1/james-gj/inferenceResults/trendGraphs'
         dateToday = date.today().strftime('%d_%m_%y')
-        whichNetwork = modelPath[52:].replace('/', '-')
+        # whichNetwork = modelPath[52:].replace('/', '-')
 
 
         # Creating directories to be saved to if they don't already exist
-        if not os.path.isdir(f'{trendGraphsDir}/{dateToday}/{whichNetwork}'):
+        if not os.path.isdir(f'{trendGraphsDir}/{dateToday}'):
 
-            if not os.path.isdir(f'{trendGraphsDir}/{dateToday}'):
-                os.mkdir(f'{trendGraphsDir}/{dateToday}')
-
-            os.mkdir(f'{trendGraphsDir}/{dateToday}/{whichNetwork}')
+            os.mkdir(f'{trendGraphsDir}/{dateToday}')
 
         fig, ax = plt.subplots()
 
@@ -477,7 +474,7 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
             # Only here to get extra plots where anomalies don't mean the rest of the graph is too squashed (should really 
             # switch to an interactive graph where this isn't an issue)
             # TODO: use better graphing than matplotlib.pyplot so that the below is not necessary
-            with open(f"{trendGraphsDir}/{dateToday}/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.txt", 'w') as f:
+            with open(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-29 :-3]}_{filenameSuffix}.txt", 'w') as f:
                 
                 numAnomalies = np.sum(predArray < yLower) + np.sum(predArray > yUpper)
 
@@ -506,4 +503,4 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
         ax.set_title("Blue points target values, red points predictions")
         plt.show()
 
-        # fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{whichNetwork}/{trendSetPath[-29 :-3]}_{filenameSuffix}.png")
+        fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-29 :-3]}_{filenameSuffix}.png")
