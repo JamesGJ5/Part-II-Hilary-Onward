@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 70 * 10**-3
+    simdim = 180 * 10**-3
 
     # Essentially the convergence semi-angle/mrad; only called aperture_size because objective aperture size controls this 
     # quantity and wanted to be consistent with (Schnitzer, 2020c) in Primary_Simulation_1.py
@@ -42,32 +42,32 @@ if __name__ == "__main__":
     max_magList = pickle.load(f)
     f.close()
 
-    # max_C10, max_C12, max_C21, max_C23, max_C30, max_C32, max_C34, max_C41, max_C43, max_C45, max_C50, max_C52, max_C54, max_C56 = max_magList
+    max_C10, max_C12, max_C21, max_C23, max_C30, max_C32, max_C34, max_C41, max_C43, max_C45, max_C50, max_C52, max_C54, max_C56 = max_magList
 
-    # print(max_C10 / 10**-9, max_C12 / 10**-9, max_C21 / 10**-9, max_C23 / 10**-9, \
-    # max_C30 / 10**-6, max_C32 / 10**-6, max_C34 / 10**-6, \
-    # max_C41 / 10**-6, max_C43 / 10**-6, max_C45 / 10**-6, \
-    # max_C50 / 10**-3, max_C52 / 10**-3, max_C54 / 10**-3, max_C56 / 10**-3)
+    print(max_C10 / 10**-9, max_C12 / 10**-9, max_C21 / 10**-9, max_C23 / 10**-9, \
+    max_C30 / 10**-6, max_C32 / 10**-6, max_C34 / 10**-6, \
+    max_C41 / 10**-6, max_C43 / 10**-6, max_C45 / 10**-6, \
+    max_C50 / 10**-3, max_C52 / 10**-3, max_C54 / 10**-3, max_C56 / 10**-3)
 
     # The maxima below for C10-C23 apply when making Ronchigrams in which the aberration in question is to be significant
-    max_C10 = 100 * 10**-9  # Maximum C10 (defocus) magnitude/m
-    max_C12 = 100 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
+    # max_C10 = 100 * 10**-9  # Maximum C10 (defocus) magnitude/m
+    # max_C12 = 100 * 10**-9  # Maximum C12 (2-fold astigmatism) magnitude/m
 
-    max_C21 = 300 * 10**-9  # Maximum C21 (axial coma) magnitude/m
-    max_C23 = 100 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
+    # max_C21 = 300 * 10**-9  # Maximum C21 (axial coma) magnitude/m
+    # max_C23 = 100 * 10**-9  # Maximum C23 (3-fold astigmatism) magnitude/m
 
-    max_C30 = 10.4 * 10**-6
-    max_C32 = 10.4 * 10**-6
-    max_C34 = 5.22 * 10**-6
+    # max_C30 = 10.4 * 10**-6
+    # max_C32 = 10.4 * 10**-6
+    # max_C34 = 5.22 * 10**-6
 
-    max_C41 = 0.1 * 10**-3
-    max_C43 = 0.1 * 10**-3
-    max_C45 = 0.1 * 10**-3
+    # max_C41 = 0.1 * 10**-3
+    # max_C43 = 0.1 * 10**-3
+    # max_C45 = 0.1 * 10**-3
 
-    max_C50 = 10 * 10**-3
-    max_C52 = 10 * 10**-3
-    max_C54 = 10 * 10**-3
-    max_C56 = 10 * 10**-3
+    # max_C50 = 10 * 10**-3
+    # max_C52 = 10 * 10**-3
+    # max_C54 = 10 * 10**-3
+    # max_C56 = 10 * 10**-3
 
     # min_Cnm will be 0 since negative values are redundant, I THINK (see lab book's 29/11/2021 entry)
     # phi_n,m will be between 0 and pi/m radians since, I believe, other angles are redundant (see lab book's 29/11/2021 entry)
@@ -82,9 +82,8 @@ if __name__ == "__main__":
     max_t = 1   # Maximum Ronchigram acquisition time/s
 
 
-    def simulate_single_aberrations(simulations_per_process: int, imdim: int, simdim: float, max_C10: float, 
-        max_C12: float, max_C21: float, max_C23: float, min_I: float, max_I: float, 
-        min_t: float, max_t: float, saveFile: str, mimickedFile = None, min_C12: float = 0) -> None:
+    def simulate_single_aberrations(simulations_per_process: int, imdim: int, simdim: float, min_I: float, 
+        max_I: float, min_t: float, max_t: float, saveFile: str, mimickedFile = None) -> None:
         # TODO: take this outside of function because, unlike the multiprocessing method I found in a video, MPI 
         # doesn't need the script being parallelised to be put in a function definition.
         """Simulates single-aberration Ronchigrams and saves them along with the magnitudes and angles individually. 
@@ -112,7 +111,6 @@ if __name__ == "__main__":
             simulations_per_process = randMags.shape[1]
 
         with h5py.File(saveFile, "x", driver="mpio", comm=MPI.COMM_WORLD) as f:
-            # Be wary that you are in write mode
 
             # print(f"Simulations per process is {simulations_per_process}")
 
@@ -141,11 +139,11 @@ if __name__ == "__main__":
             simulation_number = 0
 
             # linearC10 = np.linspace(rank / number_processes * max_C10, (rank + 1) / number_processes * max_C10, simulations_per_process, endpoint=False)
-            # linearC12 = np.linspace(rank / number_processes * max_C12, (rank + 1) / number_processes * max_C12, simulations_per_process, endpoint=False)
+            linearC12 = np.linspace(rank / number_processes * max_C12, (rank + 1) / number_processes * max_C12, simulations_per_process, endpoint=False)
             # linearC21 = np.linspace(rank / number_processes * max_C21, (rank + 1) / number_processes * max_C21, simulations_per_process, endpoint=False)
             # linearC23 = np.linspace(rank / number_processes * max_C23, (rank + 1) / number_processes * max_C23, simulations_per_process, endpoint=False)
 
-            # linearPhi12 = np.linspace(rank / number_processes * 2*np.pi/2, (rank + 1) / number_processes * 2*np.pi/2, simulations_per_process, endpoint=False)
+            linearPhi12 = np.linspace(rank / number_processes * 2*np.pi/2, (rank + 1) / number_processes * 2*np.pi/2, simulations_per_process, endpoint=False)
             # linearPhi21 = np.linspace(rank / number_processes * 2*np.pi, (rank + 1) / number_processes * 2*np.pi, simulations_per_process, endpoint=False)
             # linearPhi23 = np.linspace(rank / number_processes * 2*np.pi/3, (rank + 1) / number_processes * 2*np.pi/3, simulations_per_process, endpoint=False)
 
@@ -160,7 +158,7 @@ if __name__ == "__main__":
                 # C10 = randMags[rank, simulation, 0]
 
                 # C12 = 0
-                C12 = randu(min_C12, max_C12)
+                C12 = randu(0, max_C12)
                 # C12 = linearC12[simulation]
                 # C12 = randMags[rank, simulation, 1]
 
@@ -218,8 +216,8 @@ if __name__ == "__main__":
                 phi10 = 0
 
                 # phi12 = 0
-                phi12 = randu(0, 2 * np.pi / 2)
-                # phi12 = linearPhi12[simulation]
+                # phi12 = randu(0, 2 * np.pi / 2)
+                phi12 = linearPhi12[simulation]
                 # phi12 = randAngs[rank, simulation, 1]
 
                 # phi21 = 0
@@ -359,20 +357,25 @@ if __name__ == "__main__":
     # CALLING THE SIMULATION FUNCTION ABOVE
     # Here, X are just the maximum percentages of c1,2 in the range being sampled from; the corresponding minimum % is 
     # (X - 10)
-    XList = [10 * (i + 1) for i in range(10)]
+    # XList = [10 * (i + 1) for i in range(10)]
 
-    for X in XList:
+    # for X in XList:
 
-        saveFileX = f'/media/rob/hdd1/james-gj/Simulations/forInference/30_05_22/c12_{X-10}to{X}pct.h5'
+    #     saveFileX = f'/media/rob/hdd1/james-gj/Simulations/forInference/30_05_22/c12_{X-10}to{X}pct.h5'
 
-        currentMin_C12 = max_C12 * (X - 10) / 100
-        currentMax_C12 = max_C12 * X / 100
+    #     currentMin_C12 = max_C12 * (X - 10) / 100
+    #     currentMax_C12 = max_C12 * X / 100
 
-        print(currentMin_C12, currentMax_C12)
+    #     print(currentMin_C12, currentMax_C12)
 
-        simulate_single_aberrations(simulations_per_process=simulations_per_process, imdim=imdim, simdim=simdim, 
-        max_C10=max_C10, max_C12=currentMax_C12, max_C21=max_C21, max_C23=max_C23, min_I=min_I, max_I=max_I, min_t=min_t, 
-        max_t=max_t, saveFile=saveFileX, min_C12=currentMin_C12)
+    #     simulate_single_aberrations(simulations_per_process=simulations_per_process, imdim=imdim, simdim=simdim, 
+    #     max_C10=max_C10, max_C12=currentMax_C12, max_C21=max_C21, max_C23=max_C23, min_I=min_I, max_I=max_I, min_t=min_t, 
+    #     max_t=max_t, saveFile=saveFileX, min_C12=currentMin_C12)
+
+    saveFile = '/media/rob/hdd1/james-gj/Simulations/forInference/05_06_22/randC12linPhi12_randOthers.h5'
+
+    simulate_single_aberrations(simulations_per_process=simulations_per_process, imdim=imdim, simdim=simdim, 
+        min_I=min_I, max_I=max_I, min_t=min_t, max_t=max_t, saveFile=saveFile)
 
 
     # FINISH TIME METRICS
