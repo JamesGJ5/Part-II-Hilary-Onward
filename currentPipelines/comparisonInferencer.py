@@ -88,7 +88,7 @@ chosenVals = {
     "phi50": True, "phi52": True, "phi54": True, "phi56": True
 }
 
-c12scaling = 1 / (2.449 * 10**-9)
+c12scaling = 1 / (100 * 10**-9)
 phi12scaling = 1 / (2 * np.pi / 2)
 
 scalingVals = {
@@ -285,7 +285,7 @@ print(yPred)
 imdim = 1024    # Output Ronchigram will have an array size of imdim x imdim elements
 
 # TODO: make simdim importable alongside the simulations path that is imported
-simdim = 180 * 10**-3   # Convergence semi-angle/rad
+simdim = 70 * 10**-3   # Convergence semi-angle/rad
 
 # NOTE: this will contain numpy arrays, not torch Tensors
 predictedRonchBatch = np.empty((batchSize, imdim, imdim, 1))
