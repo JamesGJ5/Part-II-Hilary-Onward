@@ -47,8 +47,9 @@ def calc_Ronchigram(imdim, simdim,
     I: quoted electron current in Ronchigram generation/A, num
     b: fraction of I that reaches the detector, num
     t: Ronchigram aquisition time/s, num
-    aperture_size: "Objective aperture semi-angle (RADIUS)" 
-        (https://github.com/noahschnitzer/ronchigram-matlab/blob/master/misc/example.m) in rad
+    aperture_size: "Condenser aperture semi-angle (RADIUS)" 
+        (https://github.com/noahschnitzer/ronchigram-matlab/blob/master/misc/example.m and also see mention of A(q) in
+        https://arxiv.org/abs/2204.11126) in rad
     zhiyuanRange: whether or not I am including Zhiyuan's range for values of noise_fun, i.e. random-uniformly in the 
         range [0, 0.2pi), True of False
     seed: seed passed to add random phases to the beam; this is passable because it would be good to randomly pick a 
@@ -300,11 +301,11 @@ def calc_Ronchigram(imdim, simdim,
     chi_array = chi_grid(imdim, simdim, av, n_list, m_list, mag_list, ang_list)[0]
     al_rr = chi_grid(imdim, simdim, av, n_list, m_list, mag_list, ang_list)[1]
 
-    # Computing objective aperture (Schnitzer, 2020c)
+    # Computing condenser aperture (Schnitzer, 2020c), A(q) in https://arxiv.org/abs/2204.11126
 
-    obj_ap = al_rr <= aperture_size
+    condenser_ap = al_rr <= aperture_size
 
-    fft_psi_p = fft2(np.exp(-1j*chi_array) * obj_ap)    # (Schnitzer, 2020a)
+    fft_psi_p = fft2(np.exp(-1j*chi_array) * condenser_ap)    # (Schnitzer, 2020a)
     # fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
 
 
@@ -330,7 +331,7 @@ def calc_Ronchigram(imdim, simdim,
     # CALCULATING THE RONCHIGRAM
 
     # inverse = ifft2(psi_t) # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
-    inverse = ifft2(psi_t) * obj_ap # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
+    inverse = ifft2(psi_t) * condenser_ap # (Schnitzer, Sung and Hovden, 2020), (Schnitzer, 2020c)
 
     # plt.imshow(np.angle(inverse))
     # plt.show()
