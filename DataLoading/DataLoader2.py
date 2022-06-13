@@ -103,7 +103,12 @@ class RonchigramDataset(Dataset):
 
         self.RandI = self.f["random_I dataset"]
         self.Randt = self.f["random_t dataset"]
-        self.dosePct = self.f['dose_pct dataset']
+
+        try:
+            self.dosePct = self.f['dose_pct dataset']
+
+        except:
+            pass
 
         try:
             self.randSeed = self.f["random_seed dataset"]
@@ -217,7 +222,12 @@ class RonchigramDataset(Dataset):
         I = self.RandI[rank, itemInRank].item()
         t = self.Randt[rank, itemInRank].item()
 
-        dose_pct = self.dosePct[rank, itemInRank].item()
+
+        try:
+            dose_pct = self.dosePct[rank, itemInRank].item()
+
+        except:
+            pass
 
         # I will not be chosen to be zero in any of my simulations. If I is zero, it is because I/A is not known for 
         # experimental Ronchigrams, so I/% of maximum I has been saved instead. In this case, will just make it so 
@@ -429,11 +439,11 @@ if __name__ == "__main__":
 
     # DATASET INSTANTIATION
 
-    # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/23_05_22/correctedSTEM.h5", 
-    # c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
-    # c52=True, c54=True, c56=True,
-    # phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
-    # phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/23_05_22/correctedSTEM.h5", 
+    c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
+    c52=True, c54=True, c56=True,
+    phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
+    phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
 
     # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/06_06_22/correctedSTEM.h5", 
     # c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
@@ -455,11 +465,11 @@ if __name__ == "__main__":
 
     # ronch2 = calc
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5", 
-    c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
-    c52=True, c54=True, c56=True,
-    phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
-    phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
+    # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5", 
+    # c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
+    # c52=True, c54=True, c56=True,
+    # phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
+    # phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
 
     print(len(ronchdset))
 
@@ -503,7 +513,7 @@ if __name__ == "__main__":
 
     # sys.exit()
 
-    chosenIndices = [i for i in range(10)]
+    chosenIndices = [0, 1, 2, 3]
     # print(f"Chosen indices: {chosenIndices}")
 
     # print(f"Shape of Ronchigram in item at index {idx} of dataset: {ronchdset[idx][0].shape}")
@@ -532,7 +542,7 @@ if __name__ == "__main__":
             # print(ronchdset[0])
             plt.show()
 
-    sys.exit()
+    # sys.exit()
 
     # ESTIMATING MEAN AND STD
 
@@ -552,7 +562,10 @@ if __name__ == "__main__":
 
     apertureSize = 1024 / 2 * ratio # Aperture radius in pixels
 
-    estimateMeanStd = True
+    estimateMeanStd = False
+
+    calculatedMean = 0.5
+    calculatedStd = 0.25
 
     if estimateMeanStd:
 
@@ -561,7 +574,7 @@ if __name__ == "__main__":
 
         print(calculatedMean, calculatedStd)
 
-    sys.exit()
+    # sys.exit()
 
     # APPLYING TRANSFORMS
 
@@ -621,7 +634,7 @@ if __name__ == "__main__":
 
     # print(ronchExample.type())
 
-    sys.exit()
+    # sys.exit()
 
     ronchSubset = Subset(ronchdset, chosenIndices)
 
