@@ -411,7 +411,13 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
     trendSet.transform = testTransform
     print(str(trendSet.transform))
 
-    trendLoader = DataLoader(trendSet, batch_size=batchSize, shuffle=False, num_workers=0, pin_memory=True, 
+    shuffleTrendLoader = False
+
+    if trendSetPath == '/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5':
+
+        assert shuffleTrendLoader == False
+
+    trendLoader = DataLoader(trendSet, batch_size=batchSize, shuffle=shuffleTrendLoader, num_workers=0, pin_memory=True, 
                             drop_last=False)
 
     # print(trendSet[0][1].size())
@@ -441,6 +447,13 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
         targetArray = (targetTensor / usedScalingFactors[constIdx]).numpy()
         predArray = (predTensor / usedScalingFactors[constIdx]).numpy()
 
+        errorsArray = np.array([])
+
+        for idx in range(len(trendSet)):
+
+            singleRonchErrors = trendSet.getExperimentalParams(idx)
+
+            errorsArray = np.append(errorsArray, singleRonchErrors[constIdx])
 
         # Just for file names and saving
         trendGraphsDir = '/media/rob/hdd1/james-gj/inferenceResults/trendGraphs'
