@@ -507,7 +507,8 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
 
         # Plotting trend graph
 
-        ax.plot(np.linspace(1, len(targetArray), len(targetArray)), targetArray, 'b')
+        # ax.plot(np.linspace(1, len(targetArray), len(targetArray)), targetArray, 'b')
+        ax.errorbar(np.linspace(1, len(targetArray), len(targetArray)), targetArray, yerr=errorsArray, mfc='b')
         ax.plot(np.linspace(1, len(predArray), len(predArray)), predArray, 'ro', markersize=2)
 
         ax.set_xlabel("Ronchigram Number")
