@@ -257,12 +257,35 @@ if testingDataLoader:
 
 model.eval()
 
+# Whether or not to simply measure time of inference of a single Ronchigram meaned over four Ronchigrams
+measureInferenceTime = False
+
 with torch.no_grad():
     # NOTE: if this isn't feasible GPU memory-wise, may want to replace batch with batch[0] and instances of x[0] with x
     x = convert_tensor(batch[0], device=device, non_blocking=True)
 
-    # yPred is the batch of labels predicted for x
-    yPred = model(x)
+    if not measureInferenceTime:
+
+        # yPred is the batch of labels predicted for x
+        yPred = model(x)
+
+    else:
+
+        print('Beginning inference time measurement...')
+        beforeInference = time.time()
+
+        for i in range(batchSize):
+
+            print(model(torch.unsqueeze(x[i], 0)))
+
+        afterInference = time.time()
+
+        print(f'Inference took {afterInference - beforeInference} seconds for {batchSize} Ronchigrams total')
+        print(f'Time per measurement: {(afterInference - beforeInference) / batchSize} seconds')
+        print('Inference time measurement complete...')
+
+        sys.exit()
+
 
     # print("\nBatch of predicted labels:")
     # print(yPred)
