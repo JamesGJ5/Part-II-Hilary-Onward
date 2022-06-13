@@ -425,11 +425,11 @@ if __name__ == "__main__":
     # phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
     # phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/06_06_22/correctedSTEM.h5", 
-    c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
-    c52=True, c54=True, c56=True,
-    phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
-    phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
+    # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/06_06_22/correctedSTEM.h5", 
+    # c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
+    # c52=True, c54=True, c56=True,
+    # phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
+    # phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
 
     # print(ronchdset[0][1])
     # print(ronchdset[-1][1])
@@ -450,6 +450,8 @@ if __name__ == "__main__":
     c52=True, c54=True, c56=True,
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
     phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
+
+    print(len(ronchdset))
 
     # ronchExample = ronchdset[0][0]
     # print(ronchExample)
@@ -519,7 +521,7 @@ if __name__ == "__main__":
             # print(ronchdset[0])
             plt.show()
 
-    # sys.exit()
+    sys.exit()
 
     # ESTIMATING MEAN AND STD
 
