@@ -447,13 +447,15 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
         targetArray = (targetTensor / usedScalingFactors[constIdx]).numpy()
         predArray = (predTensor / usedScalingFactors[constIdx]).numpy()
 
-        errorsArray = np.array([])
+        if trendSetPath == '/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5':
 
-        for idx in range(len(trendSet)):
+            errorsArray = np.array([])
 
-            singleRonchErrors = trendSet.getExperimentalParams(idx)
+            for idx in range(len(trendSet)):
 
-            errorsArray = np.append(errorsArray, singleRonchErrors[constIdx])
+                singleRonchErrors = trendSet.getExperimentalParams(idx)
+
+                errorsArray = np.append(errorsArray, singleRonchErrors[constIdx])
 
         # Just for file names and saving
         trendGraphsDir = '/media/rob/hdd1/james-gj/inferenceResults/trendGraphs'
@@ -507,8 +509,14 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
 
         # Plotting trend graph
 
-        # ax.plot(np.linspace(1, len(targetArray), len(targetArray)), targetArray, 'b')
-        ax.errorbar(np.linspace(1, len(targetArray), len(targetArray)), targetArray, yerr=errorsArray, mfc='b')
+        if trendSetPath == '/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5':
+
+            ax.errorbar(np.linspace(1, len(targetArray), len(targetArray)), targetArray, yerr=errorsArray, mfc='b')
+
+        else:
+
+            ax.plot(np.linspace(1, len(targetArray), len(targetArray)), targetArray, 'b')
+            
         ax.plot(np.linspace(1, len(predArray), len(predArray)), predArray, 'ro', markersize=2)
 
         ax.set_xlabel("Ronchigram Number")
