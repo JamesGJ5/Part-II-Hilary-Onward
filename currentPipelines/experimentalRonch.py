@@ -82,7 +82,7 @@ idxImageNumberDict = acquisitionParamsDict['Image']
 #    error (identified by Ziyi), although Chen hasn't yet verified this or told me its unit; pi/4 limit in METRES for 
 #    each aberration
 
-with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams5.h5', 'x', driver='mpio', comm=MPI.COMM_WORLD) as f:
+with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5', 'x', driver='mpio', comm=MPI.COMM_WORLD) as f:
 
     number_processes = 1
     simulations_per_process = len(acquisitionParamsDict['Image'])
@@ -311,6 +311,21 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
                 if magUnit in unitsToBaseUnitsIn_m:
 
                     magIn_m = eval(aberParams['mag']) * unitsToBaseUnitsIn_m[magUnit]
+
+                    # Doing this because, in my simulations, I have the format that all aberration magnitudes are 
+                    # positive and all aberration angles are taken from the ranges [0, 2pi/m rad) in order to cover all 
+                    # possible contributions to the lens aberration function. Here, some magnitudes are negative; this 
+                    # would lead to the same contribution to the lens aberration function if the negative magnitude 
+                    # was made positive and the corresponding aberration angle was shifted by pi/m rad,
+                    if magIn_m < 0:
+
+                        negativeMag = True
+                        magIn_m *= -1
+
+                    else:
+
+                        negativeMag = False
+
                     mags = np.append(mags, magIn_m)
 
                 else:
@@ -327,9 +342,13 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
                     angInRad = radians(eval(aberParams['angle']))
                     krivanekAngInRad = angInRad * aberAngleCoefficientDict[aber]
 
-                    # Putting angle in range [0, 2pi/m rad)
-                    angInRad = angInRad % (2 * np.pi / aberAngleCoefficientDict[aber])
-                    krivanekAngInRad += np.pi / aberAngleCoefficientDict[aber]
+                    # Augmenting aberration angle my pi/m rad to compensate for where I have made negative magnitudes 
+                    # into positive ones to match convention.
+                    if negativeMag:
+
+                        krivanekAngInRad += np.pi / aberAngleCoefficientDict[aber]
+
+                    # Getting angles into equivalen angles in the range [0, 2pi/m rad)
                     krivanekAngInRad = krivanekAngInRad % (2 * np.pi / aberAngleCoefficientDict[aber])
 
                     angs = np.append(angs, krivanekAngInRad)
