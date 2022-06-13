@@ -252,9 +252,9 @@ class RonchigramDataset(Dataset):
 
         - Electron dosage/%, comso t/s
 
-        - Magnitude error/m
+        - Magnitude error/m; aberration magnitude is assumed to be +/- this error
 
-        - Angle error/rad
+        - Angle error/rad; aberration angle is assumed to be +/- this error
 
         - pi/4 limit in m (no conversion to Krivanek was done since it was assumed no conversion was applicable)
 
