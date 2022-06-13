@@ -56,7 +56,7 @@ from Primary_Simulation_1 import calc_Ronchigram
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
 GPU = 0
-usingGPU = True
+usingGPU = False
 
 if not usingGPU:
     os.environ["CUDA_VISIBLE_DEVICES"]=""
@@ -457,7 +457,7 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
 
         # Limiting y-axis so that presence of anomalies don't result in a squashed, un-expandable useful section of the 
         # graph plotted in its current formulation
-        limit_yAxis = True
+        limit_yAxis = False
 
         if limit_yAxis:
             
@@ -503,4 +503,8 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
         ax.set_title("Blue points target values, red points predictions")
         plt.show()
 
-        fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-29 :-3]}_{filenameSuffix}.png")
+        saveFig = input('Save figure? Input True or False: ')
+        
+        if saveFig:
+        
+            fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-26 :-3]}_{filenameSuffix}.png")
