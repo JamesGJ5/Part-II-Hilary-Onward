@@ -82,7 +82,7 @@ idxImageNumberDict = acquisitionParamsDict['Image']
 #    error (identified by Ziyi), although Chen hasn't yet verified this or told me its unit; pi/4 limit in METRES for 
 #    each aberration
 
-with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams2.h5', 'w', driver='mpio', comm=MPI.COMM_WORLD) as f:
+with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams4.h5', 'x', driver='mpio', comm=MPI.COMM_WORLD) as f:
 
     number_processes = 1
     simulations_per_process = len(acquisitionParamsDict['Image'])
@@ -328,9 +328,10 @@ with h5py.File(f'/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonch
                     krivanekAngInRad = angInRad * aberAngleCoefficientDict[aber]
 
                     # Putting angle in range [0, 2pi/m rad)
+                    angInRad = angInRad % (2 * np.pi / aberAngleCoefficientDict[aber])
                     krivanekAngInRad = krivanekAngInRad % (2 * np.pi / aberAngleCoefficientDict[aber])
 
-                    angs = np.append(angs, krivanekAngInRad)
+                    angs = np.append(angs, angInRad)
 
                 else:
 
