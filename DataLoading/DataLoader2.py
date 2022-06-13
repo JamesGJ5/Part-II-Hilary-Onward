@@ -105,7 +105,9 @@ class RonchigramDataset(Dataset):
         self.Randt = self.f["random_t dataset"]
 
         try:
-            self.dosePct = self.f['dose_pct dataset']
+            self.magErrors = self.f['magnitude_error_unknownUnit dataset']
+            self.angErrors = self.f['angle_error_unknownUnit dataset']
+            self.dosePcts = self.f['dose_pct dataset']
 
         except:
             pass
@@ -222,9 +224,8 @@ class RonchigramDataset(Dataset):
         I = self.RandI[rank, itemInRank].item()
         t = self.Randt[rank, itemInRank].item()
 
-
         try:
-            dose_pct = self.dosePct[rank, itemInRank].item()
+            dose_pct = self.dosePcts[rank, itemInRank].item()
 
         except:
             pass
@@ -251,11 +252,9 @@ class RonchigramDataset(Dataset):
 
         - Electron dosage/%, comso t/s
 
-        - Magnitude error/unknown unit (assumed to be the same as the associated 
-          magnitude before saving to HDF5, so currently it is in m if said assumption is correct)
+        - Magnitude error/m
 
-        - Angle error/unkown unit (assumed to be degrees before saving to HDF5, so currently it is in rad if said 
-          assumption is correct)
+        - Angle error/rad
 
         - pi/4 limit in m (no conversion to Krivanek was done since it was assumed no conversion was applicable)
 
@@ -270,6 +269,16 @@ class RonchigramDataset(Dataset):
 
         rank = idx // itemsPerRank
         itemInRank = idx % itemsPerRank
+
+        magError = self.magErrors[rank, itemInRank]
+        angError = self.angErrors[rank, itemInRank]
+
+        chosenMagErrors = np.take(magError, self.cnmIndices)
+        chosenAngErrors = np.take(angError, self.phinmIndices)
+
+        errors = np.concatenate((chosenMagErrors, chosenAngErrors))
+
+        return errors
 
     def __del__(self):
 
@@ -439,11 +448,11 @@ if __name__ == "__main__":
 
     # DATASET INSTANTIATION
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/23_05_22/correctedSTEM.h5", 
-    c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
-    c52=True, c54=True, c56=True,
-    phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
-    phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
+    # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forTraining/23_05_22/correctedSTEM.h5", 
+    # c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
+    # c52=True, c54=True, c56=True,
+    # phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
+    # phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
 
     # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/06_06_22/correctedSTEM.h5", 
     # c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
@@ -465,11 +474,15 @@ if __name__ == "__main__":
 
     # ronch2 = calc
 
-    # ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5", 
-    # c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
-    # c52=True, c54=True, c56=True,
-    # phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
-    # phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5", 
+    c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
+    c52=True, c54=True, c56=True,
+    phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
+    phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
+
+    print(ronchdset.getExperimentalParams(0))
+
+    sys.exit()
 
     print(len(ronchdset))
 
