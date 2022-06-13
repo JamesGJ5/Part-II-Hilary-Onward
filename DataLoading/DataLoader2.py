@@ -103,6 +103,7 @@ class RonchigramDataset(Dataset):
 
         self.RandI = self.f["random_I dataset"]
         self.Randt = self.f["random_t dataset"]
+        self.dosePct = self.f['dose_pct dataset']
 
         try:
             self.randSeed = self.f["random_seed dataset"]
@@ -215,6 +216,15 @@ class RonchigramDataset(Dataset):
 
         I = self.RandI[rank, itemInRank].item()
         t = self.Randt[rank, itemInRank].item()
+
+        dose_pct = self.dosePct[rank, itemInRank].item()
+
+        # I will not be chosen to be zero in any of my simulations. If I is zero, it is because I/A is not known for 
+        # experimental Ronchigrams, so I/% of maximum I has been saved instead. In this case, will just make it so 
+        # that I/A is 10**-9 * I/% of maximum I / 100, since maximum current in my simulations is 1nA
+        if I == 0:
+            print('I/A is recorded as zero in this Ronchigram...')
+            I = 10**-9 * dose_pct / 100
 
         try:
             seed = self.randSeed[rank, itemInRank].item()
@@ -515,6 +525,7 @@ if __name__ == "__main__":
         for ronchdset in ronchdsetList:
 
             print(f"Label: {ronchdset[idx][1]}")
+            print(np.amin(ronchdset[idx][0]))
             # print(ronchdset.get_I_t_Seed(idx))
             # print("{:.40f}".format(ronchdset[idx][0][512][512].item()))
             show_data(ronchdset[idx][0], ronchdset[idx][1])
