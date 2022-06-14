@@ -291,8 +291,11 @@ class RonchigramDataset(Dataset):
             print("The HDF5 file is closed.")
 
 # From https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
-def showBatch(batchedSample):
-    """Show Ronchigram and print its aberrations for a batch of samples."""
+def showBatch(batchedSample, title: str):
+    """Show Ronchigram and print its aberrations for a batch of samples.
+    
+    title: title of figure to be generated
+    """
 
     print("Running showBatch")
 
@@ -308,7 +311,7 @@ def showBatch(batchedSample):
     grid = utils.make_grid(images_batch)
     plt.imshow(grid.numpy().transpose((1, 2, 0)))
 
-    plt.title("Batch from dataloader")
+    plt.title(title)
 
 # Inspired by https://towardsdatascience.com/how-to-calculate-the-mean-and-standard-deviation-normalizing-datasets-in-pytorch-704bd7d05f4c
 def getMeanAndStd(dataloader, reducedBatches=None, specificDevice=None):
@@ -482,7 +485,7 @@ if __name__ == "__main__":
 
     print(ronchdset.getExperimentalParams(0))
 
-    sys.exit()
+    # sys.exit()
 
     print(len(ronchdset))
 
@@ -526,7 +529,7 @@ if __name__ == "__main__":
 
     # sys.exit()
 
-    chosenIndices = [0, 1, 2, 3]
+    # chosenIndices = [0, 1, 2, 3]
     # print(f"Chosen indices: {chosenIndices}")
 
     # print(f"Shape of Ronchigram in item at index {idx} of dataset: {ronchdset[idx][0].shape}")
@@ -540,20 +543,20 @@ if __name__ == "__main__":
 
     # NOTE: the below might look funny if the datatype of the numpy array is changed to np.uint8 in __getitem__ so that 
     # I could get ToTensor() to normalise the Ronchigrams to in between 0 and 1 inclusive
-    plt.figure()
+    # plt.figure()
 
-    for idx in chosenIndices:
-        print(f"\nIndex {idx}")
+    # for idx in chosenIndices:
+    #     print(f"\nIndex {idx}")
 
-        for ronchdset in ronchdsetList:
+    #     for ronchdset in ronchdsetList:
 
-            print(f"Label: {ronchdset[idx][1]}")
-            print(np.amin(ronchdset[idx][0]))
-            # print(ronchdset.get_I_t_Seed(idx))
-            # print("{:.40f}".format(ronchdset[idx][0][512][512].item()))
-            show_data(ronchdset[idx][0], ronchdset[idx][1])
-            # print(ronchdset[0])
-            plt.show()
+    #         print(f"Label: {ronchdset[idx][1]}")
+    #         print(np.amin(ronchdset[idx][0]))
+    #         # print(ronchdset.get_I_t_Seed(idx))
+    #         # print("{:.40f}".format(ronchdset[idx][0][512][512].item()))
+    #         show_data(ronchdset[idx][0], ronchdset[idx][1])
+    #         # print(ronchdset[0])
+    #         plt.show()
 
     # sys.exit()
 
@@ -575,10 +578,9 @@ if __name__ == "__main__":
 
     apertureSize = 1024 / 2 * ratio # Aperture radius in pixels
 
+    calculatedMean = 0.5187
+    calculatedStd = 0.3566
     estimateMeanStd = False
-
-    calculatedMean = 0.5
-    calculatedStd = 0.25
 
     if estimateMeanStd:
 
@@ -649,12 +651,13 @@ if __name__ == "__main__":
 
     # sys.exit()
 
-    ronchSubset = Subset(ronchdset, chosenIndices)
+    # ronchSubset = Subset(ronchdset, chosenIndices)
 
     # Implementing torch.utils.data.DataLoader works on the above by adapting the third step, train and test transforms 
     # incorporated, and testing the dataloader
 
-    dataloader = DataLoader(ronchSubset, batch_size=4, shuffle=False, num_workers=0)
+    batchSize = 4
+    dataloader = DataLoader(ronchdset, batch_size=batchSize, shuffle=False, num_workers=0)
 
     # for iBatch, batchedSample in enumerate(dataloader):
 
@@ -687,32 +690,30 @@ if __name__ == "__main__":
             print(iBatch, batchedSample[0].size(),
                     batchedSample[1].size())
 
-            print(batchedSample[0][0])
+            for i in range(batchSize):
 
-            # sys.exit()
+                overallIdx = iBatch * batchSize + i
 
-            if iBatch == 0:
                 plt.figure()
 
-                showBatch(batchedSample)
-                # print(batchedSample["aberrations"])
+                x = torch.unsqueeze(batchedSample[0][i], 0), torch.unsqueeze(batchedSample[0][i], 0)
+
+                showBatch(x, f'Ronchigram {overallIdx + 1}')
                 plt.ioff()
 
                 plt.show()
-
-                break
 
 
     # Checking if random_split works by splitting ronchdset into train, eval and test
     # TODO: be careful because there are also dataloaders above, the memory they take up may be high, which is bad if they 
     # are unnecessary
 
-    ronchdsetLength = len(ronchdset)
+    # ronchdsetLength = len(ronchdset)
 
-    trainLength = math.ceil(ronchdsetLength * 0.70)
-    evalLength = math.ceil(ronchdsetLength * 0.15)
-    testLength = ronchdsetLength - trainLength - evalLength
+    # trainLength = math.ceil(ronchdsetLength * 0.70)
+    # evalLength = math.ceil(ronchdsetLength * 0.15)
+    # testLength = ronchdsetLength - trainLength - evalLength
 
-    trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
+    # trainSet, evalSet, testSet = random_split(dataset=ronchdset, lengths=[trainLength, evalLength, testLength], generator=torch.Generator().manual_seed(torchSeed))
 
     # print(f"I/A and t/s respectively: {ronchdset.getIt(10)}")
