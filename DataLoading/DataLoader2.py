@@ -324,7 +324,8 @@ def showBatch(batchedSample, title: str):
         labelleft = False
     )
 
-    ax.add_artist(scalebar)
+    try: ax.add_artist(scalebar)
+    except: pass
 
     ax.imshow(grid.numpy().transpose((1, 2, 0)))
 
@@ -717,7 +718,7 @@ if __name__ == "__main__":
 
                 x = torch.unsqueeze(batchedSample[0][i], 0), torch.unsqueeze(batchedSample[0][i], 0)
 
-                scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+                # scalebar = ScaleBar(scale, units="mrad", dimension="angle")
                 showBatch(x, f'Ronchigram {overallIdx + 1}')
 
                 plt.show()
