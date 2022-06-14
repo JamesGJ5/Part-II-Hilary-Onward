@@ -302,13 +302,25 @@ def showBatch(batchedSample, title: str):
     images_batch, labels_batch = batchedSample[0], batchedSample[1]
 
     # Decomment if desired to see
-    print(labels_batch)
+    # print(labels_batch)
 
     batch_size = len(images_batch)
     im_size = images_batch[0].size(2)
     grid_border_size = 2
 
     grid = utils.make_grid(images_batch)
+
+    plt.tick_params(
+        axis='both',
+        which = 'both',
+        bottom = False,
+        top = False,
+        left = False,
+        right = False,
+        labelbottom = False,
+        labelleft = False
+    )
+
     plt.imshow(grid.numpy().transpose((1, 2, 0)))
 
     plt.title(title)
