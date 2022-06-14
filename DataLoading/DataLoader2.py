@@ -10,6 +10,7 @@ import torch
 import datetime
 import random
 import scipy.constants as sc
+from matplotlib_scalebar.scalebar import ScaleBar
 
 from torch.utils.data import Dataset, DataLoader, random_split, Subset
 from torchvision.transforms import Compose, Resize, ToTensor, Normalize, CenterCrop
@@ -310,7 +311,9 @@ def showBatch(batchedSample, title: str):
 
     grid = utils.make_grid(images_batch)
 
-    plt.tick_params(
+    ax = plt.subplot()
+
+    ax.tick_params(
         axis='both',
         which = 'both',
         bottom = False,
@@ -321,9 +324,11 @@ def showBatch(batchedSample, title: str):
         labelleft = False
     )
 
-    plt.imshow(grid.numpy().transpose((1, 2, 0)))
+    ax.add_artist(scalebar)
 
-    plt.title(title)
+    ax.imshow(grid.numpy().transpose((1, 2, 0)))
+
+    ax.set_title(title)
 
 # Inspired by https://towardsdatascience.com/how-to-calculate-the-mean-and-standard-deviation-normalizing-datasets-in-pytorch-704bd7d05f4c
 def getMeanAndStd(dataloader, reducedBatches=None, specificDevice=None):
@@ -697,6 +702,10 @@ if __name__ == "__main__":
 
     testingDataLoader = True
 
+    simdim = 180 * 10**-3
+
+    scale = 2*simdim/resolution * 1000    # mrad per pixel
+
     if testingDataLoader:
         for iBatch, batchedSample in enumerate(dataloader):
             print(iBatch, batchedSample[0].size(),
@@ -706,12 +715,10 @@ if __name__ == "__main__":
 
                 overallIdx = iBatch * batchSize + i
 
-                plt.figure()
-
                 x = torch.unsqueeze(batchedSample[0][i], 0), torch.unsqueeze(batchedSample[0][i], 0)
 
+                scalebar = ScaleBar(scale, units="mrad", dimension="angle")
                 showBatch(x, f'Ronchigram {overallIdx + 1}')
-                plt.ioff()
 
                 plt.show()
 
