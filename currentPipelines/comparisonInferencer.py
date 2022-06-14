@@ -22,6 +22,7 @@ from numpy.random import default_rng
 from matplotlib_scalebar.scalebar import ScaleBar
 from textwrap import wrap
 
+doingComparison = False
 
 # Seed information (may not use the same test set as in training but might as well set the torch seed to be 17 anyway, 
 # just in case--I don't see how it can hurt)
@@ -88,8 +89,14 @@ chosenVals = {
     "phi50": True, "phi52": True, "phi54": True, "phi56": True
 }
 
-c12scaling = 1 / (2.449 * 10**-9)
-phi12scaling = 1 / (2 * np.pi / 2)
+if not doingComparison:
+
+    c12scaling, phi12scaling = 1, 1
+
+else:
+
+    c12scaling = 1 / (2.449 * 10**-9)
+    phi12scaling = 1 / (2 * np.pi / 2)
 
 scalingVals = {
     "c10scaling": 1, "c12scaling": c12scaling, "c21scaling": 1, "c23scaling": 1, 
@@ -326,17 +333,26 @@ for labelVectorIndex in range(batchSize):
 
     labelVector = yPred[labelVectorIndex]
 
-    C12_mag, C12_ang = [element.item() for element in labelVector]
+    # Only reason you wouldn't want to is if you are just looking to get and save the simulation version of the 
+    # experimental Ronchigrams
+    if not doingComparison:
 
-    other_mags = [labelsBatch[labelVectorIndex][i].item() for i in [0] + list(range(2, 14))]
-    other_angs = [labelsBatch[labelVectorIndex][i].item() for i in [14] + list(range(16, 28))]
+        mag_list = [labelsBatch[labelVectorIndex][i].item() for i in range(14)]
+        ang_list = [labelsBatch[labelVectorIndex][i].item() for i in range(14, 28)]
 
-    # Putting c12 and phi12 together with other aberration constants of the same type
-    other_mags.insert(1, C12_mag)
-    mag_list = other_mags
+    else:
 
-    other_angs.insert(1, C12_ang)
-    ang_list = other_angs
+        C12_mag, C12_ang = [element.item() for element in labelVector]
+
+        other_mags = [labelsBatch[labelVectorIndex][i].item() for i in [0] + list(range(2, 14))]
+        other_angs = [labelsBatch[labelVectorIndex][i].item() for i in [14] + list(range(16, 28))]
+
+        # Putting c12 and phi12 together with other aberration constants of the same type
+        other_mags.insert(1, C12_mag)
+        mag_list = other_mags
+
+        other_angs.insert(1, C12_ang)
+        ang_list = other_angs
 
     I, t, seed = testSet.get_I_t_Seed(idx=chosenIndices[labelVectorIndex])
     print(I, t, seed)
@@ -366,94 +382,124 @@ testSubset = Subset(testSet, chosenIndices)
 scale = 2*simdim/imdim * 1000    # mrad per pixel
 # scalebar = ScaleBar(scale, units="mrad", dimension="angle")
 
-for i in range(len(testSubset)):
-# for i in [0]:
-    ax = plt.subplot(1, 2, 1)
+if not doingComparison:
 
-    ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    ax.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+    for i in range(len(testSubset)):
 
-    ax.imshow(testSubset[i][0], cmap="gray")
+        x = predictedRonchBatch[i]
+        scalebar = ScaleBar(scale, units="mrad", dimension="angle")
 
-    scalebar = ScaleBar(scale, units="mrad", dimension="angle")
-    ax.add_artist(ScaleBar(scale, units="mrad", dimension="angle"))
+        ax = plt.subplot()
 
-    aberConstants = testSubset[i][1]
+        ax.tick_params(
+            axis='both',
+            which = 'both',
+            bottom = False,
+            top = False,
+            left = False,
+            right = False,
+            labelbottom = False,
+            labelleft = False
+        )
 
-    l1 = []
+        ax.add_artist(scalebar)
 
-    for j, const in enumerate(aberConstants):
+        ax.imshow(x, cmap='gray')
 
-        if j <= 13:
+        ax.set_title(f'Ronchigram {i + 1}')
 
-            if j in [0, 2, 3]:
+        plt.show()
 
-                # print(const)
-                const /= 10**-9
+elif doingComparison:
 
-            elif j == 1:
+    for i in range(len(testSubset)):
+    # for i in [0]:
+        ax = plt.subplot(1, 2, 1)
 
-                const /= c12scaling
-                const /= 10**-9
+        ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+        ax.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
 
-            elif j in [4, 5, 6]:
+        ax.imshow(testSubset[i][0], cmap="gray")
 
-                const /= 10**-6
+        scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+        ax.add_artist(ScaleBar(scale, units="mrad", dimension="angle"))
 
-            else:
+        aberConstants = testSubset[i][1]
 
-                const /= 10**-3
-        
-        if j >= 14:
+        l1 = []
 
-            if j in [14, 18, 24]:
+        for j, const in enumerate(aberConstants):
 
-                continue
+            if j <= 13:
 
-            elif j == 15:
+                if j in [0, 2, 3]:
 
-                const /= phi12scaling
-                const /= np.pi
+                    # print(const)
+                    const /= 10**-9
 
-            else:
-                
-                const /= np.pi
+                elif j == 1:
 
-        const = const.item()
-        const = round(const, 2)
+                    const /= c12scaling
+                    const /= 10**-9
 
-        l1.append(const)
+                elif j in [4, 5, 6]:
 
-    # aberConstantsString = f'c1,0={l1[0]}nm, \33[1mc1,2={l1[1]}nm' + f'\33[m, c2,1={l1[2]}nm, c2,3={l1[3]}nm, c3,0={l1[4]}um, c3,2={l1[5]}um, c3,4={l1[6]}um, c4,1={l1[7]}mm, c4,3={l1[8]}mm, c4,5={l1[9]}mm, c5,0={l1[10]}mm, c5,2={l1[11]}mm, c5,4={l1[12]}mm, c5,6={l1[13]}mm, \33[1m\u03A61,2={l1[14]}\u03C0' + f'\33[m, \u03A62,1={l1[15]}\u03C0, \u03A62,3={l1[16]}\u03C0, \u03A63,2={l1[17]}\u03C0, \u03A63,4={l1[18]}\u03C0, \u03A64,1={l1[19]}\u03C0, \u03A64,3={l1[20]}\u03C0, \u03A64,5={l1[21]}\u03C0, \u03A65,2={l1[22]}\u03C0, \u03A65,4={l1[23]}\u03C0, \u03A65,6={l1[24]}\u03C0'
-    aberConstantsString = f'c1,0={l1[0]}nm, c1,2={l1[1]}nm, c2,1={l1[2]}nm, c2,3={l1[3]}nm, c3,0={l1[4]}um, c3,2={l1[5]}um, c3,4={l1[6]}um, c4,1={l1[7]}mm, c4,3={l1[8]}mm, c4,5={l1[9]}mm, c5,0={l1[10]}mm, c5,2={l1[11]}mm, c5,4={l1[12]}mm, c5,6={l1[13]}mm, \u03A61,2={l1[14]}\u03C0, \u03A62,1={l1[15]}\u03C0, \u03A62,3={l1[16]}\u03C0, \u03A63,2={l1[17]}\u03C0, \u03A63,4={l1[18]}\u03C0, \u03A64,1={l1[19]}\u03C0, \u03A64,3={l1[20]}\u03C0, \u03A64,5={l1[21]}\u03C0, \u03A65,2={l1[22]}\u03C0, \u03A65,4={l1[23]}\u03C0, \u03A65,6={l1[24]}\u03C0'
+                    const /= 10**-6
 
-    # print(aberConstantsString)
+                else:
 
-    ax.title.set_text('\n'.join(wrap(aberConstantsString, width=60)))
+                    const /= 10**-3
+            
+            if j >= 14:
+
+                if j in [14, 18, 24]:
+
+                    continue
+
+                elif j == 15:
+
+                    const /= phi12scaling
+                    const /= np.pi
+
+                else:
+                    
+                    const /= np.pi
+
+            const = const.item()
+            const = round(const, 2)
+
+            l1.append(const)
+
+        # aberConstantsString = f'c1,0={l1[0]}nm, \33[1mc1,2={l1[1]}nm' + f'\33[m, c2,1={l1[2]}nm, c2,3={l1[3]}nm, c3,0={l1[4]}um, c3,2={l1[5]}um, c3,4={l1[6]}um, c4,1={l1[7]}mm, c4,3={l1[8]}mm, c4,5={l1[9]}mm, c5,0={l1[10]}mm, c5,2={l1[11]}mm, c5,4={l1[12]}mm, c5,6={l1[13]}mm, \33[1m\u03A61,2={l1[14]}\u03C0' + f'\33[m, \u03A62,1={l1[15]}\u03C0, \u03A62,3={l1[16]}\u03C0, \u03A63,2={l1[17]}\u03C0, \u03A63,4={l1[18]}\u03C0, \u03A64,1={l1[19]}\u03C0, \u03A64,3={l1[20]}\u03C0, \u03A64,5={l1[21]}\u03C0, \u03A65,2={l1[22]}\u03C0, \u03A65,4={l1[23]}\u03C0, \u03A65,6={l1[24]}\u03C0'
+        aberConstantsString = f'c1,0={l1[0]}nm, c1,2={l1[1]}nm, c2,1={l1[2]}nm, c2,3={l1[3]}nm, c3,0={l1[4]}um, c3,2={l1[5]}um, c3,4={l1[6]}um, c4,1={l1[7]}mm, c4,3={l1[8]}mm, c4,5={l1[9]}mm, c5,0={l1[10]}mm, c5,2={l1[11]}mm, c5,4={l1[12]}mm, c5,6={l1[13]}mm, \u03A61,2={l1[14]}\u03C0, \u03A62,1={l1[15]}\u03C0, \u03A62,3={l1[16]}\u03C0, \u03A63,2={l1[17]}\u03C0, \u03A63,4={l1[18]}\u03C0, \u03A64,1={l1[19]}\u03C0, \u03A64,3={l1[20]}\u03C0, \u03A64,5={l1[21]}\u03C0, \u03A65,2={l1[22]}\u03C0, \u03A65,4={l1[23]}\u03C0, \u03A65,6={l1[24]}\u03C0'
+
+        # print(aberConstantsString)
+
+        ax.title.set_text('\n'.join(wrap(aberConstantsString, width=60)))
 
 
-    ax = plt.subplot(1, 2, 2)
+        ax = plt.subplot(1, 2, 2)
 
-    ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
-    ax.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+        ax.tick_params(axis='x', which='both', bottom=False, top=False, labelbottom=False)
+        ax.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
 
-    ax.imshow(predictedRonchBatch[i], cmap="gray")
+        ax.imshow(predictedRonchBatch[i], cmap="gray")
 
-    scalebar = ScaleBar(scale, units="mrad", dimension="angle")
-    ax.add_artist(ScaleBar(scale, units="mrad", dimension="angle"))
+        scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+        ax.add_artist(ScaleBar(scale, units="mrad", dimension="angle"))
 
-    c12Pred = (yPred[i][0]).item()
-    c12Pred /= 10**-9
-    c12Pred = round(c12Pred, 2)
+        c12Pred = (yPred[i][0]).item()
+        c12Pred /= 10**-9
+        c12Pred = round(c12Pred, 2)
 
-    phi12Pred = (yPred[i][1]).item()
-    phi12Pred /= np.pi
-    phi12Pred = round(phi12Pred, 2)
+        phi12Pred = (yPred[i][1]).item()
+        phi12Pred /= np.pi
+        phi12Pred = round(phi12Pred, 2)
 
-    predConstsString = f'c1,2={c12Pred}nm, \u03A61,2={phi12Pred}\u03C0'
+        predConstsString = f'c1,2={c12Pred}nm, \u03A61,2={phi12Pred}\u03C0'
 
-    ax.title.set_text('\n'.join(wrap(predConstsString, width=60)))
+        ax.title.set_text('\n'.join(wrap(predConstsString, width=60)))
 
-    plt.subplots_adjust(wspace=0, hspace=0, top=0.8)
+        plt.subplots_adjust(wspace=0, hspace=0, top=0.8)
 
-    plt.show()
+        plt.show()
