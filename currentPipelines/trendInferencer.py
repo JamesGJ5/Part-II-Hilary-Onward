@@ -511,13 +511,14 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
 
         if trendSetPath == '/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5':
 
-            ax.errorbar(np.linspace(1, len(targetArray), len(targetArray)), targetArray, yerr=errorsArray, mfc='b')
+            ax.errorbar(np.linspace(1, len(targetArray), len(targetArray)), targetArray, yerr=errorsArray, fmt='o',
+                        color='blue', ecolor='lightblue', elinewidth=3, capsize=10)
 
         else:
 
             ax.plot(np.linspace(1, len(targetArray), len(targetArray)), targetArray, 'b')
             
-        ax.plot(np.linspace(1, len(predArray), len(predArray)), predArray, 'ro', markersize=2)
+        ax.plot(np.linspace(1, len(predArray), len(predArray)), predArray, 'ro', markersize=5)
 
         ax.set_xlabel("Ronchigram Number")
         ax.set_ylabel(f"{const} / {constUnit}")
@@ -529,4 +530,4 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
         
         if saveFig:
         
-            fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-26 :-3]}_{filenameSuffix}.png")
+            fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-26 :-3]}_{const}_{filenameSuffix}.png")
