@@ -530,4 +530,6 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
         
         if saveFig:
         
-            fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-26 :-3]}_{const}_{filenameSuffix}.png")
+            if trendSetPath == '/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5'
+
+                fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-26 :-3]}_{const}_{filenameSuffix}.png")
