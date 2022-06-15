@@ -21,8 +21,9 @@ from datetime import date
 from numpy.random import default_rng
 from matplotlib_scalebar.scalebar import ScaleBar
 from textwrap import wrap
+from matplotlib import patches
 
-doingComparison = True
+doingComparison = False
 
 # Seed information (may not use the same test set as in training but might as well set the torch seed to be 17 anyway, 
 # just in case--I don't see how it can hurt)
@@ -359,7 +360,7 @@ for labelVectorIndex in range(batchSize):
     b = 1
 
     predictedRonch = calc_Ronchigram(imdim, simdim, *mag_list, *ang_list, I=I, b=b, t=t, aperture_size=simdim, 
-                                        zhiyuanRange=False, seed=seed)
+                                        zhiyuanRange=False, seed=17)
 
     # For the colour channel position in this numpy array
     predictedRonch = np.expand_dims(predictedRonch, 2)
@@ -384,14 +385,16 @@ scale = 2*simdim/imdim * 1000    # mrad per pixel
 
 if not doingComparison:
 
-    doTransforms = True
+    doTransforms = False
 
     for i in range(len(testSubset)):
 
         x = predictedRonchBatch[i]
-        scalebar = ScaleBar(scale, units="mrad", dimension="angle")
 
         if not doTransforms:
+
+            scale = 2 * actualSimdim / imdim
+            scalebar = ScaleBar(scale, units="mrad", dimension="angle")
 
             ax = plt.subplot()
 
@@ -407,6 +410,18 @@ if not doingComparison:
             )
 
             ax.add_artist(scalebar)
+
+            drawBox = True
+
+            if drawBox:
+
+                outerCropLength = np.sqrt(2) * 512
+                # outerCropSquare = patches.Rectangle((512 - outerCropLength / 2, 512 - outerCropLength / 2), outerCropLength, outerCropLength, edgecolor='b', facecolor='none')
+                # ax.add_patch(outerCropSquare)
+
+                innerCropLength = outerCropLength * 80 / 180
+                innerCropSquare = patches.Rectangle((512 - innerCropLength / 2, 512 - innerCropLength / 2), innerCropLength, innerCropLength, edgecolor='b', facecolor='none')
+                ax.add_patch(innerCropSquare)
 
             ax.imshow(x, cmap='gray')
 
@@ -427,7 +442,10 @@ if not doingComparison:
             x = torch.unsqueeze(temporaryTransform(x), 0), None
             print(x[0].size())
 
-            showBatch(x, f'Ronchigram {i + 1}')
+            scale = 2 * desiredSimdim / resolution
+            scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+
+            showBatch(x, f'Ronchigram {i + 1}', scalebar=scalebar)
 
         plt.show()
 
