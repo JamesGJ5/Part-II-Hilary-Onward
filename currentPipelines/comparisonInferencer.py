@@ -22,7 +22,7 @@ from numpy.random import default_rng
 from matplotlib_scalebar.scalebar import ScaleBar
 from textwrap import wrap
 
-doingComparison = False
+doingComparison = True
 
 # Seed information (may not use the same test set as in training but might as well set the torch seed to be 17 anyway, 
 # just in case--I don't see how it can hurt)
@@ -384,29 +384,50 @@ scale = 2*simdim/imdim * 1000    # mrad per pixel
 
 if not doingComparison:
 
+    doTransforms = True
+
     for i in range(len(testSubset)):
 
         x = predictedRonchBatch[i]
         scalebar = ScaleBar(scale, units="mrad", dimension="angle")
 
-        ax = plt.subplot()
+        if not doTransforms:
 
-        ax.tick_params(
-            axis='both',
-            which = 'both',
-            bottom = False,
-            top = False,
-            left = False,
-            right = False,
-            labelbottom = False,
-            labelleft = False
-        )
+            ax = plt.subplot()
 
-        ax.add_artist(scalebar)
+            ax.tick_params(
+                axis='both',
+                which = 'both',
+                bottom = False,
+                top = False,
+                left = False,
+                right = False,
+                labelbottom = False,
+                labelleft = False
+            )
 
-        ax.imshow(x, cmap='gray')
+            ax.add_artist(scalebar)
 
-        ax.set_title(f'Ronchigram {i + 1}')
+            ax.imshow(x, cmap='gray')
+
+            ax.set_title(f'Ronchigram {i + 1}')
+
+        elif doTransforms:
+
+            temporaryTransform = Compose([
+                ToTensor(),
+                CenterCrop(np.sqrt(2) * apertureSize),
+                Resize(resolution, F2.InterpolationMode.BICUBIC),
+                Normalize(mean=[0.5011], std=[0.2566])
+            ])
+
+            x = x.astype(np.uint8)
+
+            print(x.shape)
+            x = torch.unsqueeze(temporaryTransform(x), 0), None
+            print(x[0].size())
+
+            showBatch(x, f'Ronchigram {i + 1}')
 
         plt.show()
 
