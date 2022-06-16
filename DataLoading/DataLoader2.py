@@ -292,7 +292,7 @@ class RonchigramDataset(Dataset):
             print("The HDF5 file is closed.")
 
 # From https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
-def showBatch(batchedSample, title: str):
+def showBatch(batchedSample, title: str, scalebar):
     """Show Ronchigram and print its aberrations for a batch of samples.
     
     title: title of figure to be generated
@@ -501,7 +501,7 @@ if __name__ == "__main__":
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
     phi45=True, phi50=True, phi52=True, phi54=True, phi56=True)
 
-    print(ronchdset.getExperimentalParams(0))
+    # print(ronchdset.getExperimentalParams(0))
 
     # sys.exit()
 
@@ -547,7 +547,7 @@ if __name__ == "__main__":
 
     # sys.exit()
 
-    # chosenIndices = [0, 1, 2, 3]
+    chosenIndices = range(11)
     # print(f"Chosen indices: {chosenIndices}")
 
     # print(f"Shape of Ronchigram in item at index {idx} of dataset: {ronchdset[idx][0].shape}")
@@ -635,7 +635,7 @@ if __name__ == "__main__":
 
     trainTransform = Compose([
         ToTensor(),
-        CenterCrop(np.sqrt(2) * apertureSize),
+        # CenterCrop(np.sqrt(2) * apertureSize),
         Resize(resolution, F2.InterpolationMode.BICUBIC),
         Normalize(mean=[mean], std=[std])
     ])
@@ -703,7 +703,7 @@ if __name__ == "__main__":
 
     testingDataLoader = True
 
-    simdim = 180 * 10**-3
+    simdim = 80 * 10**-3
 
     scale = 2*simdim/resolution * 1000    # mrad per pixel
 
@@ -718,8 +718,8 @@ if __name__ == "__main__":
 
                 x = torch.unsqueeze(batchedSample[0][i], 0), torch.unsqueeze(batchedSample[0][i], 0)
 
-                # scalebar = ScaleBar(scale, units="mrad", dimension="angle")
-                showBatch(x, f'Ronchigram {overallIdx + 1}')
+                scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+                showBatch(x, f'Ronchigram {overallIdx + 1}', scalebar=scalebar)
 
                 plt.show()
 
