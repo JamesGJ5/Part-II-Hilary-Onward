@@ -307,17 +307,17 @@ def calc_Ronchigram(imdim, simdim,
 
     condenser_ap = al_rr <= aperture_size
 
-    fig, ax = plt.subplots()
-    ax.axis("off")
-    tmp = np.exp(-1j*chi_array*condenser_ap)
-    ax.imshow(np.angle(tmp), interpolation="nearest")
+    # fig, ax = plt.subplots()
+    # ax.axis("off")
+    # tmp = np.exp(-1j*chi_array*condenser_ap)
+    # ax.imshow(np.angle(tmp), interpolation="nearest")
 
-    scale = 2*simdim/imdim * 1000    # mrad per pixel
-    scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+    # scale = 2*simdim/imdim * 1000    # mrad per pixel
+    # scalebar = ScaleBar(scale, units="mrad", dimension="angle")
 
-    ax.add_artist(scalebar)
+    # ax.add_artist(scalebar)
     
-    plt.show()
+    # plt.show()
 
     fft_psi_p = fft2(np.exp(-1j*chi_array) * condenser_ap)    # (Schnitzer, 2020a)
     # fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
@@ -327,8 +327,9 @@ def calc_Ronchigram(imdim, simdim,
     ax.axis("off")
     ax.imshow(abs(ifftshift(fft_psi_p))**2, interpolation="nearest")
 
-    scale = 2*simdim/imdim * 1000    # mrad per pixel
-    scalebar = ScaleBar(scale, units="mrad", dimension="angle")
+    scale = calc_wavlen(av) / (2 * simdim) # m per pixel
+    print(scale)
+    scalebar = ScaleBar(scale, units="m", dimension="si-length")
 
     ax.add_artist(scalebar)
     
@@ -540,40 +541,40 @@ if __name__ == "__main__":
     ang_list = [
                 # 2 * np.pi / 1 * 1/2,
                 0,              # C1,0 angle/rad
-                2 * np.pi / 2 * 0/2,      # C1,2 angle/rad
+                2 * np.pi / 2 * 1/2,      # C1,2 angle/rad
                 # radians(50.61) * 2 + np.pi / 2,
 
-                2 * np.pi / 1 * 0/2,      # C2,1 angle/rad
+                2 * np.pi / 1 * 1/2,      # C2,1 angle/rad
                 # radians(70.38) * 1 + np.pi / 1,
-                2 * np.pi / 3 * 0/2,      # C2,3 angle/rad
+                2 * np.pi / 3 * 1/2,      # C2,3 angle/rad
                 # radians(-25.66) * 3 + np.pi / 3,
 
 
                 0,              # C3,0 angle/rad
-                2 * np.pi / 2 * 0/2,      # C3,2 angle/rad
+                2 * np.pi / 2 * 1/2,      # C3,2 angle/rad
                 # radians(-32.39) * 2 + np.pi / 2,
-                2 * np.pi / 4 * 0/2,      # C3,4 angle/rad
+                2 * np.pi / 4 * 1/2,      # C3,4 angle/rad
                 # radians(16.85) * 4 + np.pi / 4,
 
-                2 * np.pi / 1 * 0/2,      # C4,1 angle/rad
+                2 * np.pi / 1 * 1/2,      # C4,1 angle/rad
                 # radians(-86.56) * 1 + np.pi / 1,
-                2 * np.pi / 3 * 0/2,      # C4,3 angle/rad
+                2 * np.pi / 3 * 1/2,      # C4,3 angle/rad
                 # radians(36.89) * 3 + np.pi / 3,
-                2 * np.pi / 5 * 0/2,     # C4,5 angle/rad
+                2 * np.pi / 5 * 1/2,     # C4,5 angle/rad
                 # radians(-0.20) * 5 + np.pi / 5,
 
                 0,              # C5,0 angle/rad
-                2 * np.pi / 2 * 0/2,      # C5,2 angle/rad
+                2 * np.pi / 2 * 1/2,      # C5,2 angle/rad
                 # radians(0.00999) * 2 + np.pi / 2,
-                2 * np.pi / 4 * 0/2,      # C5,4 angle/rad
+                2 * np.pi / 4 * 1/2,      # C5,4 angle/rad
                 # radians(0.00999) * 4 + np.pi / 4,
-                2 * np.pi / 6 * 0/2]     # C5,6 angle/rad
+                2 * np.pi / 6 * 1/2]     # C5,6 angle/rad
                 # radians(25.03) * 6 + np.pi / 6]
 
     # print(ang_list[1] / (2 * np.pi / 2))
     # print(mag_list[1] / (2 * 50 * 10**-9))
 
-    imdim = 256
+    imdim = 2672
 
     useZhiyuanParams = False
 
@@ -601,7 +602,7 @@ if __name__ == "__main__":
 
     else:
 
-        simdim = 80 * 10**-3
+        simdim = 180 * 10**-3
 
         aperture_size = simdim
 
@@ -625,7 +626,7 @@ if __name__ == "__main__":
 
     innerCropLength = outerCropLength * 80 / 180
     innerCropSquare = patches.Rectangle((512 - innerCropLength / 2, 512 - innerCropLength / 2), innerCropLength, innerCropLength, edgecolor='b', facecolor='none')
-    ax.add_patch(innerCropSquare)
+    # ax.add_patch(innerCropSquare)
 
         # Selecting the 80mrad/180mrad part of the Ronchigram while ensuring the scalebar stuff below works properly
 
