@@ -574,7 +574,7 @@ if __name__ == "__main__":
     # print(ang_list[1] / (2 * np.pi / 2))
     # print(mag_list[1] / (2 * 50 * 10**-9))
 
-    imdim = 2672
+    imdim = 1024
 
     useZhiyuanParams = False
 
