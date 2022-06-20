@@ -55,8 +55,8 @@ from Primary_Simulation_1 import calc_Ronchigram
 
 # Device configuration (hopefully I will be able to use CPU), think the GPU variable just needs to have a value of "cpu"
 
-GPU = 0
-usingGPU = False
+GPU = 1
+usingGPU = True
 
 if not usingGPU:
     os.environ["CUDA_VISIBLE_DEVICES"]=""
@@ -518,7 +518,7 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
 
             ax.plot(np.linspace(1, len(targetArray), len(targetArray)), targetArray, 'b')
             
-        ax.plot(np.linspace(1, len(predArray), len(predArray)), predArray, 'ro', markersize=5)
+        ax.plot(np.linspace(1, len(predArray), len(predArray)), predArray, 'ro', markersize=2)
 
         ax.set_xlabel("Ronchigram Number")
         ax.set_ylabel(f"{const} / {constUnit}")
@@ -530,6 +530,14 @@ for constIdx, (const, constUnit) in enumerate(zip(constants, constUnits)):
         
         if saveFig:
         
-            if trendSetPath == '/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5'
+            if trendSetPath == '/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5':
 
-                fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-26 :-3]}_{const}_{filenameSuffix}.png")
+                fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-26: -3]}_{const}_{filenameSuffix}.png")
+
+            elif trendSetPath == '/media/rob/hdd1/james-gj/Simulations/forInference/17_06_22/correctedSTEM80mrad.h5':
+
+                fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-22: -3]}_{const}_{filenameSuffix}.png")
+
+            else:
+
+                fig.figure.savefig(f"{trendGraphsDir}/{dateToday}/{trendSetPath[-29: -3]}_{const}_{filenameSuffix}.png")
