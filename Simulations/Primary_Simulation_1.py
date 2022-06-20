@@ -322,18 +322,21 @@ def calc_Ronchigram(imdim, simdim,
     fft_psi_p = fft2(np.exp(-1j*chi_array) * condenser_ap)    # (Schnitzer, 2020a)
     # fft_psi_p = fft2(np.exp(-1j*chi_array))    # (Schnitzer, 2020a)
 
+    showProbe = False
 
-    fig, ax = plt.subplots()
-    ax.axis("off")
-    ax.imshow(abs(ifftshift(fft_psi_p))**2, interpolation="nearest")
+    if showProbe:
 
-    scale = calc_wavlen(av) / (2 * simdim) # m per pixel
-    print(scale)
-    scalebar = ScaleBar(scale, units="m", dimension="si-length")
+        fig, ax = plt.subplots()
+        ax.axis("off")
+        ax.imshow(abs(ifftshift(fft_psi_p))**2, interpolation="nearest")
 
-    ax.add_artist(scalebar)
-    
-    plt.show()
+        scale = calc_wavlen(av) / (2 * simdim) # m per pixel
+        print(scale)
+        scalebar = ScaleBar(scale, units="m", dimension="si-length")
+
+        ax.add_artist(scalebar)
+        
+        plt.show()
 
     # print(calc_wavlen(av))
 
