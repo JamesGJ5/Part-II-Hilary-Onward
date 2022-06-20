@@ -23,7 +23,7 @@ from matplotlib_scalebar.scalebar import ScaleBar
 from textwrap import wrap
 from matplotlib import patches
 
-doingComparison = False
+doingComparison = True
 
 # Seed information (may not use the same test set as in training but might as well set the torch seed to be 17 anyway, 
 # just in case--I don't see how it can hurt)
