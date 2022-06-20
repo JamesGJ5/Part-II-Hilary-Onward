@@ -495,7 +495,7 @@ if __name__ == "__main__":
 
     # ronch2 = calc
 
-    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/forReport/2022-04-29/experimentalRonchigrams.h5", 
+    ronchdset = RonchigramDataset("/media/rob/hdd1/james-gj/Simulations/forInference/17_06_22/randC12linPhi12_randOthers.h5", 
     c10=True, c12=True, c21=True, c23=True, c30=True, c32=True, c34=True, c41=True, c43=True, c45=True, c50=True, 
     c52=True, c54=True, c56=True,
     phi10=True, phi12=True, phi21=True, phi23=True, phi30=True, phi32=True, phi34=True, phi41=True, phi43=True, 
@@ -598,7 +598,7 @@ if __name__ == "__main__":
 
     calculatedMean = 0.5187
     calculatedStd = 0.3566
-    estimateMeanStd = False
+    estimateMeanStd = True
 
     if estimateMeanStd:
 
@@ -607,7 +607,7 @@ if __name__ == "__main__":
 
         print(calculatedMean, calculatedStd)
 
-    # sys.exit()
+    sys.exit()
 
     # APPLYING TRANSFORMS
 
