@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # simdim is essentially the convergence semi-angle (or maximum tilt angle) in rad. It was called simdim in code by Hovden Labs so I 
     # do the same because the below is for simulations of Ronchigrams done on the basis of code adapted from them.
-    simdim = 180 * 10**-3
+    simdim = 80 * 10**-3
 
     # Essentially the convergence semi-angle/mrad; only called aperture_size because objective aperture size controls this 
     # quantity and wanted to be consistent with (Schnitzer, 2020c) in Primary_Simulation_1.py
@@ -139,11 +139,11 @@ if __name__ == "__main__":
             simulation_number = 0
 
             # linearC10 = np.linspace(rank / number_processes * max_C10, (rank + 1) / number_processes * max_C10, simulations_per_process, endpoint=False)
-            # linearC12 = np.linspace(rank / number_processes * max_C12, (rank + 1) / number_processes * max_C12, simulations_per_process, endpoint=False)
+            linearC12 = np.linspace(rank / number_processes * max_C12, (rank + 1) / number_processes * max_C12, simulations_per_process, endpoint=False)
             # linearC21 = np.linspace(rank / number_processes * max_C21, (rank + 1) / number_processes * max_C21, simulations_per_process, endpoint=False)
             # linearC23 = np.linspace(rank / number_processes * max_C23, (rank + 1) / number_processes * max_C23, simulations_per_process, endpoint=False)
 
-            # linearPhi12 = np.linspace(rank / number_processes * 2*np.pi/2, (rank + 1) / number_processes * 2*np.pi/2, simulations_per_process, endpoint=False)
+            linearPhi12 = np.linspace(rank / number_processes * 2*np.pi/2, (rank + 1) / number_processes * 2*np.pi/2, simulations_per_process, endpoint=False)
             # linearPhi21 = np.linspace(rank / number_processes * 2*np.pi, (rank + 1) / number_processes * 2*np.pi, simulations_per_process, endpoint=False)
             # linearPhi23 = np.linspace(rank / number_processes * 2*np.pi/3, (rank + 1) / number_processes * 2*np.pi/3, simulations_per_process, endpoint=False)
 
@@ -216,8 +216,8 @@ if __name__ == "__main__":
                 phi10 = 0
 
                 # phi12 = 0
-                phi12 = randu(0, 2 * np.pi / 2)
-                # phi12 = linearPhi12[simulation]
+                # phi12 = randu(0, 2 * np.pi / 2)
+                phi12 = linearPhi12[simulation]
                 # phi12 = randAngs[rank, simulation, 1]
 
                 # phi21 = 0
@@ -329,7 +329,7 @@ if __name__ == "__main__":
     
     if not mimicFile:
     
-        total_simulations = 100
+        total_simulations = 1000
         simulations_per_process = int(math.ceil(total_simulations / number_processes))
 
         # print(f"Simulations per process is {simulations_per_process}")
@@ -372,7 +372,7 @@ if __name__ == "__main__":
     #     max_C10=max_C10, max_C12=currentMax_C12, max_C21=max_C21, max_C23=max_C23, min_I=min_I, max_I=max_I, min_t=min_t, 
     #     max_t=max_t, saveFile=saveFileX, min_C12=currentMin_C12)
 
-    saveFile = '/media/rob/hdd1/james-gj/Simulations/forInference/06_06_22/correctedSTEM.h5'
+    saveFile = '/media/rob/hdd1/james-gj/Simulations/forInference/17_06_22/randC12linPhi12_randOthers.h5'
 
     simulate_single_aberrations(simulations_per_process=simulations_per_process, imdim=imdim, simdim=simdim, 
         min_I=min_I, max_I=max_I, min_t=min_t, max_t=max_t, saveFile=saveFile)
