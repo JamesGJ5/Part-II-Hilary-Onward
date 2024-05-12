@@ -1,3 +1,9 @@
+## Context
+
+I made this repo for my MEng master's thesis at the University of Oxford. This project entailed training an EfficientNet CNN to perform multi-output regression on microscopic images, for which I built a machine learning pipeline with Git, VS Code, Python, NumPy, PyTorch, HDF5, Linux and OOP. The code here was written before I knew how to code well but I managed to use this code to generate presentable results for my report.
+
+## Repo Description
+
 Salient files/folders:
 
     currentPipelines/ (where I have my current model architecture, training pipeline and inferencer)
